@@ -1,0 +1,17 @@
+{
+  "name": "deposito-api",
+  "version": "1.0.0",
+  "description": "REST API con mySQL ",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "Ivan Di Gruttola",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.1.1",
+    "express": "^4.18.2",
+    "mysql2": "^3.3.3"
+  }
+}
