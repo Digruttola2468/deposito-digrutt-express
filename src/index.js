@@ -1,9 +1,16 @@
 import express from "express";
-import { PORT } from "./config.js";
+import cors from 'cors';
+
+import { PORT,ORIGIN_WEB } from "./config.js";
 import indexRoute from "./routes/index.routes.js";
 import mercaderiaRoute from "./routes/mercaderia.routes.js";
 
 const app = express();
+
+//Habilitamos que la URL pueda acceder a este proyecto
+app.use(cors({
+  origin: ORIGIN_WEB
+}));
 
 //Habilitamos la lectura en JSON
 app.use(express.json());
