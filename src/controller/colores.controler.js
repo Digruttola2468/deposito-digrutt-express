@@ -29,13 +29,13 @@ export const createColor = async (req, res) => {
   try {
     const { color } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO digrutt.colores ('color') VALUES (?) ;",
+      "INSERT INTO digrutt.colores (color) VALUES (?) ;",
       [color]
     );
 
     res.json({
       id: rows.insertId,
-      nombre,
+      color,
     });
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });

@@ -29,7 +29,7 @@ export const createTypeProduct = async (req, res) => {
   try {
     const { nombre } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO digrutt.tipoproducto ('tipo') VALUES (?) ;",
+      "INSERT INTO digrutt.tipoproducto (tipo) VALUES (?) ;",
       [nombre]
     );
 

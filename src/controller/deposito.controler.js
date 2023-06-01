@@ -27,15 +27,15 @@ export const getOneDeposito = async (req, res) => {
 
 export const createDeposito = async (req, res) => {
   try {
-    const { color } = req.body;
+    const { ubicacion } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO digrutt.deposito ('ubicacion') VALUES (?) ;",
-      [color]
+      "INSERT INTO digrutt.deposito (ubicacion) VALUES (?) ;",
+      [ubicacion]
     );
 
     res.json({
       id: rows.insertId,
-      nombre,
+      ubicacion,
     });
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
