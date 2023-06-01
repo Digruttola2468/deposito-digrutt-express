@@ -2,11 +2,14 @@ import express from "express";
 import cors from 'cors';
 
 import { PORT,ORIGIN_WEB } from "./config.js";
+
+//ROUTES
 import indexRoute from "./routes/index.routes.js";
 import mercaderiaRoute from "./routes/mercaderia.routes.js";
 import coloresRoute from './routes/colores.routes.js';
 import depositoRoute from './routes/deposito.routes.js';
 import tipoProductoRoute from './routes/tipoProducto.routes.js';
+import inventario from './routes/inventario.routes.js';
 
 const app = express();
 
@@ -24,6 +27,7 @@ app.use(mercaderiaRoute);
 app.use(coloresRoute);
 app.use(depositoRoute);
 app.use(tipoProductoRoute);
+app.use(inventario);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
