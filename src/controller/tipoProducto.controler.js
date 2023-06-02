@@ -2,7 +2,7 @@ import { con } from "../db.js";
 
 export const getTypeProductos = async (req, res) => {
   try {
-    const [rows] = await con.query("SELECT * FROM digrutt.tipoproducto;");
+    const [rows] = await con.query("SELECT * FROM tipoproducto;");
 
     res.json(rows);
   } catch (error) {
@@ -13,7 +13,7 @@ export const getTypeProductos = async (req, res) => {
 export const getOneTypeProducto = async (req, res) => {
   try {
     const [rows] = await con.query(
-      "SELECT * FROM digrutt.tipoproducto WHERE id = ?;",
+      "SELECT * FROM tipoproducto WHERE id = ?;",
       [req.params.id]
     );
 
@@ -29,7 +29,7 @@ export const createTypeProduct = async (req, res) => {
   try {
     const { nombre } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO digrutt.tipoproducto (tipo) VALUES (?) ;",
+      "INSERT INTO tipoproducto (tipo) VALUES (?) ;",
       [nombre]
     );
 
@@ -47,14 +47,14 @@ export const updateTypeProduct = async (req, res) => {
       const { nombre } = req.body;
       const id = req.params.id;
       const [result] = await con.query(
-        "UPDATE digrutt.tipoproducto SET tipo = IFNULL(?,tipo) WHERE id = ?",
+        "UPDATE tipoproducto SET tipo = IFNULL(?,tipo) WHERE id = ?",
         [nombre,id]
       );
 
       if (result.affectedRows === 0)
         return res.status(404).json({ message: "tipo producto not found" });
 
-      const [rows] = await con.query("SELECT * FROM digrutt.tipoproducto WHERE id = ?", [id]);
+      const [rows] = await con.query("SELECT * FROM tipoproducto WHERE id = ?", [id]);
       res.json(rows[0]);
     } catch (error) {
       return res.status(500).send({ message: "Something wrong" });
@@ -64,7 +64,7 @@ export const updateTypeProduct = async (req, res) => {
 export const deleteTypeProducto = async (req, res) => {
   try {
     const [result] = await con.query(
-      "DELETE FROM `digrutt`.`tipoproducto` WHERE (`id` = ?);",
+      "DELETE FROM tipoproducto WHERE (`id` = ?);",
       [req.params.id]
     );
 

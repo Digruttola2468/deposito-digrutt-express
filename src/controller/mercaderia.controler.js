@@ -4,9 +4,9 @@ export const getMercaderias = async (req, res) => {
   try {
     const [rows] = await con.query(
       `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,categoria,idinventario
-            FROM digrutt.mercaderia 
-            INNER JOIN digrutt.inventario on digrutt.mercaderia.idinventario = digrutt.inventario.id
-            INNER JOIN digrutt.categoria on digrutt.mercaderia.idcategoria = digrutt.categoria.id;`
+            FROM mercaderia 
+            INNER JOIN inventario on mercaderia.idinventario = inventario.id
+            INNER JOIN categoria on mercaderia.idcategoria = categoria.id;`
     );
     res.json(rows);
   } catch (error) {
@@ -18,8 +18,8 @@ export const getEntradaMercaderias = async (req, res) => {
   try {
     const [rows] = await con.query(
       `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
-            FROM digrutt.mercaderia 
-            INNER JOIN digrutt.inventario on mercaderia.idinventario = digrutt.inventario.id 
+            FROM mercaderia 
+            INNER JOIN inventario on mercaderia.idinventario = inventario.id 
             WHERE idcategoria = 2;`
     );
     res.json(rows);
@@ -32,8 +32,8 @@ export const getSalidaMercaderias = async (req, res) => {
   try {
     const [rows] = await con.query(
       `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
-            FROM digrutt.mercaderia 
-            INNER JOIN digrutt.inventario on digrutt.mercaderia.idinventario = digrutt.inventario.id 
+            FROM mercaderia 
+            INNER JOIN inventario on mercaderia.idinventario = inventario.id 
             WHERE idcategoria = 1;`
     );
     res.json(rows);
@@ -46,8 +46,8 @@ export const getEntradaMercaderiasWhereNombre = async (req, res) => {
   try {
     const [rows] = await con.query(
       `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
-            FROM digrutt.mercaderia 
-            INNER JOIN digrutt.inventario ON digrutt.mercaderia.idinventario = digrutt.inventario.id 
+            FROM mercaderia 
+            INNER JOIN inventario ON mercaderia.idinventario = inventario.id 
             WHERE nombre = ? and idcategoria = 2`,[req.params.nombre]
     );
 
@@ -63,8 +63,8 @@ export const getSalidaMercaderiasWhereNombre = async (req, res) => {
     try {
         const [rows] = await con.query(
           `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
-                FROM digrutt.mercaderia 
-                INNER JOIN digrutt.inventario ON digrutt.mercaderia.idinventario = digrutt.inventario.id 
+                FROM mercaderia 
+                INNER JOIN inventario ON mercaderia.idinventario = inventario.id 
                 WHERE nombre = ? and idcategoria = 1`,[req.params.nombre]
         );
     
@@ -83,7 +83,7 @@ export const createMercaderia = async (req,res) => {
     const fechaDate = new Date(fecha);
     
     const [rows] = await con.query(
-      'INSERT INTO `digrutt`.`mercaderia` (`factura`, `fecha`, `stock`, `proveedor`, `idcategoria`, `idinventario`) VALUES (?,?,?,?,?,?);',
+      'INSERT INTO mercaderia (`factura`, `fecha`, `stock`, `proveedor`, `idcategoria`, `idinventario`) VALUES (?,?,?,?,?,?);',
       [factura,fechaDate,stock,proveedor,idcategoria,idinventario]);
     
       res.send({
@@ -110,7 +110,7 @@ export const updateMercaderia = async (req,res) => {
     const fechaDate = new Date(fecha);
 
     const [result] = await con.query(
-      `UPDATE digrutt.mercaderia
+      `UPDATE mercaderia
         SET factura = IFNULL(?,factura), 
             fecha = IFNULL(?,fecha),
             stock = IFNULL(?,stock),
@@ -123,7 +123,7 @@ export const updateMercaderia = async (req,res) => {
       if (result.affectedRows === 0)
       return res.status(404).json({ message: "mercaderia not found" });
 
-      const [rows] = await con.query("SELECT * FROM digrutt.mercaderia WHERE id = ?", [id]);
+      const [rows] = await con.query("SELECT * FROM mercaderia WHERE id = ?", [id]);
       res.json(rows[0]);
 
   } catch (error) {
@@ -134,7 +134,7 @@ export const updateMercaderia = async (req,res) => {
 
 export const deleteMercaderia = async (req,res) => {
   try {
-    const [result] = await con.query('DELETE FROM `digrutt`.`mercaderia` WHERE (`id` = ?);', [req.params.id]);
+    const [result] = await con.query('DELETE FROM mercaderia WHERE (`id` = ?);', [req.params.id]);
 
     if (result.affectedRows <= 0)
       return res.status(404).json({ message: "No se encontro" });

@@ -2,7 +2,7 @@ import { con } from "../db.js";
 
 export const getColores = async (req, res) => {
   try {
-    const [rows] = await con.query("SELECT * FROM digrutt.colores;");
+    const [rows] = await con.query("SELECT * FROM colores;");
 
     res.json(rows);
   } catch (error) {
@@ -13,7 +13,7 @@ export const getColores = async (req, res) => {
 export const getOneColor = async (req, res) => {
   try {
     const [rows] = await con.query(
-      "SELECT * FROM digrutt.colores WHERE id = ?;",
+      "SELECT * FROM colores WHERE id = ?;",
       [req.params.id]
     );
 
@@ -29,7 +29,7 @@ export const createColor = async (req, res) => {
   try {
     const { color } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO digrutt.colores (color) VALUES (?) ;",
+      "INSERT INTO colores (color) VALUES (?) ;",
       [color]
     );
 
@@ -48,14 +48,14 @@ export const updateColor = async (req, res) => {
       const id = req.params.id;
       
       const [result] = await con.query(
-        "UPDATE digrutt.colores SET color = IFNULL(?,color) WHERE id = ?",
+        "UPDATE colores SET color = IFNULL(?,color) WHERE id = ?",
         [color,id]
       );
 
       if (result.affectedRows === 0)
         return res.status(404).json({ message: "Color not found" });
 
-      const [rows] = await con.query("SELECT * FROM digrutt.colores WHERE id = ?", [id]);
+      const [rows] = await con.query("SELECT * FROM colores WHERE id = ?", [id]);
       res.json(rows[0]);
     } catch (error) {
       return res.status(500).send({ message: "Something wrong" });
@@ -65,7 +65,7 @@ export const updateColor = async (req, res) => {
 export const deleteColor = async (req, res) => {
   try {
     const [result] = await con.query(
-      "DELETE FROM `digrutt`.`colores` WHERE (`id` = ?);",
+      "DELETE FROM colores WHERE (`id` = ?);",
       [req.params.id]
     );
 

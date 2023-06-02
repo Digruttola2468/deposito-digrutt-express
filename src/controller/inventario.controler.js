@@ -2,7 +2,7 @@ import { con } from "../db.js";
 
 export const getAllInventario = async (req, res) => {
   try {
-    const [rows] = await con.query("SELECT * FROM digrutt.inventario;");
+    const [rows] = await con.query("SELECT * FROM inventario;");
 
     res.json(rows);
   } catch (error) {
@@ -13,9 +13,9 @@ export const getAllInventario = async (req, res) => {
 export const getInventarioTipos = async (req, res) => {
   try {
     const [rows] = await con.query(`
-    SELECT nombre,precio,descripcion,tipo
-    FROM digrutt.inventario
-    INNER JOIN digrutt.tipoproducto ON digrutt.inventario.idtipoproducto = digrutt.tipoproducto.id;
+      SELECT nombre,precio,descripcion,tipo
+      FROM inventario
+      INNER JOIN tipoproducto ON inventario.idtipoproducto = tipoproducto.id;
     `);
 
     res.json(rows);
@@ -26,11 +26,14 @@ export const getInventarioTipos = async (req, res) => {
 
 export const getInventarioTiposWhereId = async (req, res) => {
   try {
-    const [rows] = await con.query(`
-    SELECT nombre,precio,descripcion,tipo
-	FROM digrutt.inventario
-	INNER JOIN digrutt.tipoproducto ON digrutt.tipoproducto.id = digrutt.inventario.idtipoproducto
-    WHERE idtipoproducto = ?`,[req.params.id]);
+    const [rows] = await con.query(
+      `
+        SELECT nombre,precio,descripcion,tipo
+	      FROM inventario
+	      INNER JOIN tipoproducto ON tipoproducto.id = inventario.idtipoproducto
+        WHERE idtipoproducto = ?`,
+      [req.params.id]
+    );
 
     if (rows.length <= 0)
       return res.status(404).json({ message: "No se encontro" });
@@ -45,8 +48,8 @@ export const getInventarioColores = async (req, res) => {
   try {
     const [rows] = await con.query(`
         SELECT nombre,precio,descripcion,color
-        FROM digrutt.inventario
-        INNER JOIN digrutt.colores ON digrutt.colores.id = digrutt.inventario.idcolor;`);
+        FROM inventario
+        INNER JOIN colores ON colores.id = inventario.idcolor;`);
 
     res.json(rows);
   } catch (error) {
@@ -59,8 +62,8 @@ export const getInventarioColoresWhereId = async (req, res) => {
     const [rows] = await con.query(
       `
       SELECT nombre,precio,descripcion,color
-          FROM digrutt.inventario
-          INNER JOIN digrutt.colores ON digrutt.colores.id = digrutt.inventario.idcolor
+          FROM inventario
+          INNER JOIN colores ON colores.id = inventario.idcolor
           WHERE idcolor = ?;`,
       [req.params.id]
     );
@@ -76,10 +79,9 @@ export const getInventarioColoresWhereId = async (req, res) => {
 
 export const getOneInventario = async (req, res) => {
   try {
-    const [rows] = await con.query(
-      "SELECT * FROM digrutt.inventario WHERE id = ?;",
-      [req.params.id]
-    );
+    const [rows] = await con.query("SELECT * FROM inventario WHERE id = ?;", [
+      req.params.id,
+    ]);
 
     if (rows.length <= 0) return res.status(404).json({ message: "No existe" });
 
@@ -93,7 +95,7 @@ export const createInventario = async (req, res) => {
   try {
     const { nombre, precio, descripcion, idcolor, idtipoproducto } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO digrutt.inventario (nombre,precio,descripcion,idcolor,idtipoproducto) VALUES (?,?,?,?,?) ;",
+      "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto) VALUES (?,?,?,?,?) ;",
       [nombre, precio, descripcion, idcolor, idtipoproducto]
     );
 
@@ -116,7 +118,7 @@ export const updateInventario = async (req, res) => {
     const id = req.params.id;
 
     const [result] = await con.query(
-      `UPDATE digrutt.inventario 
+      `UPDATE inventario 
             SET nombre = IFNULL(?,nombre),
                 precio = IFNULL(?,precio),
                 descripcion = IFNULL(?,descripcion),
@@ -129,10 +131,9 @@ export const updateInventario = async (req, res) => {
     if (result.affectedRows === 0)
       return res.status(404).json({ message: "Inventario not found" });
 
-    const [rows] = await con.query(
-      "SELECT * FROM digrutt.inventario WHERE id = ?",
-      [id]
-    );
+    const [rows] = await con.query("SELECT * FROM inventario WHERE id = ?", [
+      id,
+    ]);
     res.json(rows[0]);
   } catch (error) {
     console.log(error);
@@ -143,7 +144,7 @@ export const updateInventario = async (req, res) => {
 export const deleteInventario = async (req, res) => {
   try {
     const [result] = await con.query(
-      "DELETE FROM `digrutt`.`inventario` WHERE (`id` = ?);",
+      "DELETE FROM inventario WHERE (`id` = ?);",
       [req.params.id]
     );
 

@@ -2,7 +2,7 @@ import { con } from "../db.js";
 
 export const getDepositos = async (req, res) => {
   try {
-    const [rows] = await con.query("SELECT * FROM digrutt.deposito;");
+    const [rows] = await con.query("SELECT * FROM deposito;");
 
     res.json(rows);
   } catch (error) {
@@ -13,7 +13,7 @@ export const getDepositos = async (req, res) => {
 export const getOneDeposito = async (req, res) => {
   try {
     const [rows] = await con.query(
-      "SELECT * FROM digrutt.deposito WHERE id = ?;",
+      "SELECT * FROM deposito WHERE id = ?;",
       [req.params.id]
     );
 
@@ -29,7 +29,7 @@ export const createDeposito = async (req, res) => {
   try {
     const { ubicacion } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO digrutt.deposito (ubicacion) VALUES (?) ;",
+      "INSERT INTO deposito (ubicacion) VALUES (?) ;",
       [ubicacion]
     );
 
@@ -48,14 +48,14 @@ export const updateDeposito = async (req, res) => {
       const id = req.params.id;
       
       const [result] = await con.query(
-        "UPDATE digrutt.deposito SET ubicacion = IFNULL(?,ubicacion) WHERE id = ?",
+        "UPDATE deposito SET ubicacion = IFNULL(?,ubicacion) WHERE id = ?",
         [ubicacion,id]
       );
 
       if (result.affectedRows === 0)
         return res.status(404).json({ message: "Color not found" });
 
-      const [rows] = await con.query("SELECT * FROM digrutt.deposito WHERE id = ?", [id]);
+      const [rows] = await con.query("SELECT * FROM deposito WHERE id = ?", [id]);
       res.json(rows[0]);
     } catch (error) {
       return res.status(500).send({ message: "Something wrong" });
@@ -65,7 +65,7 @@ export const updateDeposito = async (req, res) => {
 export const deleteDeposito = async (req, res) => {
   try {
     const [result] = await con.query(
-      "DELETE FROM `digrutt`.`deposito` WHERE (`id` = ?);",
+      "DELETE FROM deposito WHERE (`id` = ?);",
       [req.params.id]
     );
 

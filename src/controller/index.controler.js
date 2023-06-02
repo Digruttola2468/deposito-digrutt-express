@@ -2,5 +2,5 @@ import { con } from '../db.js'
 
 export const isConectionBBDD = async (req,res) => {
     const result = await con.query('SELECT 1 + 1 AS result');
-    console.log(result);
+    res.send(result);
 };
