@@ -10,6 +10,7 @@ import coloresRoute from './routes/colores.routes.js';
 import depositoRoute from './routes/deposito.routes.js';
 import tipoProductoRoute from './routes/tipoProducto.routes.js';
 import inventario from './routes/inventario.routes.js';
+import excel from './routes/excel.routes.js';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(coloresRoute);
 app.use(depositoRoute);
 app.use(tipoProductoRoute);
 app.use(inventario);
+app.use(excel);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
