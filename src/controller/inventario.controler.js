@@ -156,3 +156,12 @@ export const deleteInventario = async (req, res) => {
     return res.status(500).send({ message: "Something wrong" });
   }
 };
+
+export const getInventariosSelectNombres = async (req,res) => {
+  try {
+    const [rows] = await con.query("SELECT nombre FROM inventario;");
+    res.json(rows);
+  } catch (error) {
+    return res.status(500).send({ message: "Something wrong" });
+  }
+}
