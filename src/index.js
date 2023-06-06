@@ -1,7 +1,7 @@
 import express from "express";
 import cors from 'cors';
 
-import { PORT,ORIGIN_WEB } from "./config.js";
+import { PORT } from "./config.js";
 
 //ROUTES
 import indexRoute from "./routes/index.routes.js";
@@ -15,9 +15,7 @@ import excel from './routes/excel.routes.js';
 const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
-app.use(cors({
-  origin: ORIGIN_WEB
-}));
+app.use(cors());
 
 //Habilitamos la lectura en JSON
 app.use(express.json());
