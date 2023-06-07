@@ -159,7 +159,7 @@ export const deleteInventario = async (req, res) => {
 
 export const getInventariosSelectNombres = async (req,res) => {
   try {
-    const [rows] = await con.query("SELECT id,nombre FROM inventario;");
+    const [rows] = await con.query("SELECT id,nombre,descripcion FROM inventario;");
     res.json(rows);
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
