@@ -181,22 +181,18 @@ export const getInventarioStockActual = async (req, res) => {
 
     for (let index = 0; index < resultado.length; index++) {
       const element = resultado[index];
+      console.log(element.id);
       const [rows] = await con.query(
-        `SELECT idinventario, nombre, descripcion, 
+        `SELECT nombre, descripcion, 
                 SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as Salida,
                 SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as Entrada
                 FROM mercaderia 
                 INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
                 WHERE idinventario = ${element.id};`,
       );
-      listaEnviar.push(rows[0]);
+      listaEnviar.push({...rows[0], idinventario: element.id});
     }
     
-    
-    
-
-    //listaEnviar.push(rows[0]);
-    //const [rows] = await con.query("SELECT id,nombre,descripcion FROM inventario;");
     res.json(listaEnviar);
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
