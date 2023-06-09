@@ -157,11 +157,48 @@ export const deleteInventario = async (req, res) => {
   }
 };
 
-export const getInventariosSelectNombres = async (req,res) => {
+export const getInventariosSelectNombres = async (req, res) => {
   try {
-    const [rows] = await con.query("SELECT id,nombre,descripcion FROM inventario;");
+    const [rows] = await con.query(
+      "SELECT id,nombre,descripcion FROM inventario;"
+    );
     res.json(rows);
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
   }
+};
+
+const getIdInvenario = async () => {
+  const [rows] = await con.query("SELECT id FROM inventario");
+  return rows;
 }
+
+export const getInventarioStockActual = async (req, res) => {
+  try {
+    const listaEnviar = [];
+
+    const resultado = await getIdInvenario();
+
+    for (let index = 0; index < resultado.length; index++) {
+      const element = resultado[index];
+      const [rows] = await con.query(
+        `SELECT idinventario, nombre, descripcion, 
+                SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as Salida,
+                SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as Entrada
+                FROM mercaderia 
+                INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
+                WHERE idinventario = ${element.id};`,
+      );
+      listaEnviar.push(rows[0]);
+    }
+    
+    
+    
+
+    //listaEnviar.push(rows[0]);
+    //const [rows] = await con.query("SELECT id,nombre,descripcion FROM inventario;");
+    res.json(listaEnviar);
+  } catch (error) {
+    return res.status(500).send({ message: "Something wrong" });
+  }
+};

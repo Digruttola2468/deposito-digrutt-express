@@ -9,7 +9,8 @@ import {
   getInventarioColores,
   getInventarioColoresWhereId,
   getInventarioTiposWhereId,
-  getInventariosSelectNombres
+  getInventariosSelectNombres,
+  getInventarioStockActual
 } from "../controller/inventario.controler.js";
 
 const router = Router();
@@ -20,6 +21,7 @@ router.get('/inventario/tipos/:id', getInventarioTiposWhereId);
 router.get('/inventario/colors', getInventarioColores);
 router.get('/inventario/colors/:id', getInventarioColoresWhereId);
 router.get('/inventario/nombres', getInventariosSelectNombres);
+router.get('/inventario/sumstock', getInventarioStockActual);
 
 router.get("/inventario/:id", getOneInventario);
 
