@@ -3,7 +3,7 @@ import { getExcelMercaderiaEntrada,getExcelInventario } from '../controller/exce
 
 const router = Router();
 
-//router.get('/excel/mercaderia/entrada' , getExcelMercaderiaEntrada);
+router.get('/excel/mercaderia/entrada' , getExcelMercaderiaEntrada);
 
 router.get('/excel/inventario' , getExcelInventario);
 

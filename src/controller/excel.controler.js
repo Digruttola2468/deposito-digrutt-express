@@ -24,7 +24,7 @@ export const getExcelMercaderiaEntrada = async (req, res) => {
 
     await workbook.xlsx.writeFile('mercaderia.xlsx');
 
-    res.send({message: "Archivo Excel Creado"})
+    res.download();
   } catch (error) {
     return res.status(500).json({ message: "something goes wrong" });
   }
@@ -52,7 +52,7 @@ export const getExcelInventario = async (req, res) => {
     
     await workbook.xlsx.writeFile('inventario.xlsx');
 
-    res.send({message: "Archivo Excel Creado"})
+    res.download('./inventario.xlsx')
   } catch (error) {
     return res.status(500).json({ message: "something goes wrong" });
   }
