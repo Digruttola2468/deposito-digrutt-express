@@ -51,19 +51,52 @@ export const getExcelMercaderia = async (req, res) => {
   }
 };
 
+
+const getIdInvenario = async () => {
+  const [rows] = await con.query("SELECT id FROM inventario");
+  return rows;
+};
 export const getExcelInventario = async (req, res) => {
   try {
-    const [rows] = await con.query(`SELECT nombre,descripcion FROM inventario`);
+    const listaEnviar = [];
+
+    const resultado = await getIdInvenario();
+
+    for (let index = 0; index < resultado.length; index++) {
+      const element = resultado[index];
+      const [rows] = await con.query(
+        `SELECT nombre, descripcion, 
+                SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as Salida,
+                SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as Entrada
+                FROM mercaderia 
+                INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
+                WHERE idinventario = ${element.id};`
+      );
+      if (rows[0].Entrada == null) rows[0].Entrada = 0;
+
+      if (rows[0].Salida == null) rows[0].Salida = 0;
+
+      const stockActual = parseInt(rows[0].Entrada) - parseInt(rows[0].Salida);
+      listaEnviar.push({ 
+        nombre: rows[0].nombre,
+        descripcion: rows[0].descripcion,
+        entrada: parseInt(rows[0].Entrada),
+        salida: parseInt(rows[0].Salida),
+        stockActual });
+    }
 
     const workbook = new ExcelJs.Workbook();
-    const worksheet = workbook.addWorksheet("principal");
+    const worksheet = workbook.addWorksheet("Invent de producto");
 
     worksheet.columns = [
-      { header: "CODIGO PRODUCTO", key: "nombre", width: 10 },
-      { header: "DESCRIPCION", key: "descripcion", width: 10 },
+      { header: "CODIGO PRODUCTO", key: "nombre", width: 20 },
+      { header: "DESCRIPCION", key: "descripcion", width: 60 },
+      { header: "ENTRADA", key: "entrada", width: 10 },
+      { header: "SALIDA", key: "salida", width: 10 },
+      { header: "STOCK ACTUAL", key: "stockActual", width: 15  },
     ];
 
-    worksheet.addRows(rows);
+    worksheet.addRows(listaEnviar);
 
     await workbook.xlsx.writeFile("./src/controller/inventario.xlsx");
 
