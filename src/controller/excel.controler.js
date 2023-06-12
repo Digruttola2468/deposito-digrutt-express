@@ -48,12 +48,11 @@ export const getExcelInventario = async (req, res) => {
 
     worksheet.addRows(rows);
 
-    
-    
-    await workbook.xlsx.writeFile('inventario.xlsx');
+    await workbook.xlsx.writeFile('./src/controller/inventario.xlsx');
 
-    res.download('./inventario.xlsx')
+    res.download("inventario.xlsx");
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "something goes wrong" });
   }
 };
