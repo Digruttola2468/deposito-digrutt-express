@@ -6,61 +6,48 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const dir = dirname(__filename);
 
-export const getExcelMercaderiaEntrada = async (req, res) => {
-  try {
-    const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
-                FROM mercaderia 
-                INNER JOIN inventario on mercaderia.idinventario = inventario.id 
-                WHERE idcategoria = 2;`
-    );
-
-    const workbook = new ExcelJs.Workbook();
-    const worksheet = workbook.addWorksheet("entrada");
-
-    worksheet.columns = [
-      { header: "FECHA", key: "fecha", width: 10 },
-      { header: "CODIGO PRODUCTO", key: "nombre", width: 10 },
-      { header: "DESCRIPCION", key: "descripcion", width: 10 },
-      { header: "CANTIDAD", key: "stock", width: 10 },
-    ];
-
-    worksheet.addRows(rows);
-
-    await workbook.xlsx.writeFile("./src/controller/mercaderiaEntrada.xlsx");
-
-    res.sendFile(dir + "/mercaderiaEntrada.xlsx");
-  } catch (error) {
-    return res.status(500).json({ message: "something goes wrong" });
-  }
+const getMercaderia = async (idcategoria) => {
+  const [rows] = await con.query(
+    `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
+              FROM mercaderia 
+              INNER JOIN inventario on mercaderia.idinventario = inventario.id 
+              WHERE idcategoria = ${idcategoria};`
+  );
+  return rows;
 };
 
-export const getExcelMercaderiaSalida = async (req, res) => {
+export const getExcelMercaderia = async (req, res) => {
   try {
-    const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
-                FROM mercaderia 
-                INNER JOIN inventario on mercaderia.idinventario = inventario.id 
-                WHERE idcategoria = 1;`
-    );
+    const resultEntrada = await getMercaderia(2);
+    const resultSalida = await getMercaderia(1);
 
     const workbook = new ExcelJs.Workbook();
-    const worksheet = workbook.addWorksheet("salida");
 
-    worksheet.columns = [
-      { header: "FECHA", key: "fecha", width: 10 },
-      { header: "CODIGO PRODUCTO", key: "nombre", width: 10 },
-      { header: "DESCRIPCION", key: "descripcion", width: 10 },
-      { header: "CANTIDAD", key: "stock", width: 10 },
+    const worksheetEntrada = workbook.addWorksheet("entrada");
+    const worksheetSalida = workbook.addWorksheet("salida");
+
+    worksheetEntrada.columns = [
+      { header: "FECHA", key: "fecha", width: 20 },
+      { header: "CODIGO PRODUCTO", key: "nombre", width: 15 },
+      { header: "DESCRIPCION", key: "descripcion", width: 60 },
+      { header: "CANTIDAD", key: "stock", width: 20 },
     ];
 
-    worksheet.addRows(rows);
+    worksheetSalida.columns = [
+      { header: "FECHA", key: "fecha", width: 20 },
+      { header: "CODIGO PRODUCTO", key: "nombre", width: 15 },
+      { header: "DESCRIPCION", key: "descripcion", width: 60 },
+      { header: "CANTIDAD", key: "stock", width: 20 },
+    ];
 
-    await workbook.xlsx.writeFile("./src/controller/mercaderiaSalida.xlsx");
+    worksheetEntrada.addRows(resultEntrada);
+    worksheetSalida.addRows(resultSalida);
 
-    res.sendFile(dir + "/mercaderiaSalida.xlsx");
+    await workbook.xlsx.writeFile("./src/controller/mercaderia.xlsx");
+
+    res.sendFile(dir + "/mercaderia.xlsx");
   } catch (error) {
-    return res.status(500).json({ message: "something goes wrong" });
+    console.error(error);
   }
 };
 
