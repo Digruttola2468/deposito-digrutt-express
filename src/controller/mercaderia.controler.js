@@ -163,7 +163,9 @@ export const updateMercaderia = async (req, res) => {
       req.body;
     const id = req.params.id;
 
-    const fechaDate = new Date(fecha);
+    const newFecha = fecha.split("-").reverse().join("-");
+    const fechaDate = new Date(newFecha);
+
 
     const [result] = await con.query(
       `UPDATE mercaderia
