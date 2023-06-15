@@ -29,7 +29,7 @@ export const getEntradaMercaderias = async (req, res) => {
       const element = new Date(rows[i].fecha);
 
       const year = element.getFullYear();
-      const mounth = element.getMonth();
+      const mounth = (element.getMonth() + 1);
       const day = element.getDate();
 
       const format = `${day}-${mounth}-${year}`;
@@ -56,7 +56,7 @@ export const getSalidaMercaderias = async (req, res) => {
       const element = new Date(rows[i].fecha);
 
       const year = element.getFullYear();
-      const mounth = element.getMonth();
+      const mounth = (element.getMonth() + 1);
       const day = element.getDate();
 
       const format = `${day}-${mounth}-${year}`;
@@ -87,7 +87,7 @@ export const getEntradaMercaderiasWhereNombre = async (req, res) => {
       const element = new Date(rows[i].fecha);
 
       const year = element.getFullYear();
-      const mounth = element.getMonth();
+      const mounth = (element.getMonth() + 1);
       const day = element.getDate();
 
       const format = `${day}-${mounth}-${year}`;
@@ -118,7 +118,7 @@ export const getSalidaMercaderiasWhereNombre = async (req, res) => {
       const element = new Date(rows[i].fecha);
 
       const year = element.getFullYear();
-      const mounth = element.getMonth();
+      const mounth = (element.getMonth() + 1);
       const day = element.getDate();
 
       const format = `${day}-${mounth}-${year}`;
@@ -183,7 +183,15 @@ export const updateMercaderia = async (req, res) => {
     const [rows] = await con.query("SELECT * FROM mercaderia WHERE id = ?", [
       id,
     ]);
-    res.json(rows[0]);
+
+    const element = new Date(rows[0].fecha);
+
+    const year = element.getFullYear();
+    const mounth = (element.getMonth() + 1);
+    const day = element.getDate();
+
+    const format = `${day}-${mounth}-${year}`;
+    res.json({...rows[0], fecha: format});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "something goes wrong" });
