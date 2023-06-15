@@ -193,7 +193,7 @@ export const getInventarioStockActual = async (req, res) => {
 
       if (rows[0].Salida == null) rows[0].Salida = 0;
 
-      listaEnviar.push({ ...rows[0], idinventario: element.id });
+      listaEnviar.push({ ...rows[0], id: element.id });
     }
 
     res.json(listaEnviar);
