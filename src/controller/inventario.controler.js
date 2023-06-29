@@ -24,19 +24,6 @@ export const getOneInventario = async (req, res) => {
   }
 };
 
-export const getOneInventarioEntradaSalida = async (id) => {
-  try {
-    const [rows] = await con.query("SELECT entrada,salida FROM inventario WHERE id = ?;", [
-      id,
-    ]);
-
-    return rows;
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-};
-
 export const createInventario = async (req, res) => {
   try {
     const { nombre, precio, descripcion, idcolor, idtipoproducto } = req.body;

@@ -1,5 +1,29 @@
 import { con } from "../db.js";
-import { getOneInventarioEntradaSalida } from "./inventario.controler.js";
+
+const suminventario = async (idinventario) => {
+  try {
+    const listaEnviar = [];
+
+    const [rows] = await con.query(
+      `SELECT *, 
+                    SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as salida,
+                    SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as entrada
+                    FROM mercaderia 
+                    INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
+                    WHERE idinventario = ${idinventario};`
+    );
+    if (rows[0].entrada == null) rows[0].entrada = 0;
+
+    if (rows[0].salida == null) rows[0].salida = 0;
+
+    listaEnviar.push({ ...rows[0] });
+
+    return listaEnviar;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
 
 export const getMercaderias = async (req, res) => {
   try {
@@ -144,35 +168,27 @@ export const createMercaderia = async (req, res) => {
       [factura, fechaDate, stock, proveedor, idcategoria, idinventario]
     );
 
-    const inventarioEntradaSalida = await getOneInventarioEntradaSalida(
-      idinventario
-    );
-    //1: salida
-    //2: entrada
-    const category = { salida: 1, entrada: 2 };
-    if (category.entrada == idcategoria) {
-      const valor = parseInt(inventarioEntradaSalida[0].entrada);
-      const suma = valor + stock;
+    try {
+      const resultado = await suminventario(idinventario);
 
       const [result] = await con.query(
-        `UPDATE inventario SET entrada = IFNULL(?,entrada) WHERE id = ?`,
-        [suma, idinventario]
+        ` UPDATE inventario 
+          SET salida  = IFNULL(?,salida),
+              entrada = IFNULL(?,entrada)
+          WHERE id = ?
+        `,
+        [
+          parseInt(resultado[0].salida),
+          parseInt(resultado[0].entrada),
+          resultado[0].id,
+        ]
       );
       if (result.affectedRows === 0)
         return res.status(404).json({ message: "Inventario not found" });
-    } else if (category.salida == idcategoria) {
-      const valor = parseInt(inventarioEntradaSalida[0].salida);
-      const sumar = stock + valor;
-
-      const [result] = await con.query(
-        `UPDATE inventario SET salida = IFNULL(?,salida) WHERE id = ?`,
-        [sumar, idinventario]
-      );
-
-      if (result.affectedRows === 0)
-        return res.status(404).json({ message: "Inventario not found" });
+    } catch (error) {
+      console.log(error);
     }
-
+    
     res.send({
       id: rows.insertId,
       fecha,
@@ -185,31 +201,6 @@ export const createMercaderia = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "something goes wrong" });
-  }
-};
-
-const suminventario = async (idinventario) => {
-  try {
-    const listaEnviar = [];
-
-    const [rows] = await con.query(
-      `SELECT *, 
-                    SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as salida,
-                    SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as entrada
-                    FROM mercaderia 
-                    INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
-                    WHERE idinventario = ${idinventario};`
-    );
-    if (rows[0].entrada == null) rows[0].entrada = 0;
-
-    if (rows[0].salida == null) rows[0].salida = 0;
-
-    listaEnviar.push({ ...rows[0] });
-
-    return listaEnviar;
-  } catch (error) {
-    console.log(error);
-    return [];
   }
 };
 
