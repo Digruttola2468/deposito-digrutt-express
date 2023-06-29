@@ -1,4 +1,5 @@
 import { con } from "../db.js";
+import { getOneInventarioEntradaSalida } from "./inventario.controler.js";
 
 export const getMercaderias = async (req, res) => {
   try {
@@ -29,7 +30,7 @@ export const getEntradaMercaderias = async (req, res) => {
       const element = new Date(rows[i].fecha);
 
       const year = element.getFullYear();
-      const mounth = (element.getMonth() + 1);
+      const mounth = element.getMonth() + 1;
       const day = element.getDate();
 
       const format = `${day}-${mounth}-${year}`;
@@ -56,7 +57,7 @@ export const getSalidaMercaderias = async (req, res) => {
       const element = new Date(rows[i].fecha);
 
       const year = element.getFullYear();
-      const mounth = (element.getMonth() + 1);
+      const mounth = element.getMonth() + 1;
       const day = element.getDate();
 
       const format = `${day}-${mounth}-${year}`;
@@ -87,7 +88,7 @@ export const getEntradaMercaderiasWhereNombre = async (req, res) => {
       const element = new Date(rows[i].fecha);
 
       const year = element.getFullYear();
-      const mounth = (element.getMonth() + 1);
+      const mounth = element.getMonth() + 1;
       const day = element.getDate();
 
       const format = `${day}-${mounth}-${year}`;
@@ -118,7 +119,7 @@ export const getSalidaMercaderiasWhereNombre = async (req, res) => {
       const element = new Date(rows[i].fecha);
 
       const year = element.getFullYear();
-      const mounth = (element.getMonth() + 1);
+      const mounth = element.getMonth() + 1;
       const day = element.getDate();
 
       const format = `${day}-${mounth}-${year}`;
@@ -143,6 +144,35 @@ export const createMercaderia = async (req, res) => {
       [factura, fechaDate, stock, proveedor, idcategoria, idinventario]
     );
 
+    const inventarioEntradaSalida = await getOneInventarioEntradaSalida(
+      idinventario
+    );
+    //1: salida
+    //2: entrada
+    const category = { salida: 1, entrada: 2 };
+    if (category.entrada == idcategoria) {
+      const valor = inventarioEntradaSalida[0].entrada;
+      const suma = valor + stock;
+
+      const [result] = await con.query(
+        `UPDATE inventario SET entrada = IFNULL(?,entrada) WHERE id = ?`,
+        [suma, idinventario]
+      );
+      if (result.affectedRows === 0)
+        return res.status(404).json({ message: "Inventario not found" });
+    } else if (category.salida == idcategoria) {
+      const valor = inventarioEntradaSalida[0].salida;
+      const sumar = stock + valor;
+
+      const [result] = await con.query(
+        `UPDATE inventario SET salida = IFNULL(?,salida) WHERE id = ?`,
+        [sumar, idinventario]
+      );
+
+      if (result.affectedRows === 0)
+        return res.status(404).json({ message: "Inventario not found" });
+    }
+
     res.send({
       id: rows.insertId,
       fecha,
@@ -153,7 +183,33 @@ export const createMercaderia = async (req, res) => {
       idinventario,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "something goes wrong" });
+  }
+};
+
+const suminventario = async (idinventario) => {
+  try {
+    const listaEnviar = [];
+
+    const [rows] = await con.query(
+      `SELECT *, 
+                    SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as salida,
+                    SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as entrada
+                    FROM mercaderia 
+                    INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
+                    WHERE idinventario = ${idinventario};`
+    );
+    if (rows[0].entrada == null) rows[0].entrada = 0;
+
+    if (rows[0].salida == null) rows[0].salida = 0;
+
+    listaEnviar.push({ ...rows[0] });
+
+    return listaEnviar;
+  } catch (error) {
+    console.log(error);
+    return [];
   }
 };
 
@@ -165,7 +221,6 @@ export const updateMercaderia = async (req, res) => {
 
     const newFecha = fecha.split("-").reverse().join("-");
     const fechaDate = new Date(newFecha);
-
 
     const [result] = await con.query(
       `UPDATE mercaderia
@@ -186,14 +241,36 @@ export const updateMercaderia = async (req, res) => {
       id,
     ]);
 
+    if (stock != undefined) {
+      try {
+        const resultado = await suminventario(rows[0].idinventario);
+
+        const [result] = await con.query(
+          `UPDATE inventario 
+          SET salida  = IFNULL(?,salida),
+              entrada = IFNULL(?,entrada)
+         WHERE id = ?`,
+          [
+            parseInt(resultado[0].salida),
+            parseInt(resultado[0].entrada),
+            resultado[0].id,
+          ]
+        );
+        if (result.affectedRows === 0)
+          return res.status(404).json({ message: "Inventario not found" });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
     const element = new Date(rows[0].fecha);
 
     const year = element.getFullYear();
-    const mounth = (element.getMonth() + 1);
+    const mounth = element.getMonth() + 1;
     const day = element.getDate();
 
     const format = `${day}-${mounth}-${year}`;
-    res.json({...rows[0], fecha: format});
+    res.json({ ...rows[0], fecha: format });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "something goes wrong" });
@@ -202,6 +279,10 @@ export const updateMercaderia = async (req, res) => {
 
 export const deleteMercaderia = async (req, res) => {
   try {
+    const [rows] = await con.query("SELECT * FROM mercaderia WHERE id = ?", [
+      req.params.id,
+    ]);
+
     const [result] = await con.query(
       "DELETE FROM mercaderia WHERE (`id` = ?);",
       [req.params.id]
@@ -209,6 +290,26 @@ export const deleteMercaderia = async (req, res) => {
 
     if (result.affectedRows <= 0)
       return res.status(404).json({ message: "No se encontro" });
+
+    try {
+      const resultado = await suminventario(rows[0].idinventario);
+
+      const [result] = await con.query(
+        `UPDATE inventario 
+        SET salida  = IFNULL(?,salida),
+            entrada = IFNULL(?,entrada)
+       WHERE id = ?`,
+        [
+          parseInt(resultado[0].salida),
+          parseInt(resultado[0].entrada),
+          resultado[0].id,
+        ]
+      );
+      if (result.affectedRows === 0)
+        return res.status(404).json({ message: "Inventario not found" });
+    } catch (error) {
+      console.log(error);
+    }
 
     res.status(200).send({ message: "Eliminado Correctamente" });
   } catch (error) {

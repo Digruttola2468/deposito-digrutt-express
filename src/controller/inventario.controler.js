@@ -10,73 +10,6 @@ export const getAllInventario = async (req, res) => {
   }
 };
 
-export const getInventarioTipos = async (req, res) => {
-  try {
-    const [rows] = await con.query(`
-      SELECT nombre,precio,descripcion,tipo
-      FROM inventario
-      INNER JOIN tipoproducto ON inventario.idtipoproducto = tipoproducto.id;
-    `);
-
-    res.json(rows);
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
-};
-
-export const getInventarioTiposWhereId = async (req, res) => {
-  try {
-    const [rows] = await con.query(
-      `
-        SELECT nombre,precio,descripcion,tipo
-	      FROM inventario
-	      INNER JOIN tipoproducto ON tipoproducto.id = inventario.idtipoproducto
-        WHERE idtipoproducto = ?`,
-      [req.params.id]
-    );
-
-    if (rows.length <= 0)
-      return res.status(404).json({ message: "No se encontro" });
-
-    res.json(rows);
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
-};
-
-export const getInventarioColores = async (req, res) => {
-  try {
-    const [rows] = await con.query(`
-        SELECT nombre,precio,descripcion,color
-        FROM inventario
-        INNER JOIN colores ON colores.id = inventario.idcolor;`);
-
-    res.json(rows);
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
-};
-
-export const getInventarioColoresWhereId = async (req, res) => {
-  try {
-    const [rows] = await con.query(
-      `
-      SELECT nombre,precio,descripcion,color
-          FROM inventario
-          INNER JOIN colores ON colores.id = inventario.idcolor
-          WHERE idcolor = ?;`,
-      [req.params.id]
-    );
-
-    if (rows.length <= 0)
-      return res.status(404).json({ message: "No se encontro" });
-
-    res.json(rows);
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
-};
-
 export const getOneInventario = async (req, res) => {
   try {
     const [rows] = await con.query("SELECT * FROM inventario WHERE id = ?;", [
@@ -88,6 +21,19 @@ export const getOneInventario = async (req, res) => {
     res.json(rows);
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
+  }
+};
+
+export const getOneInventarioEntradaSalida = async (id) => {
+  try {
+    const [rows] = await con.query("SELECT entrada,salida FROM inventario WHERE id = ?;", [
+      id,
+    ]);
+
+    return rows;
+  } catch (error) {
+    console.log(error);
+    return error;
   }
 };
 
@@ -163,40 +109,6 @@ export const getInventariosSelectNombres = async (req, res) => {
       "SELECT id,nombre,descripcion FROM inventario;"
     );
     res.json(rows);
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
-};
-
-const getIdInvenario = async () => {
-  const [rows] = await con.query("SELECT id FROM inventario");
-  return rows;
-};
-
-export const getInventarioStockActual = async (req, res) => {
-  try {
-    const listaEnviar = [];
-
-    const resultado = await getIdInvenario();
-
-    for (let index = 0; index < resultado.length; index++) {
-      const element = resultado[index];
-      const [rows] = await con.query(
-        `SELECT nombre, descripcion, 
-                SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as Salida,
-                SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as Entrada
-                FROM mercaderia 
-                INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
-                WHERE idinventario = ${element.id};`
-      );
-      if (rows[0].Entrada == null) rows[0].Entrada = 0;
-
-      if (rows[0].Salida == null) rows[0].Salida = 0;
-
-      listaEnviar.push({ ...rows[0], id: element.id });
-    }
-
-    res.json(listaEnviar);
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
   }
