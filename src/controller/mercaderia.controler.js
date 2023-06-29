@@ -151,7 +151,7 @@ export const createMercaderia = async (req, res) => {
     //2: entrada
     const category = { salida: 1, entrada: 2 };
     if (category.entrada == idcategoria) {
-      const valor = inventarioEntradaSalida[0].entrada;
+      const valor = parseInt(inventarioEntradaSalida[0].entrada);
       const suma = valor + stock;
 
       const [result] = await con.query(
@@ -161,7 +161,7 @@ export const createMercaderia = async (req, res) => {
       if (result.affectedRows === 0)
         return res.status(404).json({ message: "Inventario not found" });
     } else if (category.salida == idcategoria) {
-      const valor = inventarioEntradaSalida[0].salida;
+      const valor = parseInt(inventarioEntradaSalida[0].salida);
       const sumar = stock + valor;
 
       const [result] = await con.query(
