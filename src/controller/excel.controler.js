@@ -2,6 +2,7 @@ import { con } from "../db.js";
 import ExcelJs from "exceljs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import { getAllInventarioSelect } from "./inventario.controler.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const dir = dirname(__filename);
@@ -52,39 +53,20 @@ export const getExcelMercaderia = async (req, res) => {
 };
 
 
-const getIdInvenario = async () => {
-  const [rows] = await con.query("SELECT id FROM inventario");
-  return rows;
-};
 export const getExcelInventario = async (req, res) => {
   try {
+
     const listaEnviar = [];
 
-    const resultado = await getIdInvenario();
+    const listInventario = await getAllInventarioSelect();
 
-    for (let index = 0; index < resultado.length; index++) {
-      const element = resultado[index];
-      const [rows] = await con.query(
-        `SELECT nombre, descripcion, 
-                SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as Salida,
-                SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as Entrada
-                FROM mercaderia 
-                INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
-                WHERE idinventario = ${element.id};`
-      );
-      if (rows[0].Entrada == null) rows[0].Entrada = 0;
+    for (let i = 0; i < listInventario.length; i++) {
+      const element = listInventario[i];
+      const stockActual = element.entrada - element.salida;
 
-      if (rows[0].Salida == null) rows[0].Salida = 0;
-
-      const stockActual = parseInt(rows[0].Entrada) - parseInt(rows[0].Salida);
-      listaEnviar.push({ 
-        nombre: rows[0].nombre,
-        descripcion: rows[0].descripcion,
-        entrada: parseInt(rows[0].Entrada),
-        salida: parseInt(rows[0].Salida),
-        stockActual });
+      listaEnviar.push({...element, stockActual});
     }
-
+    
     const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet("Invent de producto");
 

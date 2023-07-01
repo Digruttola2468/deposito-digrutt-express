@@ -10,6 +10,15 @@ export const getAllInventario = async (req, res) => {
   }
 };
 
+export const getAllInventarioSelect = async () => {
+  try {
+    const [rows] = await con.query("SELECT nombre,descripcion,entrada,salida FROM inventario;");
+    return rows;
+  } catch (error) {
+    return [];
+  }
+}
+
 export const getOneInventario = async (req, res) => {
   try {
     const [rows] = await con.query("SELECT * FROM inventario WHERE id = ?;", [
