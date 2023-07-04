@@ -1,4 +1,5 @@
 import { con } from "../db.js";
+import { getMercaderiaWhereIdInventario } from "./mercaderia.controler.js";
 
 export const getAllInventario = async (req, res) => {
   try {
@@ -12,12 +13,14 @@ export const getAllInventario = async (req, res) => {
 
 export const getAllInventarioSelect = async () => {
   try {
-    const [rows] = await con.query("SELECT nombre,descripcion,entrada,salida FROM inventario;");
+    const [rows] = await con.query(
+      "SELECT nombre,descripcion,entrada,salida FROM inventario;"
+    );
     return rows;
   } catch (error) {
     return [];
   }
-}
+};
 
 export const getOneInventario = async (req, res) => {
   try {
@@ -83,8 +86,25 @@ export const updateInventario = async (req, res) => {
   }
 };
 
+const deleteMercaderiaWhereIdinventario = async (idinventario) => {
+  const list = await getMercaderiaWhereIdInventario(idinventario);
+
+  if (list != []) {
+    for (let i = 0; i < list.length; i++) {
+      const id = list[i];
+
+      const [result] = await con.query(
+        "DELETE FROM mercaderia WHERE (`id` = ?);",
+        [id]
+      );
+    }
+  }
+};
+
 export const deleteInventario = async (req, res) => {
   try {
+    await deleteMercaderiaWhereIdinventario(req.params.id);
+
     const [result] = await con.query(
       "DELETE FROM inventario WHERE (`id` = ?);",
       [req.params.id]

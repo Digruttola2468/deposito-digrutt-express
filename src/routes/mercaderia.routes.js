@@ -7,7 +7,7 @@ import {
   getSalidaMercaderiasWhereNombre,
   createMercaderia,
   updateMercaderia,
-  deleteMercaderia
+  deleteMercaderia,
 } from "../controller/mercaderia.controler.js";
 
 const router = Router();

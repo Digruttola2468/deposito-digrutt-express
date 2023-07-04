@@ -188,7 +188,7 @@ export const createMercaderia = async (req, res) => {
     } catch (error) {
       console.log(error);
     }
-    
+
     res.send({
       id: rows.insertId,
       fecha,
@@ -305,5 +305,24 @@ export const deleteMercaderia = async (req, res) => {
     res.status(200).send({ message: "Eliminado Correctamente" });
   } catch (error) {
     return res.status(500).json({ message: "something goes wrong" });
+  }
+};
+
+export const getMercaderiaWhereIdInventario = async (idinventario) => {
+  try {
+    const [rows] = await con.query(
+      `SELECT * FROM mercaderia WHERE idinventario = ?`,
+      [idinventario]
+    );
+
+    const listIdMercaderia = [];
+    for (let i = 0; i < rows.length; i++) {
+      const element = rows[i];
+      listIdMercaderia.push(element.id);
+    }
+    
+    return listIdMercaderia;
+  } catch (error) {
+    return [];
   }
 };
