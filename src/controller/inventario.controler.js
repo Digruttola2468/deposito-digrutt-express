@@ -14,7 +14,7 @@ export const getAllInventario = async (req, res) => {
 export const getAllInventarioSelect = async () => {
   try {
     const [rows] = await con.query(
-      "SELECT nombre,descripcion,entrada,salida FROM inventario;"
+      "SELECT nombre,descripcion,entrada,salida,pesoUnidad FROM inventario;"
     );
     return rows;
   } catch (error) {
@@ -38,10 +38,10 @@ export const getOneInventario = async (req, res) => {
 
 export const createInventario = async (req, res) => {
   try {
-    const { nombre, precio, descripcion, idcolor, idtipoproducto } = req.body;
+    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto) VALUES (?,?,?,?,?) ;",
-      [nombre, precio, descripcion, idcolor, idtipoproducto]
+      "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad) VALUES (?,?,?,?,?,?) ;",
+      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad]
     );
 
     res.json({
@@ -51,6 +51,7 @@ export const createInventario = async (req, res) => {
       descripcion,
       idcolor,
       idtipoproducto,
+      pesoUnidad,
     });
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
@@ -59,7 +60,7 @@ export const createInventario = async (req, res) => {
 
 export const updateInventario = async (req, res) => {
   try {
-    const { nombre, precio, descripcion, idcolor, idtipoproducto } = req.body;
+    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad, } = req.body;
     const id = req.params.id;
 
     const [result] = await con.query(
@@ -68,9 +69,10 @@ export const updateInventario = async (req, res) => {
                 precio = IFNULL(?,precio),
                 descripcion = IFNULL(?,descripcion),
                 idcolor = IFNULL(?,idcolor),
-                idtipoproducto = IFNULL(?,idtipoproducto)
+                idtipoproducto = IFNULL(?,idtipoproducto),
+                pesoUnidad = IFNULL(?,pesoUnidad)
             WHERE id = ?`,
-      [nombre, precio, descripcion, idcolor, idtipoproducto, id]
+      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad, id]
     );
 
     if (result.affectedRows === 0)
