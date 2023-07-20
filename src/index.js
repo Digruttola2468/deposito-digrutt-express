@@ -3,6 +3,9 @@ import cors from 'cors';
 
 import { PORT } from "./config.js";
 
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
 //ROUTES
 import indexRoute from "./routes/index.routes.js";
 import mercaderiaRoute from "./routes/mercaderia.routes.js";
@@ -11,6 +14,7 @@ import depositoRoute from './routes/deposito.routes.js';
 import tipoProductoRoute from './routes/tipoProducto.routes.js';
 import inventario from './routes/inventario.routes.js';
 import excel from './routes/excel.routes.js';
+import unidadMedidaRoute from './routes/unidadMedida.routes.js';
 
 const app = express();
 
@@ -28,10 +32,17 @@ app.use(depositoRoute);
 app.use(tipoProductoRoute);
 app.use(inventario);
 app.use(excel);
+app.use(unidadMedidaRoute);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
 });
+
+const __filename = fileURLToPath(import.meta.url);
+const dir = dirname(__filename);
+app.get('/photos/:name', (req,res) => {
+  res.sendFile(dir + `/assets/${req.params.name}.png`);
+})
 
 app.use((req, res) => {
   res.send("No se encuntra la pagina");

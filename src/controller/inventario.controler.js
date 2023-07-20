@@ -38,10 +38,10 @@ export const getOneInventario = async (req, res) => {
 
 export const createInventario = async (req, res) => {
   try {
-    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad } = req.body;
+    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad, stockCaja, idUnidadMedida } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad) VALUES (?,?,?,?,?,?) ;",
-      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad]
+      "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idUnidadMedida) VALUES (?,?,?,?,?,?) ;",
+      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida]
     );
 
     res.json({
@@ -52,6 +52,8 @@ export const createInventario = async (req, res) => {
       idcolor,
       idtipoproducto,
       pesoUnidad,
+      stockCaja, 
+      idUnidadMedida,
     });
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
@@ -60,7 +62,7 @@ export const createInventario = async (req, res) => {
 
 export const updateInventario = async (req, res) => {
   try {
-    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad, } = req.body;
+    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida } = req.body;
     const id = req.params.id;
 
     const [result] = await con.query(
@@ -70,9 +72,11 @@ export const updateInventario = async (req, res) => {
                 descripcion = IFNULL(?,descripcion),
                 idcolor = IFNULL(?,idcolor),
                 idtipoproducto = IFNULL(?,idtipoproducto),
-                pesoUnidad = IFNULL(?,pesoUnidad)
+                pesoUnidad = IFNULL(?,pesoUnidad),
+                stockCaja = IFNULL(?,stockCaja), 
+                idUnidadMedida = IFNULL(?,idUnidadMedida)
             WHERE id = ?`,
-      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad, id]
+      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida, id]
     );
 
     if (result.affectedRows === 0)
