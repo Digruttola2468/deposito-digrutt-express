@@ -6,7 +6,7 @@ export const getAllInventario = async (req, res) => {
     const [rows] = await con.query(`
     SELECT inventario.id,nombre,precio,descripcion,idcolor,idtipoproducto,entrada,salida,pesoUnidad,stockCaja,unidad FROM inventario 
     INNER JOIN unidadMedida 
-      on unidadMedida.id = inventario.idUnidadMedida`);
+      on unidadMedida.id = inventario.idUnidadMedida ORDER BY inventario.id ASC`);
 
     res.json(rows);
   } catch (error) {
