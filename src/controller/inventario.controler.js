@@ -3,7 +3,10 @@ import { getMercaderiaWhereIdInventario } from "./mercaderia.controler.js";
 
 export const getAllInventario = async (req, res) => {
   try {
-    const [rows] = await con.query("SELECT * FROM inventario;");
+    const [rows] = await con.query(`
+    SELECT * FROM inventario 
+    INNER JOIN unidadMedida 
+      on unidadMedida.id = inventario.idUnidadMedida`);
 
     res.json(rows);
   } catch (error) {

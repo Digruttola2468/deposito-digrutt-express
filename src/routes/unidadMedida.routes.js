@@ -5,7 +5,7 @@ import {
   getOneUnidadMedida,
   getUnidadMedida,
   updateUnidadMedida,
-} from "../controller/unidadMedida.controler";
+} from "../controller/unidadMedida.controler.js";
 
 const router = Router();
 
