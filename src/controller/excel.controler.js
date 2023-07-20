@@ -76,7 +76,7 @@ export const getExcelInventario = async (req, res) => {
       { header: "ENTRADA", key: "entrada", width: 10 },
       { header: "SALIDA", key: "salida", width: 10 },
       { header: "STOCK ACTUAL", key: "stockActual", width: 15  },
-      { header: "Peso x Unidad (gramos)", key: "pesoUnidad", width: 15  },
+      { header: "Peso x Unidad (gramos)", key: "pesoUnidad", width: 50  },
     ];
 
     worksheet.addRows(listaEnviar);
