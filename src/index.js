@@ -19,7 +19,7 @@ import unidadMedidaRoute from './routes/unidadMedida.routes.js';
 const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
-//app.use(cors());
+app.use(cors());
 
 //Habilitamos la lectura en JSON
 app.use(express.json());
