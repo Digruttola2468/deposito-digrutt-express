@@ -34,7 +34,19 @@ export const getMercaderias = async (req, res) => {
             INNER JOIN categoria on mercaderia.idcategoria = categoria.id 
             ORDER BY mercaderia.fecha DESC;`
     );
-    res.json(rows);
+    const listaEnviar = [];
+    for (let i = 0; i < rows.length; i++) {
+      const element = new Date(rows[i].fecha);
+
+      const year = element.getFullYear();
+      const mounth = element.getMonth() + 1;
+      const day = element.getDate();
+
+      const format = `${day}-${mounth}-${year}`;
+      listaEnviar.push({ ...rows[i], fecha: format });
+    }
+
+    res.json(listaEnviar);
   } catch (error) {
     return res.status(500).json({ message: "something goes wrong" });
   }
@@ -321,7 +333,7 @@ export const getMercaderiaWhereIdInventario = async (idinventario) => {
       const element = rows[i];
       listIdMercaderia.push(element.id);
     }
-    
+
     return listIdMercaderia;
   } catch (error) {
     return [];
