@@ -31,7 +31,8 @@ export const getMercaderias = async (req, res) => {
       `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,categoria,idinventario
             FROM mercaderia 
             INNER JOIN inventario on mercaderia.idinventario = inventario.id
-            INNER JOIN categoria on mercaderia.idcategoria = categoria.id;`
+            INNER JOIN categoria on mercaderia.idcategoria = categoria.id 
+            ORDER BY mercaderia.fecha DESC;`
     );
     res.json(rows);
   } catch (error) {
