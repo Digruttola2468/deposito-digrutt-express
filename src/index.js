@@ -18,6 +18,7 @@ import unidadMedidaRoute from './routes/unidadMedida.routes.js';
 
 //ROUTES PRODUCCION
 import clientes from './routes/clientes.routes.js';
+import materiaPrima from './routes/materiaPrima.routes.js';
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use(inventario);
 app.use(excel);
 app.use(unidadMedidaRoute);
 app.use(clientes);
+app.use(materiaPrima);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
