@@ -58,7 +58,7 @@ export const updateCliente = async (req, res) => {
       if (result.affectedRows === 0)
         return res.status(404).json({ message: "Cliente not found" });
 
-      const [rows] = await con.query("SELECT * FROM colores WHERE id = ?", [id]);
+      const [rows] = await con.query("SELECT * FROM clientes WHERE id = ?", [id]);
       res.json(rows[0]);
     } catch (error) {
       return res.status(500).send({ message: "Something wrong" });
