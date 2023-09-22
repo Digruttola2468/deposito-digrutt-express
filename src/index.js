@@ -19,6 +19,7 @@ import unidadMedidaRoute from './routes/unidadMedida.routes.js';
 //ROUTES PRODUCCION
 import clientes from './routes/clientes.routes.js';
 import materiaPrima from './routes/materiaPrima.routes.js';
+import codMaquinaParada from './routes/motivoMaquinaParada.routes.js';
 
 const app = express();
 
@@ -37,8 +38,10 @@ app.use(tipoProductoRoute);
 app.use(inventario);
 app.use(excel);
 app.use(unidadMedidaRoute);
+
 app.use(clientes);
 app.use(materiaPrima);
+app.use(codMaquinaParada);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
