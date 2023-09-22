@@ -20,6 +20,7 @@ import unidadMedidaRoute from './routes/unidadMedida.routes.js';
 import clientes from './routes/clientes.routes.js';
 import materiaPrima from './routes/materiaPrima.routes.js';
 import codMaquinaParada from './routes/motivoMaquinaParada.routes.js';
+import productos from './routes/productos.routes.js';
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use(unidadMedidaRoute);
 app.use(clientes);
 app.use(materiaPrima);
 app.use(codMaquinaParada);
+app.use(productos)
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
