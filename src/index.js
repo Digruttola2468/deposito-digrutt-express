@@ -6,7 +6,7 @@ import { PORT } from "./config.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-//ROUTES
+//ROUTES MERCADERIA
 import indexRoute from "./routes/index.routes.js";
 import mercaderiaRoute from "./routes/mercaderia.routes.js";
 import coloresRoute from './routes/colores.routes.js';
@@ -15,6 +15,9 @@ import tipoProductoRoute from './routes/tipoProducto.routes.js';
 import inventario from './routes/inventario.routes.js';
 import excel from './routes/excel.routes.js';
 import unidadMedidaRoute from './routes/unidadMedida.routes.js';
+
+//ROUTES PRODUCCION
+import clientes from './routes/clientes.routes.js';
 
 const app = express();
 
@@ -33,6 +36,7 @@ app.use(tipoProductoRoute);
 app.use(inventario);
 app.use(excel);
 app.use(unidadMedidaRoute);
+app.use(clientes);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
