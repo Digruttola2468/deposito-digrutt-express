@@ -41,10 +41,10 @@ export const getOneInventario = async (req, res) => {
 
 export const createInventario = async (req, res) => {
   try {
-    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad, stockCaja, idUnidadMedida } = req.body;
+    const { nombre, precio, descripcion, idcolor, idtipoproducto,pesoUnidad,stockCaja,idUnidadMedida,idCliente } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idUnidadMedida) VALUES (?,?,?,?,?,?) ;",
-      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida]
+      "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idUnidadMedida,idCliente) VALUES (?,?,?,?,?,?,?,?,?) ;",
+      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida,idCliente]
     );
 
     res.json({
@@ -59,6 +59,7 @@ export const createInventario = async (req, res) => {
       idUnidadMedida,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).send({ message: "Something wrong" });
   }
 };
