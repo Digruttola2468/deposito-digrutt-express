@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   createInventario,
   deleteInventario,
-  getAllInventario,
+  getAllInventarioSelect,
   getOneInventario,
   updateInventario,
   getInventariosSelectNombres,
@@ -10,7 +10,7 @@ import {
 
 const router = Router();
 
-router.get("/inventario", getAllInventario);
+router.get("/inventario", getAllInventarioSelect);
 router.get('/inventario/nombres', getInventariosSelectNombres);
 
 router.get("/inventario/:id", getOneInventario);

@@ -14,14 +14,14 @@ export const getAllInventario = async (req, res) => {
   }
 };
 
-export const getAllInventarioSelect = async () => {
+export const getAllInventarioSelect = async (req, res) => {
   try {
     const [rows] = await con.query(
-      "SELECT nombre,descripcion,entrada,salida,pesoUnidad FROM inventario;"
+      "SELECT * FROM inventario;"
     );
-    return rows;
+    res.json(rows);
   } catch (error) {
-    return [];
+    return res.status(500).send({ message: "Something wrong" });;
   }
 };
 
