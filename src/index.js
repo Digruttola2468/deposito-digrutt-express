@@ -22,6 +22,9 @@ import materiaPrima from './routes/materiaPrima.routes.js';
 import codMaquinaParada from './routes/motivoMaquinaParada.routes.js';
 import productos from './routes/productos.routes.js';
 
+//ROUTES GRAFICA
+import grafica from './routes/grafica.routes.js';
+
 const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
@@ -43,7 +46,9 @@ app.use(unidadMedidaRoute);
 app.use(clientes);
 app.use(materiaPrima);
 app.use(codMaquinaParada);
-app.use(productos)
+app.use(productos);
+
+app.use(grafica);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
