@@ -17,7 +17,7 @@ export const getAllInventario = async (req, res) => {
 export const getAllInventarioSelect = async (req, res) => {
   try {
     const [rows] = await con.query(
-      "SELECT * FROM inventario;"
+      `SELECT * FROM inventario ORDER BY inventario.id ASC;`
     );
     res.json(rows);
   } catch (error) {
@@ -57,6 +57,7 @@ export const createInventario = async (req, res) => {
       pesoUnidad,
       stockCaja, 
       idUnidadMedida,
+      idCliente
     });
   } catch (error) {
     console.log(error);
@@ -66,7 +67,7 @@ export const createInventario = async (req, res) => {
 
 export const updateInventario = async (req, res) => {
   try {
-    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida } = req.body;
+    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida, idCliente } = req.body;
     const id = req.params.id;
 
     const [result] = await con.query(
@@ -78,9 +79,10 @@ export const updateInventario = async (req, res) => {
                 idtipoproducto = IFNULL(?,idtipoproducto),
                 pesoUnidad = IFNULL(?,pesoUnidad),
                 stockCaja = IFNULL(?,stockCaja), 
-                idUnidadMedida = IFNULL(?,idUnidadMedida)
+                idUnidadMedida = IFNULL(?,idUnidadMedida),
+                idCliente = IFNULL(?,idCliente)
             WHERE id = ?`,
-      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida, id]
+      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida, idCliente, id]
     );
 
     if (result.affectedRows === 0)
