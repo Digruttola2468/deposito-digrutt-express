@@ -117,6 +117,106 @@ export const graficaMercaderia = async (req, res) => {
 
     res.json(enviarJSON);
   } catch (error) {
+    return res.status(500).send({ message: "Something wrong" });
+  }
+};
+
+const getAllMercaderia = async () => {
+  try {
+    const [rows] = await con.query(`SELECT * FROM mercaderia`);
+    return rows;
+  } catch (error) {
+    return [];
+  }
+};
+
+
+//ACA OBTENEMOS TODO LOS DATOS ; HASTA TODOS LOS AÑOS DE CADA INVENTARIO
+/*export const graficaCliente = async (req, res) => {
+  try {
+    const enviarJSON = [];
+    const idCliente = req.params.idCliente;
+
+    //Obtener todos los que tengan ese idCliente en Inventario
+    const [rows] = await con.query(
+      `SELECT id,nombre,descripcion FROM inventario WHERE idCliente = ?;`
+    ,[idCliente]);
+
+    const apiMercaderia = await getAllMercaderia();
+
+    for (let i = 0; i < rows.length; i++) {
+      const idInventario = rows[i].id;
+      const nameInventario = rows[i].nombre;
+      const descripcionInventario = rows[i].descripcion;
+
+      const filterWhereIdInventario = apiMercaderia.filter(elem => elem.idinventario === idInventario)
+
+      const arrayYear = getArrayYear(filterWhereIdInventario, idInventario);
+
+      for (let j = 0; j < arrayYear.length; j++) {
+        const year = arrayYear[j];
+        
+        const listSalida = getArrayMercaderia(filterWhereIdInventario, idInventario, 1, year);
+        
+        enviarJSON.push({
+          fecha: year,
+          idInventario,
+          nombre: nameInventario,
+          descripcion: descripcionInventario,
+          salida: listSalida,
+        });
+      }
+    }
+
+    res.json(enviarJSON);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: "Something wrong" });
+  }
+}*/
+
+//ACA SE OBTIENE EN RELACION AL AÑO ENVIADO
+export const graficaCliente = async (req, res) => {
+  try {
+    const enviarJSON = [];
+    const idCliente = req.query.idCliente;
+    const yearQuery = req.query.year;
+
+    //Obtener todos los que tengan ese idCliente en Inventario
+    const [rows] = await con.query(
+      `SELECT id,nombre,descripcion FROM inventario WHERE idCliente = ?;`,
+      [idCliente]
+    );
+
+    const apiMercaderia = await getAllMercaderia();
+
+    for (let i = 0; i < rows.length; i++) {
+      const idInventario = rows[i].id;
+      const nameInventario = rows[i].nombre;
+      const descripcionInventario = rows[i].descripcion;
+
+      const filterWhereIdInventario = apiMercaderia.filter(
+        (elem) => elem.idinventario === idInventario
+      );
+
+      const listSalida = getArrayMercaderia(
+        filterWhereIdInventario,
+        idInventario,
+        1,
+        yearQuery
+      );
+
+      enviarJSON.push({
+        fecha: yearQuery,
+        idInventario,
+        nombre: nameInventario,
+        descripcion: descripcionInventario,
+        salida: listSalida,
+      });
+    }
+
+    res.json(enviarJSON);
+  } catch (error) {
     console.log(error);
     return res.status(500).send({ message: "Something wrong" });
   }
