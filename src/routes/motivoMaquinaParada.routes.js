@@ -7,15 +7,17 @@ import {
   updateCodMaquinaParada,
 } from "../controller/motivoMaquinaParada.controler.js";
 
+import userExtractor from '../middleware/userExtractor.js'
+
 const router = Router();
 
 router.get("/maquinaParada", getCodMaquinaParada);
 router.get("/maquinaParada/:id", getOneCodMaquinaParada);
 
-router.post("/maquinaParada", createCodMaquinaParada);
+router.post("/maquinaParada",userExtractor, createCodMaquinaParada);
 
-router.put("/maquinaParada/:id", updateCodMaquinaParada);
+router.put("/maquinaParada/:id",userExtractor, updateCodMaquinaParada);
 
-router.delete("/maquinaParada/:id", deleteCodMaquinaParada);
+router.delete("/maquinaParada/:id",userExtractor, deleteCodMaquinaParada);
 
 export default router;

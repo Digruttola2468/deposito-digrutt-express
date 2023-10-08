@@ -7,15 +7,17 @@ import {
   updateUnidadMedida,
 } from "../controller/unidadMedida.controler.js";
 
+import userExtractor from '../middleware/userExtractor.js'
+
 const router = Router();
 
 router.get("/unidadMedida", getUnidadMedida);
 router.get("/unidadMedida/:id", getOneUnidadMedida);
 
-router.post("/unidadMedida", createUnidadMedida);
+router.post("/unidadMedida",userExtractor, createUnidadMedida);
 
-router.put("/unidadMedida/:id", updateUnidadMedida);
+router.put("/unidadMedida/:id",userExtractor, updateUnidadMedida);
 
-router.delete("/unidadMedida/:id", deleteUnidadMedida);
+router.delete("/unidadMedida/:id",userExtractor, deleteUnidadMedida);
 
 export default router;
