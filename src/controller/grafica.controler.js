@@ -130,7 +130,6 @@ const getAllMercaderia = async () => {
   }
 };
 
-
 //ACA OBTENEMOS TODO LOS DATOS ; HASTA TODOS LOS AÑOS DE CADA INVENTARIO
 /*export const graficaCliente = async (req, res) => {
   try {
@@ -212,6 +211,60 @@ export const graficaCliente = async (req, res) => {
         nombre: nameInventario,
         descripcion: descripcionInventario,
         salida: listSalida,
+      });
+    }
+
+    res.json(enviarJSON);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: "Something wrong" });
+  }
+};
+
+const getClientesAPI = async () => {
+  try {
+    const [rows] = await con.query("SELECT * FROM clientes;");
+
+    return rows;
+  } catch (error) {
+    return res.status(500).send({ message: "Something wrong" });
+  }
+};
+
+export const getGraficaRelacionOtrosClientes = async (req, res) => {
+  try {
+    const enviarJSON = [];
+
+    const arrayClientes = await getClientesAPI();
+
+    const [rows] = await con.query(
+      `SELECT id,entrada,salida,idCliente FROM inventario;`
+    );
+
+    for (let i = 0; i < arrayClientes.length; i++) {
+      const element = arrayClientes[i];
+
+      const filterByIdCliente = rows.filter(
+        (elem) => elem.idCliente === element.id
+      );
+
+      let entrada = 0;
+      let salida = 0;
+      
+      for (let j = 0; j < filterByIdCliente.length; j++) {
+        const element = filterByIdCliente[j];
+
+        entrada += element.entrada;
+        salida += element.salida;
+      }
+
+      const stockActual = entrada - salida;
+
+      enviarJSON.push({
+        cliente: element.cliente,
+        stockEntrada: entrada,
+        stockSalida: salida,
+        stockActual
       });
     }
 
