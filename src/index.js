@@ -25,6 +25,9 @@ import productos from './routes/productos.routes.js';
 //ROUTES GRAFICA
 import grafica from './routes/grafica.routes.js';
 
+//ROUTES USERS
+import user from './routes/auth.routes.js';
+
 const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
@@ -49,6 +52,8 @@ app.use(codMaquinaParada);
 app.use(productos);
 
 app.use(grafica);
+
+app.use(user);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");

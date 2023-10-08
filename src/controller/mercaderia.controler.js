@@ -10,7 +10,7 @@ const suminventario = async (idinventario) => {
                     SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as entrada
                     FROM mercaderia 
                     INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
-                    WHERE idinventario = ${idinventario};`
+                    WHERE idinventario = ?;`, [idinventario]
     );
     if (rows[0].entrada == null) rows[0].entrada = 0;
 
