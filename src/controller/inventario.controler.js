@@ -134,7 +134,7 @@ export const deleteInventario = async (req, res) => {
 export const getInventariosSelectNombres = async (req, res) => {
   try {
     const [rows] = await con.query(
-      "SELECT id,nombre,descripcion FROM inventario;"
+      "SELECT id,nombre,descripcion,idCliente FROM inventario;"
     );
     res.json(rows);
   } catch (error) {
