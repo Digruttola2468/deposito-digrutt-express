@@ -4,7 +4,7 @@ import {createNewUser,iniciarSesion
 
 const router = Router();
 
-router.post("/signin", createNewUser);
+router.post("/signUp", createNewUser);
 
 router.post("/login", iniciarSesion);
 
