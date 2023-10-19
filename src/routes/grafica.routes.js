@@ -1,14 +1,16 @@
 import { Router } from "express";
 import { graficaMercaderia,graficaCliente,getGraficaRelacionOtrosClientes } from '../controller/grafica.controler.js';
 
+import userExtractor from "../middleware/userExtractor.js";
+
 const router = Router();
 
-router.get('/grafica/mercaderia/:idInventario', graficaMercaderia);
+router.get('/grafica/mercaderia/:idInventario',userExtractor, graficaMercaderia);
 
 //router.get('/grafica/cliente/:idCliente', graficaCliente);
 
-router.get('/grafica/cliente', graficaCliente);
+router.get('/grafica/cliente',userExtractor, graficaCliente);
 
-router.get('/grafica/clientes/todos', getGraficaRelacionOtrosClientes);
+router.get('/grafica/clientes/todos',userExtractor, getGraficaRelacionOtrosClientes);
 
 export default router;

@@ -12,10 +12,10 @@ import userExtractor from '../middleware/userExtractor.js'
 
 const router = Router();
 
-router.get("/inventario", getAllInventarioSelect);
-router.get('/inventario/nombres', getInventariosSelectNombres);
+router.get("/inventario",userExtractor, getAllInventarioSelect);
+router.get('/inventario/nombres',userExtractor, getInventariosSelectNombres);
 
-router.get("/inventario/:id", getOneInventario);
+router.get("/inventario/:id",userExtractor, getOneInventario);
 
 router.post("/inventario",userExtractor, createInventario);
 
