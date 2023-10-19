@@ -32,11 +32,11 @@ export const createNewUser = async (req, res) => {
         );
 
         const userForToken = {
-          id: rows[0].id,
-          nombre: rows[0].nombre,
-          apellido: rows[0].apellido,
-          gmail: rows[0].gmail,
-          isAdmin: rows[0].isAdmin,
+          id: rows.insertId,
+          nombre,
+          apellido,
+          gmail,
+          isAdmin: false,
         };
     
         const token = jwt.sign(userForToken, JWT_SECRET);
