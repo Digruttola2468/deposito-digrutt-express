@@ -5,9 +5,9 @@ import { JWT_SECRET } from "../config.js";
 
 const exitsUser = async (gmail) => {
   try {
-    const [rows] = await con.query("SELECT * FROM users WHERE gmail = ?;", 
-      [gmail]
-    );
+    const [rows] = await con.query("SELECT * FROM users WHERE gmail = ?;", [
+      gmail,
+    ]);
 
     if (rows.length <= 0) return false;
     else return true;
@@ -21,7 +21,7 @@ export const createNewUser = async (req, res) => {
   //sign in
   try {
     const { nombre, apellido, password, gmail } = req.body;
-    
+
     const exitsUserWithGmail = await exitsUser(gmail);
 
     if (!exitsUserWithGmail) {
@@ -33,14 +33,18 @@ export const createNewUser = async (req, res) => {
 
         const userForToken = {
           id: rows.insertId,
-          nombre,
-          apellido,
-          gmail,
+          nombre, 
+          apellido, 
+          gmail, 
           isAdmin: false,
+          isMercaderia: false,
+          isInventario: false,
+          isOficina: false,
+          isProduccion: false,
         };
-    
+
         const token = jwt.sign(userForToken, JWT_SECRET);
-    
+
         res.json({
           ...userForToken,
           token,
@@ -73,12 +77,31 @@ export const iniciarSesion = async (req, res) => {
     if (!passwordCorrect)
       return res.status(401).json({ error: "invalid user or password" });
 
+    let isAdmin = false;
+    if (rows[0].isAdmin != 0) isAdmin = true;
+
+    let isMercaderia = false;
+    if (rows[0].is_mercaderia != 0) isMercaderia = true;
+
+    let isInventario = false;
+    if (rows[0].is_inventario != 0) isInventario = true;
+
+    let isOficina = false;
+    if (rows[0].is_oficina != 0) isOficina = true;
+
+    let isProduccion = false;
+    if (rows[0].is_produccion != 0) isProduccion = true;
+
     const userForToken = {
       id: rows[0].id,
       nombre: rows[0].nombre,
       apellido: rows[0].apellido,
       gmail: rows[0].gmail,
-      isAdmin: rows[0].isAdmin,
+      isAdmin,
+      isMercaderia,
+      isInventario,
+      isOficina,
+      isProduccion,
     };
 
     const token = jwt.sign(userForToken, JWT_SECRET);
