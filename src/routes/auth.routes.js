@@ -1,12 +1,9 @@
 import { Router } from "express";
-import {createNewUser,iniciarSesion
+import {iniciarSesion
 } from "../controller/auth.controler.js";
 
 const router = Router();
 
-router.post("/signUp", createNewUser);
-
-router.post("/login", iniciarSesion);
-
+router.get("/login", iniciarSesion);
 
 export default router;

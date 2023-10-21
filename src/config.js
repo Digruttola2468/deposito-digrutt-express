@@ -11,3 +11,5 @@ export const DB_PORT = process.env.DB_PORT;
 export const JWT_SECRET = process.env.JWT_SECRET;
 
 export const ORIGIN_WEB = process.env.ORIGIN_WEB;
+
+export const SUPABASE_KEY = process.env.SUPABASE_KEY;
