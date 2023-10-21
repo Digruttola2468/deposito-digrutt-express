@@ -14,7 +14,7 @@ export default (req,res,next) => {
       decoredToken = jwt.verify(token, JWT_SECRET);
     } catch {}
 
-    if (!token || !decoredToken.id)
+    if (!token || !decoredToken.gmail)
       return res.status(401).json({ message: "token missing or invalid" });
 
     next();
