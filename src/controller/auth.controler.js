@@ -22,6 +22,11 @@ export const iniciarSesion = async (req, res) => {
         created_at: data[0].created_at,
         nombre: data[0].nombre,
         apellido: data[0].apellido,
+        is_admin: data[0].is_admin,
+        is_mercaderia: data[0].is_mercaderia,
+        is_oficina: data[0].is_oficina,
+        is_produccion: data[0].is_produccion,
+        is_matriceria: data[0].is_matriceria,
         gmail: data[0].gmail,
       };
 
