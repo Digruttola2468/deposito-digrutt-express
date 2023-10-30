@@ -28,6 +28,9 @@ import grafica from './routes/grafica.routes.js';
 //ROUTES USERS
 import user from './routes/auth.routes.js';
 
+//ROUTES REMITOS
+import remito from './routes/remitos.routes.js'
+
 const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
@@ -54,6 +57,8 @@ app.use(productos);
 app.use(grafica);
 
 app.use(user);
+
+app.use(remito);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
