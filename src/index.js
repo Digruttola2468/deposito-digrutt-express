@@ -6,7 +6,8 @@ import { PORT } from "./config.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-//ROUTES MERCADERIA
+//ROUTES PRINCIPAL
+import localidad from './routes/localidad.routes.js'
 import indexRoute from "./routes/index.routes.js";
 import mercaderiaRoute from "./routes/mercaderia.routes.js";
 import coloresRoute from './routes/colores.routes.js';
@@ -59,6 +60,8 @@ app.use(grafica);
 app.use(user);
 
 app.use(remito);
+
+app.use(localidad);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
