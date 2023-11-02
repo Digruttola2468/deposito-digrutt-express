@@ -38,8 +38,10 @@ export const getOneCliente = async (req, res) => {
 export const createCliente = async (req, res) => {
   let lenghtCliente = await lenghtClientes();
 
+  console.log("LENGTH: ",lenghtCliente);
   if(lenghtCliente != -1) {
-    const id = lenghtCliente++;
+    const id = lenghtCliente + 1;
+    console.log("ID: ",id);
     try {
       const { codigo ,cliente, domicilio, idLocalidad, mail, cuit } = req.body;
       const [rows] = await con.query(
@@ -48,7 +50,7 @@ export const createCliente = async (req, res) => {
       );
   
       res.json({
-        id: rows.insertId,
+        id,
         codigo, 
         cliente,
         domicilio,
