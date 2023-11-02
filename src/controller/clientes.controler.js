@@ -1,5 +1,15 @@
 import { con } from "../db.js";
 
+const lenghtClientes = async () => {
+  try {
+    const [rows] = await con.query("SELECT * FROM clientes;");
+
+    return rows.length;
+  } catch (error) {
+    return -1;
+  }
+}
+
 export const getClientes = async (req, res) => {
   try {
     const [rows] = await con.query("SELECT * FROM clientes;");
@@ -26,25 +36,32 @@ export const getOneCliente = async (req, res) => {
 };
 
 export const createCliente = async (req, res) => {
-  try {
-    const { codigo ,cliente, domicilio, idLocalidad, mail, cuit } = req.body;
-    const [rows] = await con.query(
-      "INSERT INTO clientes (codigo,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?) ;",
-      [codigo,cliente,domicilio,idLocalidad,mail,cuit]
-    );
+  let lenghtCliente = await lenghtClientes();
 
-    res.json({
-      id: rows.insertId,
-      codigo, 
-      cliente,
-      domicilio,
-      idLocalidad, 
-      mail, 
-      cuit,
-    });
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
+  if(lenghtCliente != -1) {
+    const id = lenghtCliente++;
+    try {
+      const { codigo ,cliente, domicilio, idLocalidad, mail, cuit } = req.body;
+      const [rows] = await con.query(
+        "INSERT INTO clientes (id,codigo,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?,?) ;",
+        [id, codigo,cliente,domicilio,idLocalidad,mail,cuit]
+      );
+  
+      res.json({
+        id: rows.insertId,
+        codigo, 
+        cliente,
+        domicilio,
+        idLocalidad, 
+        mail, 
+        cuit,
+      });
+    } catch (error) {
+      return res.status(500).send({ message: "Something wrong" });
+    }
   }
+
+  
 };
 
 export const updateCliente = async (req, res) => {
