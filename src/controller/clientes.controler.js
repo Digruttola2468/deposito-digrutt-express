@@ -27,15 +27,20 @@ export const getOneCliente = async (req, res) => {
 
 export const createCliente = async (req, res) => {
   try {
-    const { codigo ,cliente } = req.body;
+    const { codigo ,cliente, domicilio, idLocalidad, mail, cuit } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO clientes (codigo,cliente) VALUES (?,?) ;",
-      [codigo,cliente]
+      "INSERT INTO clientes (codigo,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?) ;",
+      [codigo,cliente,domicilio,idLocalidad,mail,cuit]
     );
 
     res.json({
       id: rows.insertId,
-      color,
+      codigo, 
+      cliente,
+      domicilio,
+      idLocalidad, 
+      mail, 
+      cuit,
     });
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
