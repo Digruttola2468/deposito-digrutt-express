@@ -193,7 +193,7 @@ export const createMercaderia = async (req, res) => {
         [
           parseInt(resultado[0].salida),
           parseInt(resultado[0].entrada),
-          resultado[0].id,
+          idinventario,
         ]
       );
       if (result.affectedRows === 0)
