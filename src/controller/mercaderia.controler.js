@@ -5,7 +5,7 @@ const suminventario = async (idinventario) => {
     const listaEnviar = [];
 
     const [rows] = await con.query(
-      `SELECT *, 
+      `SELECT idinventario, 
                     SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as salida,
                     SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as entrada
                     FROM mercaderia 
@@ -298,13 +298,13 @@ export const deleteMercaderia = async (req, res) => {
 
       const [result] = await con.query(
         `UPDATE inventario 
-        SET salida  = IFNULL(?,salida),
-            entrada = IFNULL(?,entrada)
-       WHERE id = ?`,
+          SET salida  = IFNULL(?,salida),
+              entrada = IFNULL(?,entrada)
+          WHERE id = ?`,
         [
           parseInt(resultado[0].salida),
           parseInt(resultado[0].entrada),
-          resultado[0].id,
+          rows[0].idinventario,
         ]
       );
       if (result.affectedRows === 0)
