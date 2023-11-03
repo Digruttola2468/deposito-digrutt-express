@@ -171,14 +171,14 @@ export const getSalidaMercaderiasWhereNombre = async (req, res) => {
 
 export const createMercaderia = async (req, res) => {
   try {
-    const { fecha, factura, stock, proveedor, idinventario, idcategoria } =
+    const { fecha, stock, proveedor, idinventario, idcategoria } =
       req.body;
 
     const fechaDate = new Date(fecha);
 
     const [rows] = await con.query(
-      "INSERT INTO mercaderia (`factura`, `fecha`, `stock`, `proveedor`, `idcategoria`, `idinventario`) VALUES (?,?,?,?,?,?);",
-      [factura, fechaDate, stock, proveedor, idcategoria, idinventario]
+      "INSERT INTO mercaderia (`fecha`, `stock`, `proveedor`, `idcategoria`, `idinventario`) VALUES (?,?,?,?,?);",
+      [fechaDate, stock, proveedor, idcategoria, idinventario]
     );
 
     try {
@@ -205,7 +205,6 @@ export const createMercaderia = async (req, res) => {
     res.send({
       id: rows.insertId,
       fecha,
-      factura,
       stock,
       proveedor,
       idcategoria,
