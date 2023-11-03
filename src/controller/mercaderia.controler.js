@@ -218,7 +218,7 @@ export const createMercaderia = async (req, res) => {
 
 export const updateMercaderia = async (req, res) => {
   try {
-    const { fecha, factura, stock, proveedor, idinventario, idcategoria } =
+    const { fecha, stock, proveedor, idinventario, idcategoria } =
       req.body;
     const id = req.params.id;
 
@@ -227,14 +227,13 @@ export const updateMercaderia = async (req, res) => {
 
     const [result] = await con.query(
       `UPDATE mercaderia
-        SET factura = IFNULL(?,factura), 
-            fecha = IFNULL(?,fecha),
+        SET fecha = IFNULL(?,fecha),
             stock = IFNULL(?,stock),
             proveedor = IFNULL(?,proveedor),
             idcategoria = IFNULL(?,idcategoria),
             idinventario = IFNULL(?,idinventario)
         WHERE id = ?;`,
-      [factura, fechaDate, stock, proveedor, idcategoria, idinventario, id]
+      [ fechaDate, stock, proveedor, idcategoria, idinventario, id]
     );
 
     if (result.affectedRows === 0)
