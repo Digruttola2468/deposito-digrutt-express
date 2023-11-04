@@ -28,7 +28,7 @@ const suminventario = async (idinventario) => {
 export const getMercaderias = async (req, res) => {
   try {
     const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,categoria,idinventario
+      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario
             FROM mercaderia 
             INNER JOIN inventario on mercaderia.idinventario = inventario.id
             INNER JOIN categoria on mercaderia.idcategoria = categoria.id 
@@ -55,7 +55,7 @@ export const getMercaderias = async (req, res) => {
 export const getEntradaMercaderias = async (req, res) => {
   try {
     const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
+      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,idinventario
             FROM mercaderia 
             INNER JOIN inventario on mercaderia.idinventario = inventario.id 
             WHERE idcategoria = 2;`
@@ -83,7 +83,7 @@ export const getEntradaMercaderias = async (req, res) => {
 export const getSalidaMercaderias = async (req, res) => {
   try {
     const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
+      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,idinventario
             FROM mercaderia 
             INNER JOIN inventario on mercaderia.idinventario = inventario.id 
             WHERE idcategoria = 1;`
@@ -110,7 +110,7 @@ export const getSalidaMercaderias = async (req, res) => {
 export const getEntradaMercaderiasWhereNombre = async (req, res) => {
   try {
     const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
+      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,idinventario
             FROM mercaderia 
             INNER JOIN inventario ON mercaderia.idinventario = inventario.id 
             WHERE nombre = ? and idcategoria = 2`,
@@ -141,7 +141,7 @@ export const getEntradaMercaderiasWhereNombre = async (req, res) => {
 export const getSalidaMercaderiasWhereNombre = async (req, res) => {
   try {
     const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
+      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,idinventario
                 FROM mercaderia 
                 INNER JOIN inventario ON mercaderia.idinventario = inventario.id 
                 WHERE nombre = ? and idcategoria = 1`,
@@ -171,14 +171,14 @@ export const getSalidaMercaderiasWhereNombre = async (req, res) => {
 
 export const createMercaderia = async (req, res) => {
   try {
-    const { fecha, stock, proveedor, idinventario, idcategoria } =
+    const { fecha, stock, idinventario, idcategoria } =
       req.body;
 
     const fechaDate = new Date(fecha);
 
     const [rows] = await con.query(
-      "INSERT INTO mercaderia (`fecha`, `stock`, `proveedor`, `idcategoria`, `idinventario`) VALUES (?,?,?,?,?);",
-      [fechaDate, stock, proveedor, idcategoria, idinventario]
+      "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`) VALUES (?,?,?,?,?);",
+      [fechaDate, stock, idcategoria, idinventario]
     );
 
     try {
@@ -218,7 +218,7 @@ export const createMercaderia = async (req, res) => {
 
 export const updateMercaderia = async (req, res) => {
   try {
-    const { fecha, stock, proveedor, idinventario, idcategoria } =
+    const { fecha, stock, idinventario, idcategoria } =
       req.body;
     const id = req.params.id;
 
@@ -229,11 +229,10 @@ export const updateMercaderia = async (req, res) => {
       `UPDATE mercaderia
         SET fecha = IFNULL(?,fecha),
             stock = IFNULL(?,stock),
-            proveedor = IFNULL(?,proveedor),
             idcategoria = IFNULL(?,idcategoria),
             idinventario = IFNULL(?,idinventario)
         WHERE id = ?;`,
-      [ fechaDate, stock, proveedor, idcategoria, idinventario, id]
+      [ fechaDate, stock, idcategoria, idinventario, id]
     );
 
     if (result.affectedRows === 0)
