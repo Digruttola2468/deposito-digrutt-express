@@ -16,6 +16,7 @@ import tipoProductoRoute from './routes/tipoProducto.routes.js';
 import inventario from './routes/inventario.routes.js';
 import excel from './routes/excel.routes.js';
 import unidadMedidaRoute from './routes/unidadMedida.routes.js';
+import facturaNegro from './routes/facturaNegro.routes.js';
 
 //ROUTES PRODUCCION
 import clientes from './routes/clientes.routes.js';
@@ -62,6 +63,8 @@ app.use(user);
 app.use(remito);
 
 app.use(localidad);
+
+app.use(facturaNegro);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");
