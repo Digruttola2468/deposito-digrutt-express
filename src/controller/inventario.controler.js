@@ -52,9 +52,10 @@ export const createInventario = async (req, res) => {
       idcolor,
       idtipoproducto,
       pesoUnidad,
-      stockCaja, 
-      idUnidadMedida,
-      idCliente
+      stockCaja,
+      idCliente,
+      idCodMatriz,
+      articulo
     });
   } catch (error) {
     console.log(error);
