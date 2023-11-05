@@ -26,15 +26,18 @@ const suminventario = async (idinventario) => {
   }
 };
 
-export const getFacturaNegro = (req, res) => {
+export const getFacturaNegro = async (req, res) => {
   try {
+    const [rows] = await con.query('SELECT * FROM facturaNegro');
+    
+    return res.json(rows);
   } catch (error) {
     return res.status(500).send({ message: "Something wrong" });
   }
 };
 
 export const newFacturaNegro = async (req, res) => {
-  const { fecha, nro_envio, products } = req.body;
+  const { fecha, nro_envio, products, idCliente, valorDeclarado } = req.body;
 
   /*if (fecha || numRemito || idCliente || valorDeclarado || products)
     return res.status(404).json({ message: "Error campos vacios" });*/
@@ -44,8 +47,8 @@ export const newFacturaNegro = async (req, res) => {
   let idFacturaNegro = null;
   try {
     const [rows] = await con.query(
-      "INSERT INTO facturaNegro (`nro_envio`) VALUES (?);",
-      [parseInt(nro_envio)]
+      "INSERT INTO facturaNegro (`nro_envio`,`idCliente`,`valorDeclarado`) VALUES (?,?,?);",
+      [parseInt(nro_envio),idCliente,parseFloat(valorDeclarado)]
     );
     idFacturaNegro = rows.insertId;
 
