@@ -67,7 +67,7 @@ export const createInventario = async (req, res) => {
 
 export const updateInventario = async (req, res) => {
   try {
-    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida, idCliente } = req.body;
+    const { nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idCliente, idCodMatriz, articulo } = req.body;
     const id = req.params.id;
 
     const [result] = await con.query(
@@ -79,10 +79,11 @@ export const updateInventario = async (req, res) => {
                 idtipoproducto = IFNULL(?,idtipoproducto),
                 pesoUnidad = IFNULL(?,pesoUnidad),
                 stockCaja = IFNULL(?,stockCaja), 
-                idUnidadMedida = IFNULL(?,idUnidadMedida),
-                idCliente = IFNULL(?,idCliente)
+                idCliente = IFNULL(?,idCliente),
+                idCodMatriz = IFNULL(?,idCodMatriz),
+                articulo = IFNULL(?,articulo)
             WHERE id = ?`,
-      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida, idCliente, id]
+      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idCliente, idCodMatriz, articulo, id]
     );
 
     if (result.affectedRows === 0)
