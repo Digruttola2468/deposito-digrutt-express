@@ -41,10 +41,10 @@ export const getOneInventario = async (req, res) => {
 
 export const createInventario = async (req, res) => {
   try {
-    const { nombre, precio, descripcion, idcolor, idtipoproducto,pesoUnidad,stockCaja,idUnidadMedida,idCliente } = req.body;
+    const { nombre, precio, descripcion, idcolor, idtipoproducto,pesoUnidad,stockCaja,idCliente,idCodMatriz,articulo } = req.body;
     const [rows] = await con.query(
-      "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idUnidadMedida,idCliente) VALUES (?,?,?,?,?,?,?,?,?) ;",
-      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja, idUnidadMedida,idCliente]
+      "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idCliente,idCodMatriz,articulo) VALUES (?,?,?,?,?,?,?,?,?,?) ;",
+      [nombre, precio, descripcion, idcolor, idtipoproducto, pesoUnidad,stockCaja,idCliente,idCodMatriz,articulo]
     );
 
     res.json({
