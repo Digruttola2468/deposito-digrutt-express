@@ -177,7 +177,7 @@ export const createMercaderia = async (req, res) => {
     const fechaDate = new Date(fecha);
 
     const [rows] = await con.query(
-      "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`) VALUES (?,?,?,?,?);",
+      "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`) VALUES (?,?,?,?);",
       [fechaDate, stock, idcategoria, idinventario]
     );
 
