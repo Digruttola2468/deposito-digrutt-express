@@ -206,7 +206,6 @@ export const createMercaderia = async (req, res) => {
       id: rows.insertId,
       fecha,
       stock,
-      proveedor,
       idcategoria,
       idinventario,
     });
