@@ -243,7 +243,7 @@ export const updateMercaderia = async (req, res) => {
 
     if (stock != undefined) {
       try {
-        const resultado = await suminventario(rows[0].idinventario);
+        const resultado = await suminventario(idinventario);
 
         const [result] = await con.query(
           `UPDATE inventario 
@@ -253,7 +253,7 @@ export const updateMercaderia = async (req, res) => {
           [
             parseInt(resultado[0].salida),
             parseInt(resultado[0].entrada),
-            resultado[0].id,
+            idinventario,
           ]
         );
         if (result.affectedRows === 0)
