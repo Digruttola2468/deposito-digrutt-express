@@ -1,104 +1,49 @@
-import { con } from "../db.js";
+import ClientesManager from "../class/ClientesManager.js";
 
-const lenghtClientes = async () => {
-  try {
-    const [rows] = await con.query("SELECT * FROM clientes;");
-
-    return rows.length;
-  } catch (error) {
-    return -1;
-  }
-}
+const clientManager = new ClientesManager();
 
 export const getClientes = async (req, res) => {
-  try {
-    const [rows] = await con.query("SELECT * FROM clientes;");
+  const { data, error } = await clientManager.getAllClientes();
 
-    res.json(rows);
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
+  if (error != null) return res.status(500).json(result.error);
+
+  return res.json(data);
 };
 
 export const getOneCliente = async (req, res) => {
-  try {
-    const [rows] = await con.query(
-      "SELECT * FROM clientes WHERE id = ?;",
-      [req.params.id]
-    );
+  const idCliente = req.params.id;
 
-    if (rows.length <= 0) return res.status(404).json({ message: "No existe" });
+  const { data, error } = clientManager.getOneCliente(idCliente);
 
-    res.json(rows);
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
+  if (error != null) return res.status(500).json(error);
+
+  return res.json(data);
 };
 
 export const createCliente = async (req, res) => {
-  let lenghtCliente = await lenghtClientes();
+  const object = req.body;
+  const result = await clientManager.createCliente(object);
 
-  if(lenghtCliente != -1) {
-    const id = lenghtCliente + 1;
-    try {
-      const { codigo ,cliente, domicilio, idLocalidad, mail, cuit } = req.body;
-      const [rows] = await con.query(
-        "INSERT INTO clientes (id,codigo,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?,?) ;",
-        [id, codigo,cliente,domicilio,idLocalidad,mail,cuit]
-      );
-  
-      res.json({
-        id,
-        codigo, 
-        cliente,
-        domicilio,
-        idLocalidad, 
-        mail, 
-        cuit,
-      });
-    } catch (error) {
-      return res.status(500).send({ message: "Something wrong" });
-    }
-  }
+  if (result.error != null) return res.status(404).json(result.error);
 
-  
+  return res.json(result.data);
 };
 
 export const updateCliente = async (req, res) => {
-    try {
-      const { cliente,codigo } = req.body;
-      const id = req.params.id;
-      
-      const [result] = await con.query(
-        `UPDATE clientes SET
-            cliente = IFNULL(?,cliente),
-            codigo = IFNULL(?,codigo) 
-        WHERE id = ?`,
-        [cliente,codigo,id]
-      );
+  const idCliente = req.params.id;
+  const object = req.body;
+  const { data, error } = await clientManager.updateCliente(idCliente, object);
 
-      if (result.affectedRows === 0)
-        return res.status(404).json({ message: "Cliente not found" });
+  if (error != null) return res.status(500).json(error);
 
-      const [rows] = await con.query("SELECT * FROM clientes WHERE id = ?", [id]);
-      res.json(rows[0]);
-    } catch (error) {
-      return res.status(500).send({ message: "Something wrong" });
-    }
-  };
+  return res.json(data);
+};
 
 export const deleteCliente = async (req, res) => {
-  try {
-    const [result] = await con.query(
-      "DELETE FROM clientes WHERE (`id` = ?);",
-      [req.params.id]
-    );
+  const idCliente = req.params.id;
+  const { data, error } = await clientManager.deleteCliente(idCliente);
 
-    if (result.affectedRows <= 0)
-      return res.status(404).json({ message: "No se encontro" });
+  if (error != null) return res.status(500).json(error);
 
-    res.status(200).send({ message: "Eliminado Correctamente" });
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
+  return res.json(data);
 };
