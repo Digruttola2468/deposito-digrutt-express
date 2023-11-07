@@ -5,7 +5,7 @@ const clientManager = new ClientesManager();
 export const getRefreshClientes = async (req, res) => {
   const { data, error } = await clientManager.refreshListClientes();
 
-  if (error != null) return res.status(500).json(result.error);
+  if (error != null) return res.status(500).json(error);
 
   return res.json(data);
 };
@@ -13,7 +13,7 @@ export const getRefreshClientes = async (req, res) => {
 export const getClientes = async (req, res) => {
   const { data, error } = await clientManager.getAllClientes();
 
-  if (error != null) return res.status(500).json(result.error);
+  if (error != null) return res.status(500).json(error);
 
   return res.json(data);
 };
