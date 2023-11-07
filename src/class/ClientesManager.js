@@ -19,7 +19,7 @@ export default class ClientesManager {
         console.error(e);
         return { error: { message: "Something wrong" } };
       }
-    }else return { data: this.listClientes };
+    } else return { data: this.listClientes };
   }
 
   getListCliente() {
@@ -49,10 +49,14 @@ export default class ClientesManager {
       try {
         const { codigo, cliente, domicilio, idLocalidad, mail, cuit } = object;
 
-        if (cliente == null)
+        if (cliente == null || cliente == "")
           return { error: { message: "Campo Cliente Vacio" } };
 
-        if (codigo == null) return { error: { message: "Campo Codigo Vacio" } };
+        if (codigo == null || codigo == "")
+          return { error: { message: "Campo Codigo Vacio" } };
+
+        if (codigo.length != 3)
+          return { error: { message: "El Codigo tiene que ser de 3 Digitos" } };
 
         //Validar si el codigo o el cliente son los mismos
         const repeatSameCliente = this.listClientes.find(
@@ -109,14 +113,17 @@ export default class ClientesManager {
       const { cliente, codigo, domicilio, localidad, mail, cuit } = object;
 
       //Validar si el codigo o el cliente son los mismos
-      if (codigo != null) {
+      if (codigo != null || codigo == "") {
         const repeatSameCodigo = this.listClientes.find(
           (elem) => elem.codigo.toLowerCase() == codigo.toLowerCase()
         );
         if (repeatSameCodigo != null)
           return { error: { message: "Ya existe ese Codigo" } };
+
+        if (codigo.length != 3)
+          return { error: { message: "El Codigo tiene que ser de 3 Digitos" } };
       }
-      if (cliente != null) {
+      if (cliente != null || cliente == "") {
         const repeatSameCliente = this.listClientes.find(
           (elem) => elem.cliente.toLowerCase() == cliente.toLowerCase()
         );
