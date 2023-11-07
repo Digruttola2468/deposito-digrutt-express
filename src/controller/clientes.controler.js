@@ -2,6 +2,14 @@ import ClientesManager from "../class/ClientesManager.js";
 
 const clientManager = new ClientesManager();
 
+export const getRefreshClientes = async (req, res) => {
+  const { data, error } = await clientManager.refreshListClientes();
+
+  if (error != null) return res.status(500).json(result.error);
+
+  return res.json(data);
+};
+
 export const getClientes = async (req, res) => {
   const { data, error } = await clientManager.getAllClientes();
 

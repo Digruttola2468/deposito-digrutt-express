@@ -4,6 +4,7 @@ import {
   deleteCliente,
   getClientes,
   getOneCliente,
+  getRefreshClientes,
   updateCliente,
 } from "../controller/clientes.controler.js";
 
@@ -13,6 +14,7 @@ const router = Router();
 
 router.get("/clientes", getClientes);
 router.get("/cliente/:id", getOneCliente);
+router.get('refresh/clientes', getRefreshClientes)
 
 router.post("/cliente",userExtractor, createCliente);
 

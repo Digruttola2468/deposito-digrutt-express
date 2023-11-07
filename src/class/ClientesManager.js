@@ -9,6 +9,17 @@ export default class ClientesManager {
     if (this.listClientes.length == 0) await this.getAllClientes();
   }
 
+  async refreshListClientes () {
+    try {
+      const [rows] = await con.query("SELECT * FROM clientes;");
+      this.listClientes = rows;
+      return { data: rows };
+    } catch (e) {
+      console.error(e);
+      return { error: { message: "Something wrong" } };
+    }
+  }
+
   async getAllClientes() {
     if (this.listClientes.length == 0) {
       try {
