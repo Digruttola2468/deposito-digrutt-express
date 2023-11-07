@@ -14,7 +14,7 @@ const router = Router();
 
 router.get("/clientes", getClientes);
 router.get("/cliente/:id", getOneCliente);
-router.get('refresh/clientes', getRefreshClientes)
+router.get('/refresh/clientes', getRefreshClientes)
 
 router.post("/cliente",userExtractor, createCliente);
 
