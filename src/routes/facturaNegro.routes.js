@@ -10,7 +10,7 @@ import userExtractor from "../middleware/userExtractor.js";
 
 const router = Router();
 
-router.get("/facturaNegro/newNroEnvio",userExtractor, getNewNroEnvio);
+router.get("/facturaNegro/newNroEnvio", getNewNroEnvio);
 router.get("/facturaNegro",userExtractor, getFacturaNegro);
 router.get("/refresh/facturaNegro",userExtractor, getRefreshFacturaNegro);
 
