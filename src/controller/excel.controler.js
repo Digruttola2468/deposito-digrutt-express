@@ -2,7 +2,9 @@ import { con } from "../db.js";
 import ExcelJs from "exceljs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { getAllInventarioSelect } from "./inventario.controler.js";
+import InventarioManager from "../class/InventarioManager.js";
+
+const inventarioManager = new InventarioManager();
 
 const __filename = fileURLToPath(import.meta.url);
 const dir = dirname(__filename);
@@ -58,7 +60,7 @@ export const getExcelInventario = async (req, res) => {
 
     const listaEnviar = [];
 
-    const listInventario = await getAllInventarioSelect();
+    const listInventario = inventarioManager.getListInventario();
 
     for (let i = 0; i < listInventario.length; i++) {
       const element = listInventario[i];
