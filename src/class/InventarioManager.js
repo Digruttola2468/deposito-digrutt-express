@@ -204,7 +204,7 @@ export default class InventarioManager {
     await this.refreshListInventario();
 
     try {
-      const {
+      let {
         nombre,
         precio,
         descripcion,
@@ -217,7 +217,14 @@ export default class InventarioManager {
         articulo,
       } = object;
 
-      if (nombre != null && nombre != "") {
+      if(nombre == "") {
+        nombre = null;
+      }
+      if(articulo == "") {
+        articulo = null;
+      }
+
+      if (nombre != null) {
         //Validar q no se repita el cod.Producto
         const findSameCodProducto = this.listInventario.find(
           (elem) => elem.nombre.toLowerCase() == nombre.toLowerCase()
@@ -226,7 +233,7 @@ export default class InventarioManager {
         if (findSameCodProducto != null)
           return { error: { message: "Ya existe ese Cod.Producto" } };
       }
-      if (articulo != null && articulo != "") {
+      if (articulo != null) {
         //Validar que no se repita el Articulo ya que es unico
         const findSameArticulo = this.listInventario.find((elem) => {
           if (typeof elem.articulo === "string")
