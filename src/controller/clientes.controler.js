@@ -1,9 +1,7 @@
-import ClientesManager from "../class/ClientesManager.js";
-
-const clientManager = new ClientesManager();
+import {clientesManager} from '../index.js'
 
 export const getRefreshClientes = async (req, res) => {
-  const { data, error } = await clientManager.refreshListClientes();
+  const { data, error } = await clientesManager.refreshListClientes();
 
   if (error != null) return res.status(500).json(error);
 
@@ -11,7 +9,7 @@ export const getRefreshClientes = async (req, res) => {
 };
 
 export const getClientes = async (req, res) => {
-  const { data, error } = await clientManager.getAllClientes();
+  const { data, error } = await clientesManager.getAllClientes();
 
   if (error != null) return res.status(500).json(error);
 
@@ -21,7 +19,7 @@ export const getClientes = async (req, res) => {
 export const getOneCliente = async (req, res) => {
   const idCliente = req.params.id;
 
-  const { data, error } = clientManager.getOneCliente(idCliente);
+  const { data, error } = clientesManager.getOneCliente(idCliente);
 
   if (error != null) return res.status(500).json(error);
 
@@ -30,7 +28,7 @@ export const getOneCliente = async (req, res) => {
 
 export const createCliente = async (req, res) => {
   const object = req.body;
-  const result = await clientManager.createCliente(object);
+  const result = await clientesManager.createCliente(object);
 
   if (result.error != null) return res.status(404).json(result.error);
 
@@ -40,7 +38,7 @@ export const createCliente = async (req, res) => {
 export const updateCliente = async (req, res) => {
   const idCliente = req.params.id;
   const object = req.body;
-  const { data, error } = await clientManager.updateCliente(idCliente, object);
+  const { data, error } = await clientesManager.updateCliente(idCliente, object);
 
   if (error != null) return res.status(500).json(error);
 
@@ -49,7 +47,7 @@ export const updateCliente = async (req, res) => {
 
 export const deleteCliente = async (req, res) => {
   const idCliente = req.params.id;
-  const { data, error } = await clientManager.deleteCliente(idCliente);
+  const { data, error } = await clientesManager.deleteCliente(idCliente);
 
   if (error != null) return res.status(500).json(error);
 

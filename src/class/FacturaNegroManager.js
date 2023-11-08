@@ -1,7 +1,5 @@
 import { con } from "../db.js";
-import InventarioManager from "./InventarioManager.js";
-
-const inventarioManager = new InventarioManager();
+import {inventarioManager} from '../index.js'
 
 export default class FacturaNegroManager {
   constructor() {

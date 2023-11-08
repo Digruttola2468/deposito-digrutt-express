@@ -1,337 +1,48 @@
-import { con } from "../db.js";
+import {mercaderiaManager} from '../index.js'
 
-const suminventario = async (idinventario) => {
-  try {
-    const listaEnviar = [];
+export const getRefreshMercaderia = async (req, res) => {
+  const { data, error } = await mercaderiaManager.refreshGetMercaderia();
 
-    const [rows] = await con.query(
-      `SELECT idinventario, 
-                    SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as salida,
-                    SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as entrada
-                    FROM mercaderia 
-                    INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
-                    WHERE idinventario = ?;`, [idinventario]
-    );
-    if (rows[0].entrada == null) rows[0].entrada = 0;
+  if (error != null) return res.status(404).json(error);
 
-    if (rows[0].salida == null) rows[0].salida = 0;
-
-    listaEnviar.push({ ...rows[0] });
-
-    return listaEnviar;
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
+  return res.json(data);
 };
 
 export const getMercaderias = async (req, res) => {
-  try {
-    const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario
-            FROM mercaderia 
-            INNER JOIN inventario on mercaderia.idinventario = inventario.id
-            INNER JOIN categoria on mercaderia.idcategoria = categoria.id 
-            ORDER BY mercaderia.fecha DESC;`
-    );
-    const listaEnviar = [];
-    for (let i = 0; i < rows.length; i++) {
-      const element = new Date(rows[i].fecha);
+  const { data, error } = await mercaderiaManager.getMercaderia();
 
-      const year = element.getFullYear();
-      const mounth = element.getMonth() + 1;
-      const day = element.getDate();
+  if (error != null) return res.status(404).json(error);
 
-      const format = `${day}-${mounth}-${year}`;
-      listaEnviar.push({ ...rows[i], fecha: format });
-    }
-
-    res.json(listaEnviar);
-  } catch (error) {
-    return res.status(500).json({ message: "something goes wrong" });
-  }
-};
-
-export const getEntradaMercaderias = async (req, res) => {
-  try {
-    const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,idinventario
-            FROM mercaderia 
-            INNER JOIN inventario on mercaderia.idinventario = inventario.id 
-            WHERE idcategoria = 2;`
-    );
-
-    const listaEnviar = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      const element = new Date(rows[i].fecha);
-
-      const year = element.getFullYear();
-      const mounth = element.getMonth() + 1;
-      const day = element.getDate();
-
-      const format = `${day}-${mounth}-${year}`;
-      listaEnviar.push({ ...rows[i], fecha: format });
-    }
-
-    res.json(listaEnviar);
-  } catch (error) {
-    return res.status(500).json({ message: "something goes wrong" });
-  }
-};
-
-export const getSalidaMercaderias = async (req, res) => {
-  try {
-    const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,idinventario
-            FROM mercaderia 
-            INNER JOIN inventario on mercaderia.idinventario = inventario.id 
-            WHERE idcategoria = 1;`
-    );
-    const listaEnviar = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      const element = new Date(rows[i].fecha);
-
-      const year = element.getFullYear();
-      const mounth = element.getMonth() + 1;
-      const day = element.getDate();
-
-      const format = `${day}-${mounth}-${year}`;
-      listaEnviar.push({ ...rows[i], fecha: format });
-    }
-
-    res.json(listaEnviar);
-  } catch (error) {
-    return res.status(500).json({ message: "something goes wrong" });
-  }
-};
-
-export const getEntradaMercaderiasWhereNombre = async (req, res) => {
-  try {
-    const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,idinventario
-            FROM mercaderia 
-            INNER JOIN inventario ON mercaderia.idinventario = inventario.id 
-            WHERE nombre = ? and idcategoria = 2`,
-      [req.params.nombre]
-    );
-
-    if (rows.length <= 0) return res.status(404).json({ message: "No existe" });
-
-    const listaEnviar = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      const element = new Date(rows[i].fecha);
-
-      const year = element.getFullYear();
-      const mounth = element.getMonth() + 1;
-      const day = element.getDate();
-
-      const format = `${day}-${mounth}-${year}`;
-      listaEnviar.push({ ...rows[i], fecha: format });
-    }
-
-    res.json(listaEnviar);
-  } catch (error) {
-    return res.status(500).json({ message: "something goes wrong" });
-  }
-};
-
-export const getSalidaMercaderiasWhereNombre = async (req, res) => {
-  try {
-    const [rows] = await con.query(
-      `SELECT mercaderia.id,fecha,stock,nombre,descripcion,idinventario
-                FROM mercaderia 
-                INNER JOIN inventario ON mercaderia.idinventario = inventario.id 
-                WHERE nombre = ? and idcategoria = 1`,
-      [req.params.nombre]
-    );
-
-    if (rows.length <= 0) return res.status(404).json({ message: "No existe" });
-
-    const listaEnviar = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      const element = new Date(rows[i].fecha);
-
-      const year = element.getFullYear();
-      const mounth = element.getMonth() + 1;
-      const day = element.getDate();
-
-      const format = `${day}-${mounth}-${year}`;
-      listaEnviar.push({ ...rows[i], fecha: format });
-    }
-
-    res.json(listaEnviar);
-  } catch (error) {
-    return res.status(500).json({ message: "something goes wrong" });
-  }
+  return res.json(data);
 };
 
 export const createMercaderia = async (req, res) => {
-  try {
-    const { fecha, stock, idinventario, idcategoria } =
-      req.body;
+  const object = req.body;
+  const { data, error } = await mercaderiaManager.createMercaderia(object);
 
-    const fechaDate = new Date(fecha);
+  if (error != null) return res.status(404).json(error);
 
-    const [rows] = await con.query(
-      "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`) VALUES (?,?,?,?);",
-      [fechaDate, stock, idcategoria, idinventario]
-    );
-
-    try {
-      const resultado = await suminventario(idinventario);
-
-      const [result] = await con.query(
-        ` UPDATE inventario 
-          SET salida  = IFNULL(?,salida),
-              entrada = IFNULL(?,entrada)
-          WHERE id = ?
-        `,
-        [
-          parseInt(resultado[0].salida),
-          parseInt(resultado[0].entrada),
-          idinventario,
-        ]
-      );
-      if (result.affectedRows === 0)
-        return res.status(404).json({ message: "Inventario not found" });
-    } catch (error) {
-      console.log(error);
-    }
-
-    res.send({
-      id: rows.insertId,
-      fecha,
-      stock,
-      idcategoria,
-      idinventario,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "something goes wrong" });
-  }
+  return res.json(data);
 };
 
 export const updateMercaderia = async (req, res) => {
-  try {
-    const { fecha, stock, idinventario, idcategoria } =
-      req.body;
-    const id = req.params.id;
+  const object = req.body;
+  const idMercaderia = req.params.id;
+  const { data, error } = await mercaderiaManager.updateMercaderia(
+    idMercaderia,
+    object
+  );
 
-    const newFecha = fecha.split("-").reverse().join("-");
-    const fechaDate = new Date(newFecha);
+  if (error != null) return res.status(404).json(error);
 
-    const [result] = await con.query(
-      `UPDATE mercaderia
-        SET fecha = IFNULL(?,fecha),
-            stock = IFNULL(?,stock),
-            idcategoria = IFNULL(?,idcategoria),
-            idinventario = IFNULL(?,idinventario)
-        WHERE id = ?;`,
-      [ fechaDate, stock, idcategoria, idinventario, id]
-    );
-
-    if (result.affectedRows === 0)
-      return res.status(404).json({ message: "mercaderia not found" });
-
-    const [rows] = await con.query("SELECT * FROM mercaderia WHERE id = ?", [
-      id,
-    ]);
-
-    if (stock != undefined) {
-      try {
-        const resultado = await suminventario(idinventario);
-
-        const [result] = await con.query(
-          `UPDATE inventario 
-          SET salida  = IFNULL(?,salida),
-              entrada = IFNULL(?,entrada)
-         WHERE id = ?`,
-          [
-            parseInt(resultado[0].salida),
-            parseInt(resultado[0].entrada),
-            idinventario,
-          ]
-        );
-        if (result.affectedRows === 0)
-          return res.status(404).json({ message: "Inventario not found" });
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
-    const element = new Date(rows[0].fecha);
-
-    const year = element.getFullYear();
-    const mounth = element.getMonth() + 1;
-    const day = element.getDate();
-
-    const format = `${day}-${mounth}-${year}`;
-    res.json({ ...rows[0], fecha: format });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "something goes wrong" });
-  }
+  return res.json(data);
 };
 
 export const deleteMercaderia = async (req, res) => {
-  try {
-    const [rows] = await con.query("SELECT * FROM mercaderia WHERE id = ?", [
-      req.params.id,
-    ]);
+  const idMercaderia = req.params.id;
+  const { data, error } = await mercaderiaManager.deleteMercaderia(idMercaderia);
 
-    const [result] = await con.query(
-      "DELETE FROM mercaderia WHERE (`id` = ?);",
-      [req.params.id]
-    );
+  if (error != null) return res.status(500).json(error);
 
-    if (result.affectedRows <= 0)
-      return res.status(404).json({ message: "No se encontro" });
-
-    try {
-      const resultado = await suminventario(rows[0].idinventario);
-
-      const [result] = await con.query(
-        `UPDATE inventario 
-          SET salida  = IFNULL(?,salida),
-              entrada = IFNULL(?,entrada)
-          WHERE id = ?`,
-        [
-          parseInt(resultado[0].salida),
-          parseInt(resultado[0].entrada),
-          rows[0].idinventario,
-        ]
-      );
-      if (result.affectedRows === 0)
-        return res.status(404).json({ message: "Inventario not found" });
-    } catch (error) {
-      console.log(error);
-    }
-
-    res.status(200).send({ message: "Eliminado Correctamente" });
-  } catch (error) {
-    return res.status(500).json({ message: "something goes wrong" });
-  }
-};
-
-export const getMercaderiaWhereIdInventario = async (idinventario) => {
-  try {
-    const [rows] = await con.query(
-      `SELECT * FROM mercaderia WHERE idinventario = ?`,
-      [idinventario]
-    );
-
-    const listIdMercaderia = [];
-    for (let i = 0; i < rows.length; i++) {
-      const element = rows[i];
-      listIdMercaderia.push(element.id);
-    }
-
-    return listIdMercaderia;
-  } catch (error) {
-    return [];
-  }
+  return res.json(data);
 };

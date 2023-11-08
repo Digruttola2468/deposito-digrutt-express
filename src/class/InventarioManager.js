@@ -94,13 +94,23 @@ export default class InventarioManager {
     }
   }
 
-  getOneInventario(idInventario) {
+  async getOneInventario(idInventario) {
     if (this.listInventario.length != 0) {
       const findInventarioById = this.listInventario.find(
         (e) => e.id == idInventario
       );
       return { data: findInventarioById };
-    } else return { error: { message: "Lista Inventario Vacia" } };
+    } else {
+      try {
+        const [rows] = await con.query("SELECT * FROM inventario;");
+        this.listInventario = rows;
+        const findInventarioById = rows.find((e) => e.id == idInventario);
+        return { data: findInventarioById };
+      } catch (e) {
+        console.error(e);
+        return { error: { message: "Something wrong" } };
+      }
+    }
   }
 
   getLengthList() {
@@ -217,10 +227,10 @@ export default class InventarioManager {
         articulo,
       } = object;
 
-      if(nombre == "") {
+      if (nombre == "") {
         nombre = null;
       }
-      if(articulo == "") {
+      if (articulo == "") {
         articulo = null;
       }
 
@@ -321,6 +331,10 @@ export default class InventarioManager {
   }
 
   async suminventario(idInventario) {
+    const inventarioInteger = parseInt(idInventario);
+
+    if (!Number.isInteger(inventarioInteger)) return [];
+
     try {
       const listaEnviar = [];
 
@@ -331,11 +345,24 @@ export default class InventarioManager {
                       FROM mercaderia 
                       INNER JOIN inventario ON inventario.id = mercaderia.idinventario 
                       WHERE idinventario = ?;`,
-        [idInventario]
+        [inventarioInteger]
       );
       if (rows[0].entrada == null) rows[0].entrada = 0;
 
       if (rows[0].salida == null) rows[0].salida = 0;
+
+      //update ListInventario
+      const mapListInventarioUpdate = this.listInventario.map((elem) => {
+        if (elem.id == idInventario)
+          return {
+            ...elem,
+            entrada: parseInt(rows[0].entrada),
+            salida: parseInt(rows[0].salida),
+          };
+        else return elem;
+      });
+
+      this.listInventario = mapListInventarioUpdate;
 
       listaEnviar.push({ ...rows[0] });
 

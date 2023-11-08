@@ -1,5 +1,4 @@
-import FacturaNegroManager from "../class/FacturaNegroManager.js";
-const facturaNegroManager = new FacturaNegroManager();
+import {facturaNegroManager} from '../index.js'
 
 export const getNewNroEnvio = (req, res) => {
   const sendNewNroEnvio = facturaNegroManager.getNroEnvio();

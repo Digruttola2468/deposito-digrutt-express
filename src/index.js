@@ -33,6 +33,12 @@ import user from './routes/auth.routes.js';
 //ROUTES REMITOS
 import remito from './routes/remitos.routes.js'
 
+//CLASSES 
+import InventarioManager from "./class/InventarioManager.js";
+import MercaderiaManager from "./class/MercaderiaManager.js";
+import ClientesManager from "./class/ClientesManager.js";
+import FacturaNegroManager from "./class/FacturaNegroManager.js";
+
 const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
@@ -40,6 +46,12 @@ app.use(cors());
 
 //Habilitamos la lectura en JSON
 app.use(express.json());
+
+//INIT
+export const inventarioManager = new InventarioManager();
+export const mercaderiaManager = new MercaderiaManager();
+export const clientesManager = new ClientesManager();
+export const facturaNegroManager = new FacturaNegroManager();
 
 //
 app.use(indexRoute);

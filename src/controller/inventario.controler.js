@@ -1,6 +1,5 @@
-import InventarioManager from "../class/InventarioManager.js";
 
-const inventarioManager = new InventarioManager();
+import {inventarioManager} from '../index.js'
 
 export const getRefreshInventario = async (req, res) => {
   const { data, error } = await inventarioManager.refreshListInventario();
@@ -26,9 +25,9 @@ export const getInventariosSelectNombres = async (req, res) => {
   return res.json(data);
 };
 
-export const getOneInventario = (req, res) => {
+export const getOneInventario = async (req, res) => {
   const idInventario = req.params.id;
-  const { data, error } = inventarioManager.getOneInventario(idInventario);
+  const { data, error } = await inventarioManager.getOneInventario(idInventario);
 
   if (error != null) return res.status(404).json(error);
 
