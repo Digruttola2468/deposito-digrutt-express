@@ -5,7 +5,7 @@ export default class MercaderiaManager {
   constructor() {
     this.listMercaderia = [];
   }
-  listInventario
+  listInventario;
   async refreshGetMercaderia() {
     try {
       const [rows] = await con.query(
@@ -39,6 +39,15 @@ export default class MercaderiaManager {
 
   async getMercaderia() {
     if (this.listMercaderia.length != 0) {
+      this.listMercaderia.sort((a, b) => {
+        const ADate = new Date(a.fecha);
+        const BDate = new Date(b.fecha);
+
+        if (ADate < BDate) return 1;
+        if (ADate > BDate) return -1;
+        return 0;
+      });
+      
       return { data: this.listMercaderia };
     }
 
@@ -240,7 +249,7 @@ export default class MercaderiaManager {
       const day = fechaDate.getDate();
 
       const format = `${year}-${mounth}-${day}`;
-      
+
       const [result] = await con.query(
         `UPDATE mercaderia
             SET fecha = IFNULL(?,fecha),
