@@ -5,7 +5,6 @@ export default class MercaderiaManager {
   constructor() {
     this.listMercaderia = [];
   }
-  listInventario;
   async refreshGetMercaderia() {
     try {
       const [rows] = await con.query(
@@ -15,23 +14,10 @@ export default class MercaderiaManager {
                   INNER JOIN categoria on mercaderia.idcategoria = categoria.id 
               ORDER BY mercaderia.fecha DESC;`
       );
-      const listaEnviar = [];
+      
+      this.listMercaderia = rows;
 
-      //format date
-      for (let i = 0; i < rows.length; i++) {
-        const element = new Date(rows[i].fecha);
-
-        const year = element.getFullYear();
-        const mounth = element.getMonth() + 1;
-        const day = element.getDate();
-
-        const format = `${day}-${mounth}-${year}`;
-        listaEnviar.push({ ...rows[i], fecha: format });
-      }
-
-      this.listMercaderia = listaEnviar;
-
-      return { data: listaEnviar };
+      return { data: rows };
     } catch (error) {
       return { error: { message: "Something wrong" } };
     }
@@ -167,14 +153,12 @@ export default class MercaderiaManager {
 
       if (idcategoria == 2) categoria = "Entrada";
 
-      const format = `${day}-${mounth}-${year}`;
-
       const enviar = {
         id: rows.insertId,
         nombre: nombre,
         descripcion: descripcion,
         articulo: articulo,
-        fecha: format,
+        fecha: fechaDate,
         stock: stockInteger,
         idinventario: idinventario,
         categoria: categoria,
@@ -215,12 +199,7 @@ export default class MercaderiaManager {
       //Si se agrega los siguientes campos , validar q sean correctos
       if (fecha) {
         const validarDate = new Date(fecha);
-        const year = validarDate.getFullYear();
-        const mounth = validarDate.getMonth() + 1;
-        const day = validarDate.getDate();
-
-        const format = `${day}-${mounth}-${year}`;
-        enviar.fecha = format;
+        enviar.fecha = validarDate;
 
         if (Number.isNaN(validarDate.getDate()))
           return { error: { message: "Error en el formato de la Fecha" } };
