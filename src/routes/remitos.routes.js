@@ -5,6 +5,6 @@ import userExtractor from '../middleware/userExtractor.js'
 const router = Router();
 
 router.get('/remito', getRemitos);
-router.post('/remito', userExtractor, newRemito);
+router.post('/remito', newRemito);
 
 export default router;

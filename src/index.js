@@ -38,6 +38,7 @@ import InventarioManager from "./class/InventarioManager.js";
 import MercaderiaManager from "./class/MercaderiaManager.js";
 import ClientesManager from "./class/ClientesManager.js";
 import FacturaNegroManager from "./class/FacturaNegroManager.js";
+import RemitosManager from "./class/RemitosManager.js";
 
 const app = express();
 
@@ -52,6 +53,7 @@ export const inventarioManager = new InventarioManager();
 export const mercaderiaManager = new MercaderiaManager();
 export const clientesManager = new ClientesManager();
 export const facturaNegroManager = new FacturaNegroManager();
+export const remitosManager = new RemitosManager();
 
 //
 app.use(indexRoute);

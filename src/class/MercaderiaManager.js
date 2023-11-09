@@ -67,7 +67,7 @@ export default class MercaderiaManager {
   async createMercaderia(object) {
     await this.getMercaderia();
     try {
-      const { fecha, stock, idinventario, idcategoria } = object;
+      const { fecha, stock, idinventario, idcategoria, idFacturaNegro, idremito } = object;
 
       //Validar Campos
       if (fecha == null || fecha == "")
@@ -88,6 +88,20 @@ export default class MercaderiaManager {
 
       const categoriaInteger = parseInt(idcategoria);
 
+      if (idFacturaNegro != null) {
+        const facturaNegroInteger = parseInt(idFacturaNegro);
+
+        if (!Number.isInteger(facturaNegroInteger)) 
+          return { error: { message: "Algo paso con la facturaNegro" } };
+      }
+      
+      if (idremito != null) {
+        const remitoInteger = parseInt(idremito);
+
+        if (!Number.isInteger(remitoInteger)) 
+          return { error: { message: "Algo paso con la facturaNegro" } };
+      }
+
       if (!Number.isInteger(stockInteger))
         return { error: { message: "Campo Stock No es un numero" } };
 
@@ -106,8 +120,8 @@ export default class MercaderiaManager {
         return { error: { message: "Error en el formato de la Fecha" } };
 
       const [rows] = await con.query(
-        "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`) VALUES (?,?,?,?);",
-        [fechaDate, stockInteger, categoriaInteger, inventarioInteger]
+        "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`, `idremito`, `idFacturaNegro`) VALUES (?,?,?,?,?,?);",
+        [fechaDate, stockInteger, categoriaInteger, inventarioInteger, idremito, idFacturaNegro]
       );
 
       try {

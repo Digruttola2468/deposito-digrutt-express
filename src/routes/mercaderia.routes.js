@@ -10,12 +10,12 @@ import userExtractor from '../middleware/userExtractor.js'
 
 const router = Router();
 
-router.get("/mercaderia",userExtractor, getMercaderias);
+router.get("/mercaderia", getMercaderias);
 
-router.post('/mercaderia',userExtractor, createMercaderia)
+router.post('/mercaderia', createMercaderia)
 
-router.put('/mercaderia/:id',userExtractor, updateMercaderia)
+router.put('/mercaderia/:id', updateMercaderia)
 
-router.delete("/mercaderia/:id",userExtractor, deleteMercaderia);
+router.delete("/mercaderia/:id", deleteMercaderia);
 
 export default router;

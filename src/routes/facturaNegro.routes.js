@@ -11,9 +11,9 @@ import userExtractor from "../middleware/userExtractor.js";
 const router = Router();
 
 router.get("/facturaNegro/newNroEnvio", getNewNroEnvio);
-router.get("/facturaNegro",userExtractor, getFacturaNegro);
-router.get("/refresh/facturaNegro",userExtractor, getRefreshFacturaNegro);
+router.get("/facturaNegro", getFacturaNegro);
+router.get("/refresh/facturaNegro", getRefreshFacturaNegro);
 
-router.post("/facturaNegro",userExtractor, newFacturaNegro);
+router.post("/facturaNegro", newFacturaNegro);
 
 export default router;

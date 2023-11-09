@@ -1,5 +1,5 @@
 import { con } from "../db.js";
-import {inventarioManager} from '../index.js'
+import { inventarioManager, mercaderiaManager } from "../index.js";
 
 export default class FacturaNegroManager {
   constructor() {
@@ -87,7 +87,7 @@ export default class FacturaNegroManager {
         id: idFacturaNegro,
         nro_envio: parseInt(nro_envio),
         idCliente: idCliente,
-        valorDeclarado: parseFloat(valorDeclarado)
+        valorDeclarado: parseFloat(valorDeclarado),
       });
 
       //Agregar todos los products como salida
@@ -98,32 +98,23 @@ export default class FacturaNegroManager {
             for (let i = 0; i < products.length; i++) {
               const element = products[i];
 
-              //Agregar a mercaderia
-              const [rows] = await con.query(
-                "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`, `idFacturaNegro`) VALUES (?,?,?,?,?);",
-                [fechaDate, element.stock, 1, element.idProduct, idFacturaNegro]
+              const enviar = {
+                fecha: fechaDate,
+                stock: element.stock,
+                idinventario: element.idProduct,
+                idcategoria: 1,
+                idFacturaNegro: idFacturaNegro,
+              };
+              const { error } = await mercaderiaManager.createMercaderia(
+                enviar
               );
 
-              //Update Inventario
-              const resultado = await inventarioManager.suminventario(element.idProduct);
-
-              const [result] = await con.query(
-                ` UPDATE inventario 
-                  SET salida  = IFNULL(?,salida),
-                      entrada = IFNULL(?,entrada)
-                  WHERE id = ?
-                `,
-                [
-                  parseInt(resultado[0].salida),
-                  parseInt(resultado[0].entrada),
-                  resultado[0].id,
-                ]
-              );
-              if (result.affectedRows === 0)
-                return { error: { message: "No se encontro el Inventario" } };
+              if (error != null)
+                return {
+                  error: { message: "Ocurrio un error en agregar mercaderia" },
+                };
             }
 
-            
             return {
               data: { message: "La operacion se realizo Correctamente" },
             };
