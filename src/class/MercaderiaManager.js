@@ -116,18 +116,12 @@ export default class MercaderiaManager {
 
       const fechaDate = new Date(fecha);
 
-      const year = fechaDate.getFullYear();
-      const mounth = fechaDate.getMonth() + 1;
-      const day = fechaDate.getDate();
-
-      const formatDDBB = `${year}-${mounth}-${day}`;
-
       if (Number.isNaN(fechaDate.getDate()))
         return { error: { message: "Error en el formato de la Fecha" } };
 
       const [rows] = await con.query(
         "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`) VALUES (?,?,?,?);",
-        [formatDDBB, stockInteger, categoriaInteger, inventarioInteger]
+        [fechaDate, stockInteger, categoriaInteger, inventarioInteger]
       );
 
       try {
@@ -221,7 +215,13 @@ export default class MercaderiaManager {
       //Si se agrega los siguientes campos , validar q sean correctos
       if (fecha) {
         const validarDate = new Date(fecha);
-        enviar.fecha = fecha;
+        const year = validarDate.getFullYear();
+        const mounth = validarDate.getMonth() + 1;
+        const day = validarDate.getDate();
+
+        const format = `${day}-${mounth}-${year}`;
+        enviar.fecha = format;
+
         if (Number.isNaN(validarDate.getDate()))
           return { error: { message: "Error en el formato de la Fecha" } };
       }
@@ -246,12 +246,6 @@ export default class MercaderiaManager {
 
       const fechaDate = new Date(fecha);
 
-      const year = fechaDate.getFullYear();
-      const mounth = fechaDate.getMonth() + 1;
-      const day = fechaDate.getDate();
-
-      const format = `${year}-${mounth}-${day}`;
-
       const [result] = await con.query(
         `UPDATE mercaderia
             SET fecha = IFNULL(?,fecha),
@@ -259,7 +253,7 @@ export default class MercaderiaManager {
                 idcategoria = IFNULL(?,idcategoria),
                 idinventario = IFNULL(?,idinventario)
             WHERE id = ?;`,
-        [format, stock, idcategoria, idinventario, id]
+        [fechaDate, stock, idcategoria, idinventario, id]
       );
 
       if (result.affectedRows === 0)
