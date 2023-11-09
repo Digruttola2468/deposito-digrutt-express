@@ -47,7 +47,7 @@ export default class MercaderiaManager {
         if (ADate > BDate) return -1;
         return 0;
       });
-      
+
       return { data: this.listMercaderia };
     }
 
@@ -120,14 +120,14 @@ export default class MercaderiaManager {
       const mounth = fechaDate.getMonth() + 1;
       const day = fechaDate.getDate();
 
-      const format = `${year}-${mounth}-${day}`;
+      const formatDDBB = `${year}-${mounth}-${day}`;
 
       if (Number.isNaN(fechaDate.getDate()))
         return { error: { message: "Error en el formato de la Fecha" } };
 
       const [rows] = await con.query(
         "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`) VALUES (?,?,?,?);",
-        [format, stockInteger, categoriaInteger, inventarioInteger]
+        [formatDDBB, stockInteger, categoriaInteger, inventarioInteger]
       );
 
       try {
@@ -172,6 +172,8 @@ export default class MercaderiaManager {
       if (idcategoria == 1) categoria = "Salida";
 
       if (idcategoria == 2) categoria = "Entrada";
+
+      const format = `${day}-${mounth}-${year}`;
 
       const enviar = {
         id: rows.insertId,
