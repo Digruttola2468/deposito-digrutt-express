@@ -13,16 +13,16 @@ import userExtractor from '../middleware/userExtractor.js'
 
 const router = Router();
 
-router.get("/inventario", getAllInventario);
-router.get('/inventario/nombres', getInventariosSelectNombres);
-router.get('/refresh/inventario', getRefreshInventario);
+router.get("/inventario",userExtractor, getAllInventario);
+router.get('/inventario/nombres',userExtractor, getInventariosSelectNombres);
+router.get('/refresh/inventario',userExtractor, getRefreshInventario);
 
-router.get("/inventario/:id", getOneInventario);
+router.get("/inventario/:id",userExtractor, getOneInventario);
 
-router.post("/inventario", createInventario);
+router.post("/inventario",userExtractor, createInventario);
 
-router.put("/inventario/:id", updateInventario);
+router.put("/inventario/:id",userExtractor, updateInventario);
 
-router.delete("/inventario/:id", deleteInventario);
+router.delete("/inventario/:id",userExtractor, deleteInventario);
 
 export default router;
