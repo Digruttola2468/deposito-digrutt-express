@@ -1,17 +1,15 @@
-import {remitosManager} from '../index.js'
+import { remitosManager } from "../index.js";
 
-export const getRemitos = (req, res) => {
-  try {
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
+export const getRemitos = async (req, res) => {
+  const { data, error } = await remitosManager.getRemitos();
+
+  if (error != null) return res.status(404).json(error);
+
+  return res.json(data);
 };
 
-export const getRemiteFromMercaderiaByIdRemito = (req, res) => {
-  try {
-  } catch (error) {
-    return res.status(500).send({ message: "Something wrong" });
-  }
+export const getOneRemitoFromMercaderiaByIdRemito = (req, res) => {
+
 };
 
 export const newRemito = async (req, res) => {

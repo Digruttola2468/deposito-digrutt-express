@@ -7,20 +7,41 @@ export default class RemitosManager {
     this.listRemitos = [];
   }
 
+  async getRemitos() {
+    if (this.listRemitos.length != 0) return { data: this.listRemitos };
+
+    try {
+      const [rows] = await con.query(`SELECT * FROM remitos`);
+      this.listRemitos = rows;
+      return { data: rows };
+    } catch (error) {
+      console.log(error);
+      return { error: { message: "Something wrong" } };
+    }
+  }
+
+  existNroRemito(nroRemito) {
+    const findNroRemito = this.listRemitos.find(
+      (elem) => elem.num_remito == nroRemito
+    );
+    if (findNroRemito) return true;
+    else false;
+  }
+
   async newRemito(object) {
+    await this.getRemitos();
     const { fecha, numRemito, idCliente, nroOrden, valorDeclarado, products } =
       object;
 
     if (fecha && numRemito && idCliente && valorDeclarado && products)
       return { error: { message: "Campos Vacios" } };
 
-    ///////////////
     //Validar Campos
     if (fecha == null || fecha == "")
       return { error: { message: "Campo Fecha Vacio" } };
 
     if (numRemito == null || numRemito == "")
-      return { error: { message: "Campo Stock Vacio" } };
+      return { error: { message: "Campo NroRemito Vacio" } };
 
     if (idCliente == null || idCliente == "")
       return { error: { message: "Campo Cliente Vacio" } };
@@ -33,6 +54,12 @@ export default class RemitosManager {
         return {
           error: { message: "Campo del valor Declarado no es numerico" },
         };
+
+    if (this.existNroRemito(numRemito))
+      return { error: { message: "Ya existe ese nro remito" } };
+
+    if (numRemito.length !== 13)
+      return { error: { message: "Error en el formato del remito" } };
 
     const numRemitoInteger = parseInt(numRemito);
 
@@ -51,7 +78,6 @@ export default class RemitosManager {
 
     if (Number.isNaN(fechaDate.getDate()))
       return { error: { message: "Error en el formato de la Fecha" } };
-    //////////////
 
     let idRemito = null;
     try {
