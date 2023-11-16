@@ -8,7 +8,7 @@ export default class MercaderiaManager {
   async refreshGetMercaderia() {
     try {
       const [rows] = await con.query(
-        `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario,articulo
+        `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario,articulo,idremito,idFacturaNegro
               FROM mercaderia 
                   INNER JOIN inventario on mercaderia.idinventario = inventario.id
                   INNER JOIN categoria on mercaderia.idcategoria = categoria.id 
@@ -356,4 +356,47 @@ export default class MercaderiaManager {
       };
     }
   }
+
+  async deleteMercaderiaWhereIdinventario(idinventario) {
+    await this.getMercaderia();
+    const list = await this.getMercaderiaWhereIdInventario(idinventario);
+
+    if (list.length > 0) {
+      for (let i = 0; i < list.length; i++) {
+        const id = list[i];
+
+        const [result] = await con.query(
+          "DELETE FROM mercaderia WHERE (`id` = ?);",
+          [id]
+        );
+      }
+    }
+  }
+  
+  async getMercaderiaWhereIdInventario(idinventario) {
+    await this.getMercaderia();
+    try {
+      const filterListMercaderiaByIdInventario = this.listMercaderia.filter(elem => elem.id == idinventario)
+      
+      const listIdMercaderia = [];
+      for (let i = 0; i < filterListMercaderiaByIdInventario.length; i++) {
+        const element = filterListMercaderiaByIdInventario[i];
+        listIdMercaderia.push(element.id);
+      }
+      
+      return listIdMercaderia;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  getMercaderiaByIdRemito(idRemito) {
+    if (this.listMercaderia.length != 0) {
+      const filterByIdRemito = this.listMercaderia.filter(elem => elem.idremito == idRemito);
+      if (filterByIdRemito) return filterByIdRemito;
+      else return [];
+    }else return [];
+  }
+
 }
+

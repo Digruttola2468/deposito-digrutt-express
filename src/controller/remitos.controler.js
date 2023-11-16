@@ -9,7 +9,11 @@ export const getRemitos = async (req, res) => {
 };
 
 export const getOneRemitoFromMercaderiaByIdRemito = (req, res) => {
+  const { id } = req.params;
+  
+  const resultJson = remitosManager.getOneRemito(id);
 
+  res.json(resultJson);
 };
 
 export const newRemito = async (req, res) => {

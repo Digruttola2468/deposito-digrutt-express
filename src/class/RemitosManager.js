@@ -20,6 +20,22 @@ export default class RemitosManager {
     }
   }
 
+  getOneRemito(idRemito) {
+    const listMercaderiaByIdRemito =
+      mercaderiaManager.getMercaderiaByIdRemito(idRemito);
+    const findByIdRemito = this.listRemitos.filter(
+      (elem) => elem.id == idRemito
+    );
+    if (findByIdRemito) {
+      if (listMercaderiaByIdRemito.length != 0) {
+        return {
+          remito: findByIdRemito[0],
+          mercaderia: listMercaderiaByIdRemito,
+        };
+      } else return { error: { message: "No se encontro en la mercaderia" } };
+    } else return { error: { message: "No se encontro el remito" } };
+  }
+
   existNroRemito(nroRemito) {
     const findNroRemito = this.listRemitos.find(
       (elem) => elem.num_remito == nroRemito
