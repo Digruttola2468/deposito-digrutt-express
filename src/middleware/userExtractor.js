@@ -14,8 +14,16 @@ export default (req,res,next) => {
       decoredToken = jwt.verify(token, JWT_SECRET);
     } catch {}
 
-    if (!token || !decoredToken.gmail)
+    const {gmail, is_admin, is_mercaderia, is_oficina, is_produccion, is_matriceria} = decoredToken;
+
+    if (!token)
       return res.status(401).json({ message: "token missing or invalid" });
+
+    if (!gmail)
+      return res.status(401).json({ message: "token missing or invalid" });
+
+    if (!is_admin)
+      return res.status(401).json({ message: "You dont have permission" });
 
     next();
 }
