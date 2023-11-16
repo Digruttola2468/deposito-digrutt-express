@@ -198,13 +198,12 @@ export default class MercaderiaManager {
     await this.getMercaderia();
     try {
       let enviar = {};
-      const { fecha, stock, idinventario, idcategoria } = object;
+      const { fecha, stock, idcategoria } = object;
       const id = idMercaderia;
 
       if (
         fecha == null &&
-        stock == null &&
-        idinventario == null &&
+        stock == null && 
         idcategoria == null
       ) {
         return { error: { message: "Campos vacios" } };
@@ -224,12 +223,6 @@ export default class MercaderiaManager {
         if (!Number.isInteger(stockInteger))
           return { error: { message: "Campo Stock No es un numero" } };
       }
-      if (idinventario) {
-        const inventarioInteger = parseInt(idinventario);
-        enviar.idinventario = inventarioInteger;
-        if (!Number.isInteger(inventarioInteger))
-          return { error: { message: "Algo paso con inventario" } };
-      }
       if (idcategoria) {
         const categoriaInteger = parseInt(idcategoria);
         enviar.idcategoria = categoriaInteger;
@@ -243,10 +236,9 @@ export default class MercaderiaManager {
         `UPDATE mercaderia
             SET fecha = IFNULL(?,fecha),
                 stock = IFNULL(?,stock),
-                idcategoria = IFNULL(?,idcategoria),
-                idinventario = IFNULL(?,idinventario)
+                idcategoria = IFNULL(?,idcategoria)
             WHERE id = ?;`,
-        [fechaDate, stock, idcategoria, idinventario, id]
+        [fechaDate, stock, idcategoria, id]
       );
 
       if (result.affectedRows === 0)
@@ -254,7 +246,7 @@ export default class MercaderiaManager {
 
       const { data } = await this.getOneMercaderia(id);
 
-      if (stock) {
+      if (stock || idcategoria) {
         try {
           const resultado = await inventarioManager.suminventario(
             data.idinventario
