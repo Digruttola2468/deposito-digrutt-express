@@ -5,7 +5,7 @@ import { db_supabase } from "../supabase/supabase.js";
 
 export const iniciarSesion = async (req, res) => {
   const gmail = req.query.email;
-
+  
   if (gmail != null) {
     try {
       const { data, error } = await db_supabase
@@ -16,7 +16,7 @@ export const iniciarSesion = async (req, res) => {
       if (error) throw new Error("Error al momento de leer tabla");
 
       if (data.length === 0)
-        return res.status(404).send({ message: "Not Found" });
+        return res.status(404).send({ message: "No se encontro el usuario" });
 
       const userForToken = {
         created_at: data[0].created_at,
@@ -51,5 +51,5 @@ export const iniciarSesion = async (req, res) => {
     } catch (error) {
       return res.status(500).send({ message: "Something wrong" });
     }
-  } else res.status(404).send({ message: "Not Found" });
+  } else res.status(404).send({ message: "Gmail Vacio" });
 };
