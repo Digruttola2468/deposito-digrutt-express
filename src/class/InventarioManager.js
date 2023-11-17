@@ -1,45 +1,11 @@
 import { con } from "../db.js";
 
+import {mercaderiaManager} from "../index.js";
+
 export default class InventarioManager {
   constructor() {
     this.listInventario = [];
   }
-
-  ////////////////////////////////////////////////////////////////////////////
-  //Esto deberia pertenecer a Mercaderia
-  async deleteMercaderiaWhereIdinventario(idinventario) {
-    const list = await this.getMercaderiaWhereIdInventario(idinventario);
-
-    if (list != []) {
-      for (let i = 0; i < list.length; i++) {
-        const id = list[i];
-
-        const [result] = await con.query(
-          "DELETE FROM mercaderia WHERE (`id` = ?);",
-          [id]
-        );
-      }
-    }
-  }
-  async getMercaderiaWhereIdInventario(idinventario) {
-    try {
-      const [rows] = await con.query(
-        `SELECT * FROM mercaderia WHERE idinventario = ?`,
-        [idinventario]
-      );
-
-      const listIdMercaderia = [];
-      for (let i = 0; i < rows.length; i++) {
-        const element = rows[i];
-        listIdMercaderia.push(element.id);
-      }
-
-      return listIdMercaderia;
-    } catch (error) {
-      return [];
-    }
-  }
-  ////////////////////////////////////////////////////////////////////////////
 
   async refreshListInventario() {
     try {
@@ -202,6 +168,8 @@ export default class InventarioManager {
           idCliente,
           idCodMatriz,
           articulo,
+          entrada: 0, 
+          salida: 0
         },
       };
     } catch (e) {
@@ -306,20 +274,27 @@ export default class InventarioManager {
   async deleteInventario(idInventario) {
     await this.refreshListInventario();
 
+    if (idInventario == null ) 
+      return { error: { message: "Campo Vacio" } };
+    
+    const inventarioInteger = parseInt(idInventario);
+    if (!Number.isInteger(inventarioInteger))
+      return { error: { message: "Algo paso al obtener el cod.producto" } };
+
     try {
+      await mercaderiaManager.deleteMercaderiaWhereIdinventario(inventarioInteger);
+
       const [result] = await con.query(
         "DELETE FROM inventario WHERE (`id` = ?);",
-        [idInventario]
+        [inventarioInteger]
       );
 
       if (result.affectedRows <= 0)
         return { error: { message: "No se encontro el inventario" } };
 
-      await this.deleteMercaderiaWhereIdinventario(idInventario);
-
       //Delete from listInventario
       const filterListInventario = this.listInventario.filter(
-        (elem) => elem.id != idInventario
+        (elem) => elem.id != inventarioInteger
       );
       this.listInventario = filterListInventario;
 
