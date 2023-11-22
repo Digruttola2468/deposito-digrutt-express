@@ -144,10 +144,11 @@ export default class FacturaNegroManager {
               nro_envio: parseInt(nro_envio),
               idCliente: idCliente,
               valorDeclarado: parseFloat(valorDeclarado),
+              fecha: fechaDate
             });
 
             return {
-              data: { message: "La operacion se realizo Correctamente" },
+              data: { message: "La operacion se realizo Correctamente", insertId: idFacturaNegro },
             };
           }
         }
