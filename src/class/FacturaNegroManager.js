@@ -27,7 +27,18 @@ export default class FacturaNegroManager {
         console.error(e);
         return { error: { message: "Something wrong" } };
       }
-    } else return { data: this.listFacturaNegro };
+    } else {
+      this.listFacturaNegro.sort((a, b) => {
+        const ADate = new Date(a.fecha);
+        const BDate = new Date(b.fecha);
+
+        if (ADate < BDate) return 1;
+        if (ADate > BDate) return -1;
+        return 0;
+      });
+
+      return { data: this.listFacturaNegro }
+    };
   }
 
   async getAllListFacturaNegroBBDD() {
