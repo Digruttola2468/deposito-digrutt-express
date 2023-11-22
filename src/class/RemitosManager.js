@@ -128,7 +128,7 @@ export default class RemitosManager {
                 };
             }
 
-            return { data: { message: "Operacion exitosa" } };
+            return { data: { message: "Operacion exitosa", insertId: idRemito } };
           }
         }
       } catch (e) {
