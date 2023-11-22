@@ -60,8 +60,8 @@ export default class RemitosManager {
     const { fecha, numRemito, idCliente, nroOrden, valorDeclarado, products } =
       object;
 
-    if (fecha && numRemito && idCliente && valorDeclarado && products)
-      return { error: { message: "Campos Vacios" } };
+    /*if (fecha && numRemito && idCliente && valorDeclarado && products)
+      return { error: { message: "Campos Vacios" } };*/
 
     //Validar Campos
     if (fecha == null || fecha == "")
