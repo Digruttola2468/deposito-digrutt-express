@@ -11,7 +11,7 @@ export default class RemitosManager {
     if (this.listRemitos.length != 0) return { data: this.listRemitos };
 
     try {
-      const [rows] = await con.query(`SELECT * FROM remitos`);
+      const [rows] = await con.query(`SELECT * FROM remitos ORDER BY fecha DESC`);
       this.listRemitos = rows;
       return { data: rows };
     } catch (error) {

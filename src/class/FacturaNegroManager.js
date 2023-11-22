@@ -18,7 +18,7 @@ export default class FacturaNegroManager {
   async getAllListFacturaNegro() {
     if (this.listFacturaNegro.length == 0) {
       try {
-        const [rows] = await con.query("SELECT * FROM facturaNegro;");
+        const [rows] = await con.query("SELECT * FROM facturaNegro ORDER BY fecha DESC;");
         this.listFacturaNegro = rows;
         return { data: rows };
       } catch (e) {
@@ -30,7 +30,7 @@ export default class FacturaNegroManager {
 
   async getAllListFacturaNegroBBDD() {
     try {
-      const [rows] = await con.query("SELECT * FROM facturaNegro;");
+      const [rows] = await con.query("SELECT * FROM facturaNegro ORDER BY fecha DESC;");
       this.listFacturaNegro = rows;
       return { data: rows };
     } catch (e) {
