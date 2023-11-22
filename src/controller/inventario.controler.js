@@ -1,5 +1,4 @@
-
-import {inventarioManager} from '../index.js'
+import { inventarioManager } from "../index.js";
 
 export const getRefreshInventario = async (req, res) => {
   const { data, error } = await inventarioManager.refreshListInventario();
@@ -7,7 +6,7 @@ export const getRefreshInventario = async (req, res) => {
   if (error != null) return res.status(404).json(error);
 
   return res.json(data);
-}
+};
 
 export const getAllInventario = async (req, res) => {
   const { data, error } = await inventarioManager.getInventario();
@@ -27,12 +26,25 @@ export const getInventariosSelectNombres = async (req, res) => {
 
 export const getOneInventario = async (req, res) => {
   const idInventario = req.params.id;
-  const { data, error } = await inventarioManager.getOneInventario(idInventario);
+  const { data, error } = await inventarioManager.getOneInventario(
+    idInventario
+  );
 
   if (error != null) return res.status(404).json(error);
 
   console.log(data);
   return res.json(data);
+};
+
+export const getSumInventario = async (req, res) => {
+  const { id } = req.params;
+
+  const result = await inventarioManager.suminventario(id);
+
+  if (result.length == 0)
+    return res.status(404).json({ message: "Ocurrio un error" });
+
+  return res.json(result);
 };
 
 export const createInventario = async (req, res) => {
@@ -47,7 +59,10 @@ export const createInventario = async (req, res) => {
 export const updateInventario = async (req, res) => {
   const idInventario = req.params.id;
   const object = req.body;
-  const { data, error } = await inventarioManager.updateInventario(idInventario, object);
+  const { data, error } = await inventarioManager.updateInventario(
+    idInventario,
+    object
+  );
 
   if (error != null) return res.status(500).json(error);
 
@@ -56,7 +71,9 @@ export const updateInventario = async (req, res) => {
 
 export const deleteInventario = async (req, res) => {
   const idInventario = req.params.id;
-  const { data, error } = await inventarioManager.deleteInventario(idInventario);
+  const { data, error } = await inventarioManager.deleteInventario(
+    idInventario
+  );
 
   if (error != null) return res.status(500).json(error);
 

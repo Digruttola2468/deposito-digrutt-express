@@ -7,6 +7,7 @@ import {
   updateInventario,
   getInventariosSelectNombres,
   getRefreshInventario,
+  getSumInventario,
 } from "../controller/inventario.controler.js";
 
 import userExtractor from '../middleware/userExtractor.js'
@@ -16,6 +17,8 @@ const router = Router();
 router.get("/inventario",userExtractor, getAllInventario);
 router.get('/inventario/nombres',userExtractor, getInventariosSelectNombres);
 router.get('/refresh/inventario',userExtractor, getRefreshInventario);
+
+router.get('/inventario/sumInventario/:id', userExtractor, getSumInventario)
 
 router.get("/inventario/:id",userExtractor, getOneInventario);
 
