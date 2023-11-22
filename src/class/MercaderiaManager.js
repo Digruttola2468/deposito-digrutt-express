@@ -176,6 +176,8 @@ export default class MercaderiaManager {
         stock: stockInteger,
         idinventario: idinventario,
         categoria: categoria,
+        idFacturaNegro: idFacturaNegro, 
+        idremito: idremito
       };
 
       //add this.listMercaderia
