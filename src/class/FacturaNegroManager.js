@@ -1,5 +1,5 @@
 import { con } from "../db.js";
-import { inventarioManager, mercaderiaManager } from "../index.js";
+import { mercaderiaManager } from "../index.js";
 
 export default class FacturaNegroManager {
   constructor() {
@@ -37,6 +37,22 @@ export default class FacturaNegroManager {
       console.error(e);
       return { error: { message: "Something wrong" } };
     }
+  }
+
+  getOneNotaEnvio(idFacturaNegro) {
+    const listMercaderiaByIdFacturaNegro =
+      mercaderiaManager.getMercaderiaByIdFacturaNegro(idFacturaNegro);
+    const findByIdFacturaNegro = this.listFacturaNegro.filter(
+      (elem) => elem.id == idFacturaNegro
+    );
+    if (findByIdFacturaNegro) {
+      if (listMercaderiaByIdFacturaNegro.length != 0) {
+        return { 
+          notaEnvio: findByIdFacturaNegro[0],
+          mercaderia: listMercaderiaByIdFacturaNegro,
+        };
+      } else return { error: { message: "No se encontro en la mercaderia" } };
+    } else return { error: { message: "No se encontro la nota envio" } };
   }
 
   async createFacturaNegro(object) {
@@ -78,8 +94,8 @@ export default class FacturaNegroManager {
     let idFacturaNegro = null;
     try {
       const [rows] = await con.query(
-        "INSERT INTO facturaNegro (`nro_envio`,`idCliente`,`valorDeclarado`) VALUES (?,?,?);",
-        [parseInt(nro_envio), idCliente, parseFloat(valorDeclarado)]
+        "INSERT INTO facturaNegro (`nro_envio`,`idCliente`,`valorDeclarado`,`fecha`) VALUES (?,?,?,?);",
+        [parseInt(nro_envio), idCliente, parseFloat(valorDeclarado), fechaDate]
       );
       idFacturaNegro = rows.insertId;
 

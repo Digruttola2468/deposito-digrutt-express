@@ -27,6 +27,13 @@ export const getFacturaNegro = async (req, res) => {
   return res.json(data);
 };
 
+export const getMercaderiaWhereIdFacturaNegro = (req, res) => {
+  const { id } = req.params;
+  const resultJson = facturaNegroManager.getOneNotaEnvio(id);
+
+  return res.json(resultJson);
+}
+
 export const newFacturaNegro = async (req, res) => {
   const object = req.body;
   const result = await facturaNegroManager.createFacturaNegro(object);

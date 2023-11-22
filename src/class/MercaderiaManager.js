@@ -11,7 +11,7 @@ export default class MercaderiaManager {
         `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario,articulo,idremito,idFacturaNegro
               FROM mercaderia 
                   INNER JOIN inventario on mercaderia.idinventario = inventario.id
-                  INNER JOIN categoria on mercaderia.idcategoria = categoria.id 
+                  INNER JOIN categoria on mercaderia.idcategoria = categoria.id
               ORDER BY mercaderia.fecha DESC;`
       );
       
@@ -99,7 +99,7 @@ export default class MercaderiaManager {
         const remitoInteger = parseInt(idremito);
 
         if (!Number.isInteger(remitoInteger)) 
-          return { error: { message: "Algo paso con la facturaNegro" } };
+          return { error: { message: "Algo paso con el Remito" } };
       }
 
       if (!Number.isInteger(stockInteger))
@@ -386,6 +386,14 @@ export default class MercaderiaManager {
     if (this.listMercaderia.length != 0) {
       const filterByIdRemito = this.listMercaderia.filter(elem => elem.idremito == idRemito);
       if (filterByIdRemito) return filterByIdRemito;
+      else return [];
+    }else return [];
+  }
+
+  getMercaderiaByIdFacturaNegro(idFactura) {
+    if (this.listMercaderia.length != 0) {
+      const filterByIdFacturaNegro = this.listMercaderia.filter(elem => elem.idFacturaNegro == idFactura);
+      if (filterByIdFacturaNegro) return filterByIdFacturaNegro;
       else return [];
     }else return [];
   }
