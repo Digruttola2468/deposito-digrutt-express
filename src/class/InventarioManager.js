@@ -153,6 +153,8 @@ export default class InventarioManager {
         idCliente,
         idCodMatriz,
         articulo,
+        entrada: 0, 
+        salida: 0
       });
 
       return {

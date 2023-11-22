@@ -2,9 +2,7 @@ import { con } from "../db.js";
 import ExcelJs from "exceljs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import InventarioManager from "../class/InventarioManager.js";
-
-const inventarioManager = new InventarioManager();
+import {inventarioManager} from "../index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const dir = dirname(__filename);
@@ -70,6 +68,7 @@ export const getExcelInventario = async (req, res) => {
     }
     
     const workbook = new ExcelJs.Workbook();
+    
     const worksheet = workbook.addWorksheet("Invent de producto");
 
     worksheet.columns = [
@@ -80,6 +79,7 @@ export const getExcelInventario = async (req, res) => {
       { header: "STOCK ACTUAL", key: "stockActual", width: 15  },
       { header: "Peso x Unidad (gramos)", key: "pesoUnidad", width: 50  },
     ];
+
 
     worksheet.addRows(listaEnviar);
 
