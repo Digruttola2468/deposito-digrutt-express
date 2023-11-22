@@ -18,7 +18,9 @@ export default class FacturaNegroManager {
   async getAllListFacturaNegro() {
     if (this.listFacturaNegro.length == 0) {
       try {
-        const [rows] = await con.query("SELECT * FROM facturaNegro ORDER BY fecha DESC;");
+        const [rows] = await con.query(
+          "SELECT * FROM facturaNegro ORDER BY fecha DESC;"
+        );
         this.listFacturaNegro = rows;
         return { data: rows };
       } catch (e) {
@@ -30,7 +32,9 @@ export default class FacturaNegroManager {
 
   async getAllListFacturaNegroBBDD() {
     try {
-      const [rows] = await con.query("SELECT * FROM facturaNegro ORDER BY fecha DESC;");
+      const [rows] = await con.query(
+        "SELECT * FROM facturaNegro ORDER BY fecha DESC;"
+      );
       this.listFacturaNegro = rows;
       return { data: rows };
     } catch (e) {
@@ -47,7 +51,7 @@ export default class FacturaNegroManager {
     );
     if (findByIdFacturaNegro) {
       if (listMercaderiaByIdFacturaNegro.length != 0) {
-        return { 
+        return {
           notaEnvio: findByIdFacturaNegro[0],
           mercaderia: listMercaderiaByIdFacturaNegro,
         };
@@ -99,13 +103,6 @@ export default class FacturaNegroManager {
       );
       idFacturaNegro = rows.insertId;
 
-      this.listFacturaNegro.push({
-        id: idFacturaNegro,
-        nro_envio: parseInt(nro_envio),
-        idCliente: idCliente,
-        valorDeclarado: parseFloat(valorDeclarado),
-      });
-
       //Agregar todos los products como salida
       try {
         if (idFacturaNegro != null) {
@@ -130,6 +127,13 @@ export default class FacturaNegroManager {
                   error: { message: "Ocurrio un error en agregar mercaderia" },
                 };
             }
+
+            this.listFacturaNegro.push({
+              id: idFacturaNegro,
+              nro_envio: parseInt(nro_envio),
+              idCliente: idCliente,
+              valorDeclarado: parseFloat(valorDeclarado),
+            });
 
             return {
               data: { message: "La operacion se realizo Correctamente" },

@@ -128,6 +128,8 @@ export default class RemitosManager {
                 };
             }
 
+            this.listRemitos.push({id: idRemito, fecha: fechaDate, idCliente: idCliente, num_remito: numRemito, num_orden: nroOrden, total: valorDeclarado});
+            
             return { data: { message: "Operacion exitosa", insertId: idRemito } };
           }
         }
