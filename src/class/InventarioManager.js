@@ -125,7 +125,7 @@ export default class InventarioManager {
         return { error: { message: "Ya existe ese Cod.Producto" } };
 
       const [rows] = await con.query(
-        "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idCliente,idCodMatriz,articulo) VALUES (?,?,?,?,?,?,?,?,?,?) ;",
+        "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idCliente,idCodMatriz,articulo,entrada,salida) VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ;",
         [
           nombre,
           precio,
@@ -137,6 +137,8 @@ export default class InventarioManager {
           idCliente,
           idCodMatriz,
           articulo,
+          0,
+          0
         ]
       );
 
