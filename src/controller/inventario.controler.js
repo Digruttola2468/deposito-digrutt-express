@@ -17,16 +17,16 @@ export const getAllInventario = async (req, res) => {
 };
 
 export const getInventariosSelectNombres = async (req, res) => {
-  const { data, error } = await inventarioManager.getListInventarioNombre();
+  const { data, error } = inventarioManager.getListInventarioNombre();
 
   if (error != null) return res.status(404).json(error);
 
   return res.json(data);
 };
 
-export const getOneInventario = async (req, res) => {
+export const getOneInventario = (req, res) => {
   const idInventario = req.params.id;
-  const { data, error } = await inventarioManager.getOneInventario(
+  const { data, error } = inventarioManager.getOneInventario(
     idInventario
   );
 
