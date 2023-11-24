@@ -42,7 +42,7 @@ export default class InventarioManager {
   async getInventario() {
     if (this.listInventario.length != 0) return { data: this.listInventario };
 
-    await this.refreshListInventario();
+    return await this.refreshListInventario()
   }
 
   getOneInventario(idInventario) {
