@@ -37,8 +37,8 @@ export default class FacturaNegroManager {
         return 0;
       });
 
-      return { data: this.listFacturaNegro }
-    };
+      return { data: this.listFacturaNegro };
+    }
   }
 
   async getAllListFacturaNegroBBDD() {
@@ -70,6 +70,12 @@ export default class FacturaNegroManager {
     } else return { error: { message: "No se encontro la nota envio" } };
   }
 
+  formatDate(fechaDate) {
+    return `${fechaDate.getFullYear()}-${fechaDate.getMonth()}-${
+      fechaDate.getDay() + 1
+    }`;
+  }
+
   async createFacturaNegro(object) {
     const { fecha, nro_envio, products, idCliente, valorDeclarado } = object;
 
@@ -83,7 +89,7 @@ export default class FacturaNegroManager {
     if (idCliente == null || idCliente == 0 || idCliente == "")
       return { error: { message: "El Campo Cliente esta Vacio" } };
 
-    if (products == null || products == "")
+    if (products == null || products.length == 0)
       return {
         error: { message: "El Campo Lista de Productos esta vacia" },
       };
@@ -97,6 +103,10 @@ export default class FacturaNegroManager {
     if (!Number.isInteger(nroEnvioInt))
       return { error: { message: "El Campo Nro Envio no es un numero" } };
 
+    const clienteInteger = parseInt(idCliente);
+    if (!Number.isInteger(clienteInteger))
+      return { error: { message: "Something wrong" } };
+
     //Validar si el nro_envio no se repita
     const repeatSameNroFacturaNegro = this.listFacturaNegro.find(
       (elem) => elem.nro_envio == nroEnvioInt
@@ -106,11 +116,23 @@ export default class FacturaNegroManager {
 
     const fechaDate = new Date(fecha);
 
+    if (Number.isNaN(fechaDate.getDate()))
+      return { error: { message: "Error en el formato de la Fecha" } };
+
+    let valorTotal = 0;
+    if (valorDeclarado != null) {
+      const valorFloat = parseFloat(valorDeclarado);
+      if (!Number.isInteger(valorFloat))
+        return { error: { message: "El campo Valor Declarado no es numerico" } };
+
+      valorTotal = valorFloat;
+    }
+
     let idFacturaNegro = null;
     try {
       const [rows] = await con.query(
         "INSERT INTO facturaNegro (`nro_envio`,`idCliente`,`valorDeclarado`,`fecha`) VALUES (?,?,?,?);",
-        [parseInt(nro_envio), idCliente, parseFloat(valorDeclarado), fechaDate]
+        [nroEnvioInt, clienteInteger, valorTotal, this.formatDate(fechaDate)]
       );
       idFacturaNegro = rows.insertId;
 
@@ -123,7 +145,7 @@ export default class FacturaNegroManager {
               const element = products[i];
 
               const enviar = {
-                fecha: fechaDate,
+                fecha: this.formatDate(fechaDate),
                 stock: element.stock,
                 idinventario: element.idProduct,
                 idcategoria: 1,
@@ -143,12 +165,15 @@ export default class FacturaNegroManager {
               id: idFacturaNegro,
               nro_envio: parseInt(nro_envio),
               idCliente: idCliente,
-              valorDeclarado: parseFloat(valorDeclarado),
-              fecha: fechaDate
+              valorDeclarado: valorTotal,
+              fecha: fechaDate,
             });
 
             return {
-              data: { message: "La operacion se realizo Correctamente", insertId: idFacturaNegro },
+              data: {
+                message: "La operacion se realizo Correctamente",
+                insertId: idFacturaNegro,
+              },
             };
           }
         }

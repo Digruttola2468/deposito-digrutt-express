@@ -1,6 +1,6 @@
 import { con } from "../db.js";
 
-import {mercaderiaManager} from "../index.js";
+import { mercaderiaManager } from "../index.js";
 
 export default class InventarioManager {
   constructor() {
@@ -22,7 +22,7 @@ export default class InventarioManager {
     return this.listInventario;
   }
 
-  async getListInventarioNombre() {
+  getListInventarioNombre() {
     if (this.listInventario.length != 0) {
       let listEnviar = [];
       for (let i = 0; i < this.listInventario.length; i++) {
@@ -36,47 +36,22 @@ export default class InventarioManager {
       }
       return { data: listEnviar };
     }
-
-    try {
-      const [rows] = await con.query(
-        "SELECT id,nombre,descripcion,idCliente FROM inventario;"
-      );
-      return { data: rows };
-    } catch (error) {
-      return { error: { message: "Something wrong" } };
-    }
+    return { error: { message: "Lista Inventario Vacio" } };
   }
 
   async getInventario() {
     if (this.listInventario.length != 0) return { data: this.listInventario };
 
-    try {
-      const [rows] = await con.query("SELECT * FROM inventario;");
-      this.listInventario = rows;
-      return { data: rows };
-    } catch (e) {
-      console.error(e);
-      return { error: { message: "Something wrong" } };
-    }
+    await this.refreshListInventario();
   }
 
-  async getOneInventario(idInventario) {
+  getOneInventario(idInventario) {
     if (this.listInventario.length != 0) {
       const findInventarioById = this.listInventario.find(
         (e) => e.id == idInventario
       );
       return { data: findInventarioById };
-    } else {
-      try {
-        const [rows] = await con.query("SELECT * FROM inventario;");
-        this.listInventario = rows;
-        const findInventarioById = rows.find((e) => e.id == idInventario);
-        return { data: findInventarioById };
-      } catch (e) {
-        console.error(e);
-        return { error: { message: "Something wrong" } };
-      }
-    }
+    } else return { error: { message: "Lista Inventario Vacio" } };
   }
 
   getLengthList() {
@@ -85,12 +60,11 @@ export default class InventarioManager {
   }
 
   async createInventario(object) {
-    await this.refreshListInventario();
     try {
       const {
-        nombre,
+        nombre, //Obligatorio
         precio,
-        descripcion,
+        descripcion, //Obligatorio
         idcolor,
         idtipoproducto,
         pesoUnidad,
@@ -99,6 +73,7 @@ export default class InventarioManager {
         idCodMatriz,
         articulo,
       } = object;
+      //Entrada - salida
 
       //Validar Campos
       if (nombre == null || nombre == "")
@@ -120,7 +95,6 @@ export default class InventarioManager {
       const findSameCodProducto = this.listInventario.find(
         (elem) => elem.nombre.toLowerCase() == nombre.toLowerCase()
       );
-
       if (findSameCodProducto != null)
         return { error: { message: "Ya existe ese Cod.Producto" } };
 
@@ -138,12 +112,11 @@ export default class InventarioManager {
           idCodMatriz,
           articulo,
           0,
-          0
+          0,
         ]
       );
 
-      //Agregar a la lista
-      this.listInventario.push({
+      const enviar = {
         id: rows.insertId,
         nombre,
         precio,
@@ -155,26 +128,15 @@ export default class InventarioManager {
         idCliente,
         idCodMatriz,
         articulo,
-        entrada: 0, 
-        salida: 0
-      });
+        entrada: 0,
+        salida: 0,
+      };
+
+      //Agregar a la lista
+      this.listInventario.push(enviar);
 
       return {
-        data: {
-          id: rows.insertId,
-          nombre,
-          precio,
-          descripcion,
-          idcolor,
-          idtipoproducto,
-          pesoUnidad,
-          stockCaja,
-          idCliente,
-          idCodMatriz,
-          articulo,
-          entrada: 0, 
-          salida: 0
-        },
+        data: enviar,
       };
     } catch (e) {
       console.error(e);
@@ -183,10 +145,8 @@ export default class InventarioManager {
   }
 
   async updateInventario(idInventario, object) {
-    await this.refreshListInventario();
-
     try {
-      let {
+      const {
         nombre,
         precio,
         descripcion,
@@ -199,30 +159,40 @@ export default class InventarioManager {
         articulo,
       } = object;
 
-      if (nombre == "") {
-        nombre = null;
-      }
-      if (articulo == "") {
-        articulo = null;
-      }
-
       if (nombre != null) {
-        //Validar q no se repita el cod.Producto
-        const findSameCodProducto = this.listInventario.find(
-          (elem) => elem.nombre.toLowerCase() == nombre.toLowerCase()
-        );
+        if (typeof nombre === "string") {
+          if (nombre != "") {
+            //Validar q no se repita el cod.Producto
+            const findSameCodProducto = this.listInventario.find(
+              (elem) => elem.nombre.toLowerCase() == nombre.toLowerCase()
+            );
 
-        if (findSameCodProducto != null)
-          return { error: { message: "Ya existe ese Cod.Producto" } };
+            //Validamos si existe ese nombre
+            if (findSameCodProducto != null) {
+              //Si existe, validar si es igual que el anterior
+              if (findSameCodProducto.nombre != nombre)
+                return { error: { message: "Ya existe ese Cod.Producto" } };
+            }
+          } else return { error: { message: "Campo nombre Vacio" } };
+        } else return { error: { message: "Error en el tipo de dato nombre" } };
       }
       if (articulo != null) {
-        //Validar que no se repita el Articulo ya que es unico
-        const findSameArticulo = this.listInventario.find((elem) => {
-          if (typeof elem.articulo === "string")
-            return elem.articulo.toLowerCase() == articulo.toLowerCase();
-        });
-        if (findSameArticulo != null)
-          return { error: { message: "Ya existe ese Articulo" } };
+        if (typeof articulo === "string") {
+          if (articulo != "") {
+            //Validar q no se repita el cod.Producto
+            const findSameCodProducto = this.listInventario.find(
+              (elem) => elem.articulo.toLowerCase() == articulo.toLowerCase()
+            );
+
+            //Validamos si existe ese nombre
+            if (findSameCodProducto != null) {
+              //Si existe, validar si es igual que el anterior
+              if (findSameCodProducto.articulo != articulo)
+                return { error: { message: "Ya existe ese Articulo" } };
+            }
+          } else return { error: { message: "Campo articulo Vacio" } };
+        } else
+          return { error: { message: "Error en el tipo de dato articulo" } };
       }
 
       const [result] = await con.query(
@@ -256,19 +226,17 @@ export default class InventarioManager {
       if (result.affectedRows === 0)
         return { error: { message: "No se encontro el Inventario" } };
 
-      const [rows] = await con.query("SELECT * FROM inventario WHERE id = ?", [
-        idInventario,
-      ]);
+      const { data } = this.getOneInventario(idInventario);
 
       //update ListInventario
       const mapListInventarioUpdate = this.listInventario.map((elem) => {
-        if (elem.id == idInventario) return { ...rows[0] };
+        if (elem.id == idInventario) return { ...data };
         else return elem;
       });
 
       this.listInventario = mapListInventarioUpdate;
 
-      return { data: rows[0] };
+      return { data: data };
     } catch (e) {
       console.error(e);
       return { error: { message: "Something wrong" } };
@@ -276,33 +244,36 @@ export default class InventarioManager {
   }
 
   async deleteInventario(idInventario) {
-    await this.refreshListInventario();
+    if (idInventario == null) return { error: { message: "Campo Vacio" } };
 
-    if (idInventario == null ) 
-      return { error: { message: "Campo Vacio" } };
-    
+    //Validamos que sea de tipo integer
     const inventarioInteger = parseInt(idInventario);
     if (!Number.isInteger(inventarioInteger))
       return { error: { message: "Algo paso al obtener el cod.producto" } };
 
     try {
-      await mercaderiaManager.deleteMercaderiaWhereIdinventario(inventarioInteger);
-
-      const [result] = await con.query(
-        "DELETE FROM inventario WHERE (`id` = ?);",
-        [inventarioInteger]
+      const { data } = await mercaderiaManager.deleteMercaderiaWhereIdinventario(
+        inventarioInteger
       );
+      
+      if (data.done) {
+        const [result] = await con.query(
+          "DELETE FROM inventario WHERE (`id` = ?);",
+          [inventarioInteger]
+        );
+  
+        if (result.affectedRows <= 0)
+          return { error: { message: "No se encontro el inventario" } };
+  
+        //Delete from listInventario
+        const filterListInventario = this.listInventario.filter(
+          (elem) => elem.id != inventarioInteger
+        );
+        this.listInventario = filterListInventario;
+  
+        return { data: { message: "Eliminado Correctamente" } };
+      } else return { error: { message: "Error al eliminar en mercaderia" } };
 
-      if (result.affectedRows <= 0)
-        return { error: { message: "No se encontro el inventario" } };
-
-      //Delete from listInventario
-      const filterListInventario = this.listInventario.filter(
-        (elem) => elem.id != inventarioInteger
-      );
-      this.listInventario = filterListInventario;
-
-      return { data: { message: "Eliminado Correctamente" } };
     } catch (e) {
       console.error(e);
       return { error: { message: "Something wrong" } };

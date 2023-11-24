@@ -18,11 +18,13 @@ export default class RemitosManager {
         return 0;
       });
 
-      return { data: this.listRemitos }
-    };
+      return { data: this.listRemitos };
+    }
 
     try {
-      const [rows] = await con.query(`SELECT * FROM remitos ORDER BY fecha DESC`);
+      const [rows] = await con.query(
+        `SELECT * FROM remitos ORDER BY fecha DESC`
+      );
       this.listRemitos = rows;
       return { data: rows };
     } catch (error) {
@@ -55,13 +57,15 @@ export default class RemitosManager {
     else false;
   }
 
+  formatDate(fechaDate) {
+    return `${fechaDate.getFullYear()}-${fechaDate.getMonth()}-${
+      fechaDate.getDay() + 1
+    }`;
+  }
+
   async newRemito(object) {
-    await this.getRemitos();
     const { fecha, numRemito, idCliente, nroOrden, valorDeclarado, products } =
       object;
-
-    /*if (fecha && numRemito && idCliente && valorDeclarado && products)
-      return { error: { message: "Campos Vacios" } };*/
 
     //Validar Campos
     if (fecha == null || fecha == "")
@@ -73,7 +77,7 @@ export default class RemitosManager {
     if (idCliente == null || idCliente == "")
       return { error: { message: "Campo Cliente Vacio" } };
 
-    if (products == null || products == [])
+    if (products == null || products.length == 0)
       return { error: { message: "Campo Products Vacio" } };
 
     if (valorDeclarado != null)
@@ -106,44 +110,55 @@ export default class RemitosManager {
     if (Number.isNaN(fechaDate.getDate()))
       return { error: { message: "Error en el formato de la Fecha" } };
 
+    const enviarFecha = this.formatDate(fechaDate);
+
     let idRemito = null;
     try {
       const [rows] = await con.query(
         "INSERT INTO remitos (`fecha`,`num_remito`,`idCliente`,`num_orden`,`total`) VALUES (?,?,?,?,?);",
-        [fechaDate, numRemito, idCliente, nroOrden, parseFloat(valorDeclarado)]
+        [
+          enviarFecha,
+          numRemito,
+          idCliente,
+          nroOrden,
+          parseFloat(valorDeclarado),
+        ]
       );
       idRemito = rows.insertId;
 
       //Agregar todos los products como salida
       try {
         if (idRemito != null) {
-          //verificamos si el array esta vacia
-          if (products.length > 0) {
-            for (let i = 0; i < products.length; i++) {
-              const element = products[i];
+          for (let i = 0; i < products.length; i++) {
+            const element = products[i];
 
-              const enviar = {
-                fecha: fechaDate,
-                stock: element.stock,
-                idinventario: element.idProduct,
-                idcategoria: 1,
-                idremito: idRemito,
+            const enviar = {
+              fecha: enviarFecha,
+              stock: element.stock,
+              idinventario: element.idProduct,
+              idcategoria: 1,
+              idremito: idRemito,
+            };
+            const { error } = await mercaderiaManager.createMercaderia(enviar);
+
+            if (error != null)
+              return {
+                error: { message: "Ocurrio un error en agregar mercaderia" },
               };
-              const { error } = await mercaderiaManager.createMercaderia(
-                enviar
-              );
-
-              if (error != null)
-                return {
-                  error: { message: "Ocurrio un error en agregar mercaderia" },
-                };
-            }
-
-            this.listRemitos.push({id: idRemito, fecha: fechaDate, idCliente: idCliente, num_remito: numRemito, num_orden: nroOrden, total: valorDeclarado});
-            
-            return { data: { message: "Operacion exitosa", insertId: idRemito } };
           }
+
+          this.listRemitos.push({
+            id: idRemito,
+            fecha: fechaDate,
+            idCliente: idCliente,
+            num_remito: numRemito,
+            num_orden: nroOrden,
+            total: valorDeclarado,
+          });
+
+          return { data: { message: "Operacion exitosa", insertId: idRemito } };
         }
+        return { error: { message: "No se agrego el remito" } };
       } catch (e) {
         console.error(e);
         return { error: { message: "Something wrong" } };

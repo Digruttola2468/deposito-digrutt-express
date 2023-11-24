@@ -5,6 +5,7 @@ export default class MercaderiaManager {
   constructor() {
     this.listMercaderia = [];
   }
+
   async refreshGetMercaderia() {
     try {
       const [rows] = await con.query(
@@ -14,7 +15,7 @@ export default class MercaderiaManager {
                   INNER JOIN categoria on mercaderia.idcategoria = categoria.id
               ORDER BY mercaderia.fecha DESC;`
       );
-      
+
       this.listMercaderia = rows;
 
       return { data: rows };
@@ -40,34 +41,33 @@ export default class MercaderiaManager {
     return await this.refreshGetMercaderia();
   }
 
-  async getOneMercaderia(idMercaderia) {
+  getOneMercaderia(idMercaderia) {
     if (this.listMercaderia.length != 0) {
       const findInventarioById = this.listMercaderia.find(
         (e) => e.id == idMercaderia
       );
       return { data: findInventarioById };
-    } else {
-      try {
-        const [rows] =
-          await con.query(`SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario,articulo
-        FROM mercaderia 
-            INNER JOIN inventario on mercaderia.idinventario = inventario.id
-            INNER JOIN categoria on mercaderia.idcategoria = categoria.id 
-        ORDER BY mercaderia.fecha DESC;`);
-        this.listMercaderia = rows;
-        const findInventarioById = rows.find((e) => e.id == idMercaderia);
-        return { data: findInventarioById };
-      } catch (e) {
-        console.error(e);
-        return { error: { message: "Something wrong" } };
-      }
-    }
+    } else return { error: { message: "Mercaderia Vacia" } };
+  }
+
+  formatDate(fechaDate) {
+    if (fechaDate != null)
+      return `${fechaDate.getFullYear()}-${fechaDate.getMonth()}-${
+        fechaDate.getDay() + 1
+      }`;
+    else return null;
   }
 
   async createMercaderia(object) {
-    await this.getMercaderia();
     try {
-      const { fecha, stock, idinventario, idcategoria, idFacturaNegro, idremito } = object;
+      const {
+        fecha,
+        stock,
+        idinventario,
+        idcategoria,
+        idFacturaNegro,
+        idremito,
+      } = object;
 
       //Validar Campos
       if (fecha == null || fecha == "")
@@ -82,26 +82,27 @@ export default class MercaderiaManager {
       if (idcategoria == null || idcategoria == "")
         return { error: { message: "Campo Categoria Vacia" } };
 
-      const stockInteger = parseInt(stock);
-
-      const inventarioInteger = parseInt(idinventario);
-
-      const categoriaInteger = parseInt(idcategoria);
-
+      //Si se coloca idFacturaNegro verificar que sea de tipo integer
       if (idFacturaNegro != null) {
         const facturaNegroInteger = parseInt(idFacturaNegro);
 
-        if (!Number.isInteger(facturaNegroInteger)) 
+        if (!Number.isInteger(facturaNegroInteger))
           return { error: { message: "Algo paso con la facturaNegro" } };
       }
-      
+
+      //Si se coloca idRemito verificar que sea de tipo integer
       if (idremito != null) {
         const remitoInteger = parseInt(idremito);
 
-        if (!Number.isInteger(remitoInteger)) 
+        if (!Number.isInteger(remitoInteger))
           return { error: { message: "Algo paso con el Remito" } };
       }
 
+      const stockInteger = parseInt(stock);
+      const inventarioInteger = parseInt(idinventario);
+      const categoriaInteger = parseInt(idcategoria);
+
+      //Verificamos que sean de tipo Integer
       if (!Number.isInteger(stockInteger))
         return { error: { message: "Campo Stock No es un numero" } };
 
@@ -111,17 +112,29 @@ export default class MercaderiaManager {
       if (!Number.isInteger(categoriaInteger))
         return { error: { message: "Algo paso con la categoria" } };
 
+      //Verificamos que sea de tipo Entrada - Salida , si no es ninguna de las dos saltar un error
       if (categoriaInteger !== 1 && categoriaInteger !== 2)
         return { error: { message: "Algo paso con la categoria" } };
 
+      //Convertimos la fecha ingresada a tipo Date
       const fechaDate = new Date(fecha);
 
       if (Number.isNaN(fechaDate.getDate()))
         return { error: { message: "Error en el formato de la Fecha" } };
 
+      //Colocamos un formato de fecha al enviar a mercaderia
+      const enviarFecha = this.formatDate(fechaDate);
+
       const [rows] = await con.query(
         "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`, `idremito`, `idFacturaNegro`) VALUES (?,?,?,?,?,?);",
-        [fechaDate, stockInteger, categoriaInteger, inventarioInteger, idremito, idFacturaNegro]
+        [
+          enviarFecha,
+          stockInteger,
+          categoriaInteger,
+          inventarioInteger,
+          idremito,
+          idFacturaNegro,
+        ]
       );
 
       try {
@@ -137,7 +150,7 @@ export default class MercaderiaManager {
           [
             parseInt(resultado[0].salida),
             parseInt(resultado[0].entrada),
-            idinventario,
+            inventarioInteger,
           ]
         );
         if (result.affectedRows === 0)
@@ -163,9 +176,9 @@ export default class MercaderiaManager {
       const { nombre, descripcion, articulo } = getOneInventario.data;
 
       let categoria = "";
-      if (idcategoria == 1) categoria = "Salida";
+      if (categoriaInteger === 1) categoria = "Salida";
 
-      if (idcategoria == 2) categoria = "Entrada";
+      if (categoriaInteger === 2) categoria = "Entrada";
 
       const enviar = {
         id: rows.insertId,
@@ -174,10 +187,10 @@ export default class MercaderiaManager {
         articulo: articulo,
         fecha: fechaDate,
         stock: stockInteger,
-        idinventario: idinventario,
+        idinventario: inventarioInteger,
         categoria: categoria,
-        idFacturaNegro: idFacturaNegro, 
-        idremito: idremito
+        idFacturaNegro: idFacturaNegro,
+        idremito: idremito,
       };
 
       //add this.listMercaderia
@@ -197,42 +210,40 @@ export default class MercaderiaManager {
   }
 
   async updateMercaderia(idMercaderia, object) {
-    await this.getMercaderia();
     try {
-      let enviar = {};
+      let enviar = {
+        fecha: null,
+        stock: null,
+        idcategoria: null,
+      };
       const { fecha, stock, idcategoria } = object;
       const id = idMercaderia;
-
-      if (
-        fecha == null &&
-        stock == null && 
-        idcategoria == null
-      ) {
-        return { error: { message: "Campos vacios" } };
-      }
 
       //Si se agrega los siguientes campos , validar q sean correctos
       if (fecha) {
         const validarDate = new Date(fecha);
-        enviar.fecha = validarDate;
 
         if (Number.isNaN(validarDate.getDate()))
           return { error: { message: "Error en el formato de la Fecha" } };
+
+        enviar.fecha = validarDate;
       }
       if (stock) {
         const stockInteger = parseInt(stock);
-        enviar.stock = stockInteger;
+
         if (!Number.isInteger(stockInteger))
           return { error: { message: "Campo Stock No es un numero" } };
+
+        enviar.stock = stockInteger;
       }
       if (idcategoria) {
         const categoriaInteger = parseInt(idcategoria);
-        enviar.idcategoria = categoriaInteger;
+
         if (!Number.isInteger(categoriaInteger))
           return { error: { message: "Algo paso con la categoria" } };
-      }
 
-      const fechaDate = new Date(fecha);
+        enviar.idcategoria = categoriaInteger;
+      }
 
       const [result] = await con.query(
         `UPDATE mercaderia
@@ -240,13 +251,13 @@ export default class MercaderiaManager {
                 stock = IFNULL(?,stock),
                 idcategoria = IFNULL(?,idcategoria)
             WHERE id = ?;`,
-        [fechaDate, stock, idcategoria, id]
+        [this.formatDate(enviar.fecha), enviar.stock, enviar.idcategoria, id]
       );
 
       if (result.affectedRows === 0)
         return { error: { message: "No se encontro la mercaderia" } };
 
-      const { data } = await this.getOneMercaderia(id);
+      const { data } = this.getOneMercaderia(id);
 
       if (stock || idcategoria) {
         try {
@@ -269,6 +280,7 @@ export default class MercaderiaManager {
             return { error: { message: "No se encontro el inventario" } };
         } catch (e) {
           console.error(e);
+          return { error: { message: "Something Wrong" } };
         }
       }
 
@@ -292,9 +304,8 @@ export default class MercaderiaManager {
   }
 
   async deleteMercaderia(idMercaderia) {
-    await this.getMercaderia();
     try {
-      const { data } = await this.getOneMercaderia(idMercaderia);
+      const { data } = this.getOneMercaderia(idMercaderia);
 
       const [result] = await con.query(
         "DELETE FROM mercaderia WHERE (`id` = ?);",
@@ -352,53 +363,60 @@ export default class MercaderiaManager {
   }
 
   async deleteMercaderiaWhereIdinventario(idinventario) {
-    await this.getMercaderia();
-    const list = await this.getMercaderiaWhereIdInventario(idinventario);
+    const list = this.getMercaderiaWhereIdInventario(idinventario);
 
-    if (list.length > 0) {
-      for (let i = 0; i < list.length; i++) {
-        const id = list[i];
+    if (list.length != 0) {
+      if (list.length > 0) {
+        for (let i = 0; i < list.length; i++) {
+          const id = list[i];
 
-        const [result] = await con.query(
-          "DELETE FROM mercaderia WHERE (`id` = ?);",
-          [id]
-        );
+          const [result] = await con.query(
+            "DELETE FROM mercaderia WHERE (`id` = ?);",
+            [id]
+          );
+        }
       }
-    }
+      return { data: { message: "Eliminado Correctamente", done: true } };
+    } else return { error: { message: "Ocurrio un error al eliminar" } };
   }
-  
-  async getMercaderiaWhereIdInventario(idinventario) {
-    await this.getMercaderia();
-    try {
-      const filterListMercaderiaByIdInventario = this.listMercaderia.filter(elem => elem.id == idinventario)
-      
-      const listIdMercaderia = [];
-      for (let i = 0; i < filterListMercaderiaByIdInventario.length; i++) {
-        const element = filterListMercaderiaByIdInventario[i];
-        listIdMercaderia.push(element.id);
+
+  getMercaderiaWhereIdInventario(idinventario) {
+    if (this.listMercaderia.length != 0) {
+      try {
+        const filterListMercaderiaByIdInventario = this.listMercaderia.filter(
+          (elem) => elem.id == idinventario
+        );
+
+        const listIdMercaderia = [];
+        for (let i = 0; i < filterListMercaderiaByIdInventario.length; i++) {
+          const element = filterListMercaderiaByIdInventario[i];
+          listIdMercaderia.push(element.id);
+        }
+
+        return listIdMercaderia;
+      } catch (error) {
+        return [];
       }
-      
-      return listIdMercaderia;
-    } catch (error) {
-      return [];
-    }
+    } else return [];
   }
 
   getMercaderiaByIdRemito(idRemito) {
     if (this.listMercaderia.length != 0) {
-      const filterByIdRemito = this.listMercaderia.filter(elem => elem.idremito == idRemito);
+      const filterByIdRemito = this.listMercaderia.filter(
+        (elem) => elem.idremito == idRemito
+      );
       if (filterByIdRemito) return filterByIdRemito;
       else return [];
-    }else return [];
+    } else return [];
   }
 
   getMercaderiaByIdFacturaNegro(idFactura) {
     if (this.listMercaderia.length != 0) {
-      const filterByIdFacturaNegro = this.listMercaderia.filter(elem => elem.idFacturaNegro == idFactura);
+      const filterByIdFacturaNegro = this.listMercaderia.filter(
+        (elem) => elem.idFacturaNegro == idFactura
+      );
       if (filterByIdFacturaNegro) return filterByIdFacturaNegro;
       else return [];
-    }else return [];
+    } else return [];
   }
-
 }
-
