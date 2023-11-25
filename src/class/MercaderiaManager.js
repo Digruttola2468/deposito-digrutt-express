@@ -50,14 +50,6 @@ export default class MercaderiaManager {
     } else return { error: { message: "Mercaderia Vacia" } };
   }
 
-  formatDate(fechaDate) {
-    if (fechaDate != null)
-      return `${fechaDate.getFullYear()}-${fechaDate.getMonth()}-${
-        fechaDate.getDay() + 1
-      }`;
-    else return null;
-  }
-
   async createMercaderia(object) {
     try {
       const {
@@ -77,7 +69,7 @@ export default class MercaderiaManager {
         return { error: { message: "Campo Stock Vacio" } };
 
       if (idinventario == null || idinventario == "")
-        return { error: { message: "Campo Pieza Vacia" } };
+        return { error: { message: "Campo Cod.Producto Vacio" } };
 
       if (idcategoria == null || idcategoria == "")
         return { error: { message: "Campo Categoria Vacia" } };
@@ -116,19 +108,24 @@ export default class MercaderiaManager {
       if (categoriaInteger !== 1 && categoriaInteger !== 2)
         return { error: { message: "Algo paso con la categoria" } };
 
+      //Validar que el idinventario exista
+      const existsIdInventario =
+        inventarioManager.existsIdInventario(inventarioInteger);
+      if (existsIdInventario != null) {
+        if (!existsIdInventario)
+          return { error: { message: "No existe ese cod.producto" } };
+      } else return { error: { message: "Algo paso con la idInventario" } };
+
       //Convertimos la fecha ingresada a tipo Date
       const fechaDate = new Date(fecha);
 
       if (Number.isNaN(fechaDate.getDate()))
         return { error: { message: "Error en el formato de la Fecha" } };
 
-      //Colocamos un formato de fecha al enviar a mercaderia
-      const enviarFecha = this.formatDate(fechaDate);
-
       const [rows] = await con.query(
         "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`, `idremito`, `idFacturaNegro`) VALUES (?,?,?,?,?,?);",
         [
-          enviarFecha,
+          fecha,
           stockInteger,
           categoriaInteger,
           inventarioInteger,
@@ -137,41 +134,9 @@ export default class MercaderiaManager {
         ]
       );
 
-      try {
-        const resultado = await inventarioManager.suminventario(
-          inventarioInteger
-        );
-        const [result] = await con.query(
-          ` UPDATE inventario 
-                  SET salida  = IFNULL(?,salida),
-                      entrada = IFNULL(?,entrada)
-                  WHERE id = ?
-                `,
-          [
-            parseInt(resultado[0].salida),
-            parseInt(resultado[0].entrada),
-            inventarioInteger,
-          ]
-        );
-        if (result.affectedRows === 0)
-          return {
-            error: {
-              message: "NO se agrego el stock de la pieza en el inventario",
-            },
-          };
-      } catch (e) {
-        console.log(e);
-        return {
-          error: {
-            message: "something wrong",
-          },
-        };
-      }
-
       //get one listInventario
-      const getOneInventario = await inventarioManager.getOneInventario(
-        inventarioInteger
-      );
+      const getOneInventario =
+        inventarioManager.getOneInventario(inventarioInteger);
 
       const { nombre, descripcion, articulo } = getOneInventario.data;
 
@@ -185,7 +150,7 @@ export default class MercaderiaManager {
         nombre: nombre,
         descripcion: descripcion,
         articulo: articulo,
-        fecha: fechaDate,
+        fecha: fecha,
         stock: stockInteger,
         idinventario: inventarioInteger,
         categoria: categoria,
@@ -195,6 +160,17 @@ export default class MercaderiaManager {
 
       //add this.listMercaderia
       this.listMercaderia.push(enviar);
+
+      try {
+        await inventarioManager.suminventario(inventarioInteger);
+      } catch (e) {
+        console.log(e);
+        return {
+          error: {
+            message: "something wrong",
+          },
+        };
+      }
 
       return {
         data: enviar,
@@ -215,6 +191,7 @@ export default class MercaderiaManager {
         fecha: null,
         stock: null,
         idcategoria: null,
+        categoria: null,
       };
       const { fecha, stock, idcategoria } = object;
       const id = idMercaderia;
@@ -226,7 +203,7 @@ export default class MercaderiaManager {
         if (Number.isNaN(validarDate.getDate()))
           return { error: { message: "Error en el formato de la Fecha" } };
 
-        enviar.fecha = validarDate;
+        enviar.fecha = fecha;
       }
       if (stock) {
         const stockInteger = parseInt(stock);
@@ -242,6 +219,10 @@ export default class MercaderiaManager {
         if (!Number.isInteger(categoriaInteger))
           return { error: { message: "Algo paso con la categoria" } };
 
+        if (categoriaInteger == 2) enviar.categoria = "Entrada";
+        else if (categoriaInteger == 1) enviar.categoria = "Salida";
+        else return { error: { message: "Algo paso con la categoria" } };
+        
         enviar.idcategoria = categoriaInteger;
       }
 
@@ -251,7 +232,7 @@ export default class MercaderiaManager {
                 stock = IFNULL(?,stock),
                 idcategoria = IFNULL(?,idcategoria)
             WHERE id = ?;`,
-        [this.formatDate(enviar.fecha), enviar.stock, enviar.idcategoria, id]
+        [enviar.fecha, enviar.stock, enviar.idcategoria, id]
       );
 
       if (result.affectedRows === 0)
@@ -259,40 +240,36 @@ export default class MercaderiaManager {
 
       const { data } = this.getOneMercaderia(id);
 
+      if (enviar.fecha == null) enviar.fecha = data.fecha;
+
+      if (enviar.categoria == null) enviar.categoria = data.categoria;
+
+      if (enviar.stock == null) enviar.stock = data.stock;
+
+      const enviarUpdateList = {
+        fecha: enviar.fecha,
+        categoria: enviar.categoria,
+        stock: enviar.stock,
+      };
+
+      //Update this.listMercaderia
+      const mapListMercaderia = this.listMercaderia.map((elem) => {
+        if (elem.id == id) return { ...data, ...enviarUpdateList };
+        else return elem;
+      });
+
+      this.listMercaderia = mapListMercaderia;
+
       if (stock || idcategoria) {
         try {
-          const resultado = await inventarioManager.suminventario(
-            data.idinventario
-          );
-
-          const [result] = await con.query(
-            `UPDATE inventario 
-                  SET salida  = IFNULL(?,salida),
-                      entrada = IFNULL(?,entrada)
-                 WHERE id = ?`,
-            [
-              parseInt(resultado[0].salida),
-              parseInt(resultado[0].entrada),
-              data.idinventario,
-            ]
-          );
-          if (result.affectedRows === 0)
-            return { error: { message: "No se encontro el inventario" } };
+          await inventarioManager.suminventario(data.idinventario);
         } catch (e) {
           console.error(e);
           return { error: { message: "Something Wrong" } };
         }
       }
 
-      //Update this.listMercaderia
-      const mapListMercaderia = this.listMercaderia.map((elem) => {
-        if (elem.id == id) return { ...data, ...enviar };
-        else return elem;
-      });
-
-      this.listMercaderia = mapListMercaderia;
-
-      return { data: { ...data, ...enviar } };
+      return { data: { ...data, ...enviarUpdateList } };
     } catch (e) {
       console.error(e);
       return {
@@ -319,38 +296,18 @@ export default class MercaderiaManager {
           },
         };
 
-      try {
-        const resultado = await inventarioManager.suminventario(
-          data.idinventario
-        );
-
-        const [result] = await con.query(
-          `UPDATE inventario 
-              SET salida  = IFNULL(?,salida),
-                  entrada = IFNULL(?,entrada)
-              WHERE id = ?`,
-          [
-            parseInt(resultado[0].salida),
-            parseInt(resultado[0].entrada),
-            data.idinventario,
-          ]
-        );
-        if (result.affectedRows === 0)
-          return { error: { message: "No se encontro el inventario" } };
-      } catch (e) {
-        console.error(e);
-        return {
-          error: {
-            message: "something wrong",
-          },
-        };
-      }
-
       //Delete from listInventario
       const filterListMercaderia = this.listMercaderia.filter(
         (elem) => elem.id != idMercaderia
       );
       this.listMercaderia = filterListMercaderia;
+
+      try {
+        await inventarioManager.suminventario(data.idinventario);
+      } catch (e) {
+        console.error(e);
+        return { error: { message: "Something Wrong" } };
+      }
 
       return { data: { message: "Eliminado Correctamente" } };
     } catch (error) {
@@ -384,7 +341,7 @@ export default class MercaderiaManager {
     if (this.listMercaderia.length != 0) {
       try {
         const filterListMercaderiaByIdInventario = this.listMercaderia.filter(
-          (elem) => elem.id == idinventario
+          (elem) => elem.idinventario == idinventario
         );
 
         const listIdMercaderia = [];
@@ -394,6 +351,20 @@ export default class MercaderiaManager {
         }
 
         return listIdMercaderia;
+      } catch (error) {
+        return [];
+      }
+    } else return [];
+  }
+
+  getMercaderiaIdInventario(idinventario) {
+    if (this.listMercaderia.length != 0) {
+      try {
+        const filterListMercaderiaByIdInventario = this.listMercaderia.filter(
+          (elem) => elem.idinventario == idinventario
+        );
+
+        return filterListMercaderiaByIdInventario;
       } catch (error) {
         return [];
       }

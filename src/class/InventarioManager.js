@@ -42,7 +42,7 @@ export default class InventarioManager {
   async getInventario() {
     if (this.listInventario.length != 0) return { data: this.listInventario };
 
-    return await this.refreshListInventario()
+    return await this.refreshListInventario();
   }
 
   getOneInventario(idInventario) {
@@ -52,6 +52,17 @@ export default class InventarioManager {
       );
       return { data: findInventarioById };
     } else return { error: { message: "Lista Inventario Vacio" } };
+  }
+
+  existsIdInventario(idInventario) {
+    if (this.listInventario.length != 0) {
+
+      const findIdInventario = this.listInventario.find(elem => elem.id == idInventario);
+
+      if (findIdInventario) return true;
+      else return false;
+
+    }else return null;
   }
 
   getLengthList() {
@@ -252,28 +263,28 @@ export default class InventarioManager {
       return { error: { message: "Algo paso al obtener el cod.producto" } };
 
     try {
-      const { data } = await mercaderiaManager.deleteMercaderiaWhereIdinventario(
-        inventarioInteger
-      );
-      
+      const { data } =
+        await mercaderiaManager.deleteMercaderiaWhereIdinventario(
+          inventarioInteger
+        );
+
       if (data.done) {
         const [result] = await con.query(
           "DELETE FROM inventario WHERE (`id` = ?);",
           [inventarioInteger]
         );
-  
+
         if (result.affectedRows <= 0)
           return { error: { message: "No se encontro el inventario" } };
-  
+
         //Delete from listInventario
         const filterListInventario = this.listInventario.filter(
           (elem) => elem.id != inventarioInteger
         );
         this.listInventario = filterListInventario;
-  
+
         return { data: { message: "Eliminado Correctamente" } };
       } else return { error: { message: "Error al eliminar en mercaderia" } };
-
     } catch (e) {
       console.error(e);
       return { error: { message: "Something wrong" } };
@@ -286,10 +297,90 @@ export default class InventarioManager {
     if (!Number.isInteger(inventarioInteger)) return [];
 
     try {
+      let stockMercaderia = {
+        entrada: 0,
+        salida: 0,
+      };
+
+      const listMercaderia =
+        mercaderiaManager.getMercaderiaIdInventario(idInventario);
+
+      const listMercaderiaEntrada = listMercaderia.filter(
+        (elem) => elem.categoria == "Entrada"
+      );
+
+      const listMercaderiaSalida = listMercaderia.filter(
+        (elem) => elem.categoria == "Salida"
+      );
+
+      //Contamos stock mercaderia Entrada
+      if (listMercaderiaEntrada.length != 0) {
+        for (let i = 0; i < listMercaderiaEntrada.length; i++) {
+          const element = listMercaderiaEntrada[i];
+          stockMercaderia.entrada += element.stock;
+        }
+      }
+
+      //Contamos stock mercaderia Salida
+      if (listMercaderiaSalida.length != 0) {
+        for (let i = 0; i < listMercaderiaSalida.length; i++) {
+          const element = listMercaderiaSalida[i];
+          stockMercaderia.salida += element.stock;
+        }
+      }
+
+      //Update BBDD
+      const [result] = await con.query(
+        ` UPDATE inventario 
+                SET salida  = IFNULL(?,salida),
+                    entrada = IFNULL(?,entrada)
+                WHERE id = ?
+              `,
+        [stockMercaderia.salida, stockMercaderia.entrada, inventarioInteger]
+      );
+
+      if (result.affectedRows === 0)
+        return {
+          error: {
+            message: "NO se agrego el stock de la pieza en el inventario",
+          },
+        };
+
+      //update ListInventario
+      const mapListInventarioUpdate = this.listInventario.map((elem) => {
+        if (elem.id == idInventario)
+          return {
+            ...elem,
+            entrada: stockMercaderia.entrada,
+            salida: stockMercaderia.salida,
+          };
+        else return elem;
+      });
+
+      this.listInventario = mapListInventarioUpdate;
+
+      return { data: { isDone: true } };
+    } catch (error) {
+      console.error(error);
+      return {
+        error: {
+          message: "Something Wrong",
+        },
+      };
+    }
+  }
+
+  // No se porque pero no funciona :(
+  /*async suminventario(idInventario) {
+    const inventarioInteger = parseInt(idInventario);
+
+    if (!Number.isInteger(inventarioInteger)) return [];
+
+    try {
       const listaEnviar = [];
 
       const [rows] = await con.query(
-        `SELECT *, 
+        `SELECT  *,
                       SUM(CASE WHEN idcategoria = 1 THEN stock ELSE 0 END ) as salida,
                       SUM(CASE WHEN idcategoria = 2 THEN stock ELSE 0 END ) as entrada
                       FROM mercaderia 
@@ -321,5 +412,5 @@ export default class InventarioManager {
       console.error(error);
       return [];
     }
-  }
+  }*/
 }
