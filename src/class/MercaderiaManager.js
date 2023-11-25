@@ -334,7 +334,7 @@ export default class MercaderiaManager {
         }
       }
       return { data: { message: "Eliminado Correctamente", done: true } };
-    } else return { error: { message: "Ocurrio un error al eliminar" } };
+    } return { data: { done: true } };
   }
 
   getMercaderiaWhereIdInventario(idinventario) {
