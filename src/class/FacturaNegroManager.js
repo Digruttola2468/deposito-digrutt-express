@@ -70,12 +70,6 @@ export default class FacturaNegroManager {
     } else return { error: { message: "No se encontro la nota envio" } };
   }
 
-  formatDate(fechaDate) {
-    return `${fechaDate.getFullYear()}-${fechaDate.getMonth()}-${
-      fechaDate.getDay() + 1
-    }`;
-  }
-
   async createFacturaNegro(object) {
     const { fecha, nro_envio, products, idCliente, valorDeclarado } = object;
 
@@ -132,7 +126,7 @@ export default class FacturaNegroManager {
     try {
       const [rows] = await con.query(
         "INSERT INTO facturaNegro (`nro_envio`,`idCliente`,`valorDeclarado`,`fecha`) VALUES (?,?,?,?);",
-        [nroEnvioInt, clienteInteger, valorTotal, this.formatDate(fechaDate)]
+        [nroEnvioInt, clienteInteger, valorTotal, fecha]
       );
       idFacturaNegro = rows.insertId;
 
@@ -145,7 +139,7 @@ export default class FacturaNegroManager {
               const element = products[i];
 
               const enviar = {
-                fecha: this.formatDate(fechaDate),
+                fecha: fecha,
                 stock: element.stock,
                 idinventario: element.idProduct,
                 idcategoria: 1,
@@ -166,7 +160,7 @@ export default class FacturaNegroManager {
               nro_envio: parseInt(nro_envio),
               idCliente: idCliente,
               valorDeclarado: valorTotal,
-              fecha: fechaDate,
+              fecha: fecha,
             });
 
             return {

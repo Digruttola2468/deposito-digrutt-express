@@ -57,12 +57,6 @@ export default class RemitosManager {
     else false;
   }
 
-  formatDate(fechaDate) {
-    return `${fechaDate.getFullYear()}-${fechaDate.getMonth()}-${
-      fechaDate.getDay() + 1
-    }`;
-  }
-
   async newRemito(object) {
     const { fecha, numRemito, idCliente, nroOrden, valorDeclarado, products } =
       object;
@@ -110,14 +104,12 @@ export default class RemitosManager {
     if (Number.isNaN(fechaDate.getDate()))
       return { error: { message: "Error en el formato de la Fecha" } };
 
-    const enviarFecha = this.formatDate(fechaDate);
-
     let idRemito = null;
     try {
       const [rows] = await con.query(
         "INSERT INTO remitos (`fecha`,`num_remito`,`idCliente`,`num_orden`,`total`) VALUES (?,?,?,?,?);",
         [
-          enviarFecha,
+          fecha,
           numRemito,
           idCliente,
           nroOrden,
@@ -133,7 +125,7 @@ export default class RemitosManager {
             const element = products[i];
 
             const enviar = {
-              fecha: enviarFecha,
+              fecha: fecha,
               stock: element.stock,
               idinventario: element.idProduct,
               idcategoria: 1,
@@ -149,7 +141,7 @@ export default class RemitosManager {
 
           this.listRemitos.push({
             id: idRemito,
-            fecha: fechaDate,
+            fecha: fecha,
             idCliente: idCliente,
             num_remito: numRemito,
             num_orden: nroOrden,
