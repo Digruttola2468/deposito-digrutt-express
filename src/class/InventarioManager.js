@@ -367,9 +367,15 @@ export default class InventarioManager {
 
       this.listInventario = mapListInventarioUpdate;
 
-      return { data: { isDone: true } };
-    } catch (error) {
-      console.error(error);
+      return {
+        data: {
+          isDone: true,
+          entrada: stockMercaderia.entrada,
+          salida: stockMercaderia.salida,
+        },
+      };
+    } catch (e) {
+      console.error(e);
       return {
         error: {
           message: "Something Wrong",

@@ -41,10 +41,10 @@ export const getSumInventario = async (req, res) => {
 
   const result = await inventarioManager.suminventario(id);
 
-  if (result.length == 0)
+  if (result.error != null)
     return res.status(404).json({ message: "Ocurrio un error" });
 
-  return res.json(result);
+  return res.json(result.data);
 };
 
 export const createInventario = async (req, res) => {
