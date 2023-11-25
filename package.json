@@ -5,10 +5,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "nodemon src/index.js"
   },
   "author": "Ivan Di Gruttola",
   "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.2",
     "bcrypt": "^5.1.1",

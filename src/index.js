@@ -45,6 +45,7 @@ const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
 app.use(cors());
+app.use(express.urlencoded({extended: true}));
 
 //Habilitamos la lectura en JSON
 app.use(express.json());
