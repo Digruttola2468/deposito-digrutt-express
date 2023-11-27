@@ -163,6 +163,7 @@ export default class MercaderiaManager {
 
       try {
         await inventarioManager.suminventario(inventarioInteger);
+        console.log("SUMANDO AL INVENTARIO");
       } catch (e) {
         console.log(e);
         return {
@@ -183,6 +184,57 @@ export default class MercaderiaManager {
         },
       };
     }
+  }
+
+  async postMercaderiaList(object) {
+    const { fecha, data } = object;
+
+    if (!Array.isArray(data))
+      return { error: { message: "Algo paso al agregar mercaderia" } };
+
+    if (data.length == 0) return { error: { message: "Lista vacia" } };
+
+    //Validar Campos
+    if (fecha == null || fecha == "")
+      return { error: { message: "Campo Fecha Vacio" } };
+
+    //Validar los campos de la lista sean correctas
+    for (let i = 0; i < data.length; i++) {
+      const element = data[i];
+      const stockInteger = parseInt(element.stock);
+      const idInventarioInteger = parseInt(element.idinventario);
+
+      //Validamos que sean de tipo integer
+      if (!Number.isInteger(stockInteger))
+        return { error: { message: "Campo Stock No es un numero" } };
+
+      if (!Number.isInteger(idInventarioInteger))
+        return { error: { message: "Algo paso al agregar mercaderia" } };
+
+      console.log(idInventarioInteger);
+
+      //Validar que el idinventario exista
+      const existsIdInventario =
+        inventarioManager.existsIdInventario(idInventarioInteger);
+      if (existsIdInventario != null) {
+        if (!existsIdInventario)
+          return { error: { message: "No existe ese cod.producto" } };
+      } else return { error: { message: "Algo paso con la idInventario" } };
+    }
+
+    //Agregamos a la mercaderia
+    for (let i = 0; i < data.length; i++) {
+      const element = data[i];
+
+      await this.createMercaderia({
+        fecha: fecha,
+        stock: element.stock,
+        idinventario: element.idinventario,
+        idcategoria: 2,
+      });
+    }
+
+    return { data: { isDone: true } };
   }
 
   async updateMercaderia(idMercaderia, object) {
@@ -222,7 +274,7 @@ export default class MercaderiaManager {
         if (categoriaInteger == 2) enviar.categoria = "Entrada";
         else if (categoriaInteger == 1) enviar.categoria = "Salida";
         else return { error: { message: "Algo paso con la categoria" } };
-        
+
         enviar.idcategoria = categoriaInteger;
       }
 
@@ -334,7 +386,8 @@ export default class MercaderiaManager {
         }
       }
       return { data: { message: "Eliminado Correctamente", done: true } };
-    } return { data: { done: true } };
+    }
+    return { data: { done: true } };
   }
 
   getMercaderiaWhereIdInventario(idinventario) {

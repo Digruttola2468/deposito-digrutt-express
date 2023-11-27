@@ -32,7 +32,6 @@ export const getOneInventario = (req, res) => {
 
   if (error != null) return res.status(404).json(error);
 
-  console.log(data);
   return res.json(data);
 };
 

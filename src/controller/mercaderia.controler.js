@@ -25,6 +25,15 @@ export const createMercaderia = async (req, res) => {
   return res.json(data);
 };
 
+export const createListMercaderia = async (req,res) => {
+  const object = req.body;
+  const { data,error } = await mercaderiaManager.postMercaderiaList(object);
+
+  if (error != null) return res.status(404).json(error);
+
+  return res.json(data);
+}
+
 export const updateMercaderia = async (req, res) => {
   const object = req.body;
   const idMercaderia = req.params.id;
