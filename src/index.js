@@ -3,9 +3,6 @@ import cors from 'cors';
 
 import { PORT } from "./config.js";
 
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-
 //ROUTES PRINCIPAL
 import localidad from './routes/localidad.routes.js'
 import indexRoute from "./routes/index.routes.js";
@@ -18,7 +15,6 @@ import facturaNegro from './routes/facturaNegro.routes.js';
 
 //ROUTES PRODUCCION
 import clientes from './routes/clientes.routes.js';
-import productos from './routes/productos.routes.js';
 
 //ROUTES GRAFICA
 import grafica from './routes/grafica.routes.js';
@@ -63,7 +59,6 @@ app.use(inventario);
 app.use(excel);
 
 app.use(clientes);
-app.use(productos);
 
 app.use(grafica);
 
@@ -78,12 +73,6 @@ app.use(facturaNegro);
 app.get("/", (req, res) => {
   res.send("Page Principal");
 });
-
-const __filename = fileURLToPath(import.meta.url);
-const dir = dirname(__filename);
-app.get('/photos/:name', (req,res) => {
-  res.sendFile(dir + `/assets/${req.params.name}.png`);
-})
 
 app.use((req, res) => {
   res.send("No se encuntra la pagina");
