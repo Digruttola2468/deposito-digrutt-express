@@ -5,11 +5,7 @@ export default class ClientesManager {
     this.listClientes = [];
   }
 
-  async emptyListClientes() {
-    if (this.listClientes.length == 0) await this.getAllClientes();
-  }
-
-  async refreshListClientes () {
+  async getClientes() {
     try {
       const [rows] = await con.query("SELECT * FROM clientes;");
       this.listClientes = rows;
@@ -20,21 +16,8 @@ export default class ClientesManager {
     }
   }
 
-  async getAllClientes() {
-    if (this.listClientes.length == 0) {
-      try {
-        const [rows] = await con.query("SELECT * FROM clientes;");
-        this.listClientes = rows;
-        return { data: rows };
-      } catch (e) {
-        console.error(e);
-        return { error: { message: "Something wrong" } };
-      }
-    } else return { data: this.listClientes };
-  }
-
-  getListCliente() {
-    return this.listClientes;
+  getLenghtClientes() {
+    return this.listClientes.length;
   }
 
   getOneCliente(idCliente) {
@@ -44,11 +27,6 @@ export default class ClientesManager {
       );
       return { data: findClienteById };
     } else return { error: { message: "Lista Clientes Vacia" } };
-  }
-
-  getLengthList() {
-    if (this.listClientes.length != 0) return this.listClientes.length;
-    else return -1;
   }
 
   async createCliente(object) {

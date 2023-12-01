@@ -15,37 +15,11 @@ export default class FacturaNegroManager {
     } else return -1;
   }
 
-  async getAllListFacturaNegro() {
-    if (this.listFacturaNegro.length == 0) {
-      try {
-        const [rows] = await con.query(
-          "SELECT * FROM facturaNegro ORDER BY fecha DESC;"
-        );
-        this.listFacturaNegro = rows;
-        return { data: rows };
-      } catch (e) {
-        console.error(e);
-        return { error: { message: "Something wrong" } };
-      }
-    } else {
-      this.listFacturaNegro.sort((a, b) => {
-        const ADate = new Date(a.fecha);
-        const BDate = new Date(b.fecha);
-
-        if (ADate < BDate) return 1;
-        if (ADate > BDate) return -1;
-        return 0;
-      });
-
-      return { data: this.listFacturaNegro };
-    }
-  }
-
-  async getAllListFacturaNegroBBDD() {
+  async getFacturaNegro(page) {
     try {
       const [rows] = await con.query(
-        "SELECT * FROM facturaNegro ORDER BY fecha DESC;"
-      );
+        "SELECT * FROM facturaNegro ORDER BY fecha DESC LIMIT 10 OFFSET ?;"
+      , [page]);
       this.listFacturaNegro = rows;
       return { data: rows };
     } catch (e) {
@@ -117,7 +91,9 @@ export default class FacturaNegroManager {
     if (valorDeclarado != null) {
       const valorFloat = parseFloat(valorDeclarado);
       if (!Number.isInteger(valorFloat))
-        return { error: { message: "El campo Valor Declarado no es numerico" } };
+        return {
+          error: { message: "El campo Valor Declarado no es numerico" },
+        };
 
       valorTotal = valorFloat;
     }

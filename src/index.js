@@ -11,17 +11,13 @@ import localidad from './routes/localidad.routes.js'
 import indexRoute from "./routes/index.routes.js";
 import mercaderiaRoute from "./routes/mercaderia.routes.js";
 import coloresRoute from './routes/colores.routes.js';
-import depositoRoute from './routes/deposito.routes.js';
 import tipoProductoRoute from './routes/tipoProducto.routes.js';
 import inventario from './routes/inventario.routes.js';
 import excel from './routes/excel.routes.js';
-import unidadMedidaRoute from './routes/unidadMedida.routes.js';
 import facturaNegro from './routes/facturaNegro.routes.js';
 
 //ROUTES PRODUCCION
 import clientes from './routes/clientes.routes.js';
-import materiaPrima from './routes/materiaPrima.routes.js';
-import codMaquinaParada from './routes/motivoMaquinaParada.routes.js';
 import productos from './routes/productos.routes.js';
 
 //ROUTES GRAFICA
@@ -62,15 +58,11 @@ export const authManager = new AuthManager();
 app.use(indexRoute);
 app.use(mercaderiaRoute);
 app.use(coloresRoute);
-app.use(depositoRoute);
 app.use(tipoProductoRoute);
 app.use(inventario);
 app.use(excel);
-app.use(unidadMedidaRoute);
 
 app.use(clientes);
-app.use(materiaPrima);
-app.use(codMaquinaParada);
 app.use(productos);
 
 app.use(grafica);

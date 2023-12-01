@@ -7,23 +7,10 @@ export default class RemitosManager {
     this.listRemitos = [];
   }
 
-  async getRemitos() {
-    if (this.listRemitos.length != 0) {
-      this.listRemitos.sort((a, b) => {
-        const ADate = new Date(a.fecha);
-        const BDate = new Date(b.fecha);
-
-        if (ADate < BDate) return 1;
-        if (ADate > BDate) return -1;
-        return 0;
-      });
-
-      return { data: this.listRemitos };
-    }
-
+  async getRemitos(page) {
     try {
       const [rows] = await con.query(
-        `SELECT * FROM remitos ORDER BY fecha DESC`
+        `SELECT * FROM remitos ORDER BY fecha DESC LIMIT 10 OFFSET ${page}`
       );
       this.listRemitos = rows;
       return { data: rows };
