@@ -1,4 +1,4 @@
-import { con } from "../db.js";
+import { con } from "../config/db.js";
 
 export default class ClientesManager {
   constructor() {

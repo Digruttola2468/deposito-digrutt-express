@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config.js";
 
-import { db_supabase } from "../supabase/supabase.js";
+import { db_supabase } from "../config/supabase.js";
 
 export default class AuthManager {
   constructor() {

@@ -1,4 +1,4 @@
-import { con } from "../db.js";
+import { con } from "../config/db.js";
 
 import { mercaderiaManager } from "../index.js";
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { con } from "../db.js";
+import { con } from "../config/db.js";
 import ExcelJs from "exceljs";
 import userExtractor from "../middleware/userExtractor.js";
 import {inventarioManager} from "../index.js";
