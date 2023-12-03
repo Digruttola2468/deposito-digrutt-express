@@ -6,15 +6,15 @@ export default class MercaderiaManager {
     this.listMercaderia = [];
   }
 
-  async refreshGetMercaderia() {
+  async getMercaderia(page) {
     try {
       const [rows] = await con.query(
         `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario,articulo,idremito,idFacturaNegro
               FROM mercaderia 
                   INNER JOIN inventario on mercaderia.idinventario = inventario.id
                   INNER JOIN categoria on mercaderia.idcategoria = categoria.id
-              ORDER BY mercaderia.fecha DESC;`
-      );
+              ORDER BY mercaderia.fecha DESC LIMIT 10 OFFSET ?;`
+      , [page]);
 
       this.listMercaderia = rows;
 
@@ -22,23 +22,6 @@ export default class MercaderiaManager {
     } catch (error) {
       return { error: { message: "Something wrong" } };
     }
-  }
-
-  async getMercaderia() {
-    if (this.listMercaderia.length != 0) {
-      this.listMercaderia.sort((a, b) => {
-        const ADate = new Date(a.fecha);
-        const BDate = new Date(b.fecha);
-
-        if (ADate < BDate) return 1;
-        if (ADate > BDate) return -1;
-        return 0;
-      });
-
-      return { data: this.listMercaderia };
-    }
-
-    return await this.refreshGetMercaderia();
   }
 
   getOneMercaderia(idMercaderia) {

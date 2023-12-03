@@ -7,7 +7,7 @@ export default class InventarioManager {
     this.listInventario = [];
   }
 
-  async refreshListInventario() {
+  async getInventario() {
     try {
       const [rows] = await con.query("SELECT * FROM inventario;");
       this.listInventario = rows;
@@ -16,10 +16,6 @@ export default class InventarioManager {
       console.error(e);
       return { error: { message: "Something wrong" } };
     }
-  }
-
-  getListInventario() {
-    return this.listInventario;
   }
 
   getListInventarioNombre() {
@@ -37,12 +33,6 @@ export default class InventarioManager {
       return { data: listEnviar };
     }
     return { error: { message: "Lista Inventario Vacio" } };
-  }
-
-  async getInventario() {
-    if (this.listInventario.length != 0) return { data: this.listInventario };
-
-    return await this.refreshListInventario();
   }
 
   getOneInventario(idInventario) {

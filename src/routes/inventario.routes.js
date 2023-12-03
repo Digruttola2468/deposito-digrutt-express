@@ -1,12 +1,9 @@
 import { Router } from "express";
 import { inventarioManager } from "../index.js";
 
-
 import userExtractor from "../middleware/userExtractor.js";
 
 const router = Router();
-
-
 
 router.get("/inventario", userExtractor, async (req, res) => {
   const { data, error } = await inventarioManager.getInventario();
@@ -16,7 +13,7 @@ router.get("/inventario", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
-router.get("/inventario/nombres", userExtractor, async (req, res) => {
+router.get("/inventario/nombres", userExtractor, (req, res) => {
   const { data, error } = inventarioManager.getListInventarioNombre();
 
   if (error != null) return res.status(404).json(error);
