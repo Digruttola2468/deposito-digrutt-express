@@ -6,7 +6,8 @@ import userExtractor from "../middleware/userExtractor.js";
 const router = Router();
 
 router.get("/inventario", userExtractor, async (req, res) => {
-  const { data, error } = await inventarioManager.getInventario();
+  const page = parseInt(req.query?.page ?? 0) * 10;
+  const { data, error } = await inventarioManager.getInventario(page);
 
   if (error != null) return res.status(404).json(error);
 
