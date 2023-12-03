@@ -13,7 +13,7 @@ export default class MercaderiaManager {
               FROM mercaderia 
                   INNER JOIN inventario on mercaderia.idinventario = inventario.id
                   INNER JOIN categoria on mercaderia.idcategoria = categoria.id
-              ORDER BY mercaderia.fecha DESC LIMIT 10 OFFSET ?;`
+              ORDER BY mercaderia.fecha DESC;`
       , [page]);
 
       this.listMercaderia = rows;

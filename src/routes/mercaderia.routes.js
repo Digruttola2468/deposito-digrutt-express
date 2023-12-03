@@ -6,8 +6,7 @@ import userExtractor from "../middleware/userExtractor.js";
 const router = Router();
 
 router.get("/mercaderia", userExtractor, async (req, res) => {
-  const page = parseInt(req.query?.page ?? 0) * 10;
-  const { data, error } = await mercaderiaManager.getMercaderia(page);
+  const { data, error } = await mercaderiaManager.getMercaderia();
 
   if (error != null) return res.status(404).json(error);
 

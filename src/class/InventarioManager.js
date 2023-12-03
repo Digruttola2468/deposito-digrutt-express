@@ -7,9 +7,9 @@ export default class InventarioManager {
     this.listInventario = [];
   }
 
-  async getInventario(page) {
+  async getInventario() {
     try {
-      const [rows] = await con.query("SELECT * FROM inventario LIMIT 10 OFFSET ?;", [page]);
+      const [rows] = await con.query("SELECT * FROM inventario;");
       this.listInventario = rows;
       return { data: rows };
     } catch (e) {
