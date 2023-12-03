@@ -28,6 +28,7 @@ export default class InventarioManager {
           nombre: element.nombre,
           descripcion: element.descripcion,
           idCliente: element.idCliente,
+          urlImage: element.url_image
         });
       }
       return { data: listEnviar };
@@ -131,6 +132,7 @@ export default class InventarioManager {
         articulo,
         entrada: 0,
         salida: 0,
+        url_image: null,
       };
 
       //Agregar a la lista
