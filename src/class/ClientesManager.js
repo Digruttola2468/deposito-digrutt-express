@@ -7,7 +7,9 @@ export default class ClientesManager {
 
   async getClientes() {
     try {
-      const [rows] = await con.query("SELECT * FROM clientes;");
+      const [rows] = await con.query(
+        "SELECT *,localidad.ciudad,clientes.id FROM clientes INNER JOIN localidad ON clientes.localidad = localidad.id;"
+      );
       this.listClientes = rows;
       return { data: rows };
     } catch (e) {

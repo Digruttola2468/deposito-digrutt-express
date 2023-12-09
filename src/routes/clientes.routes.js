@@ -8,9 +8,10 @@ const router = Router();
 
 router.get("/clientes", async (req, res) => {
 
-  const page = parseInt(req.query?.page ?? -1) * 10;
+  /*const page = parseInt(req.query?.page ?? -1) * 10;
 
   if (page != -10) {
+    console.log("ACA");
     try {
       const [rows] = await con.query("SELECT * FROM clientes LIMIT 10 OFFSET ?;", [page]);
       
@@ -19,7 +20,7 @@ router.get("/clientes", async (req, res) => {
       console.error(e);
       return res.status(500).json({ message: "Something wrong" });
     }
-  }
+  }*/
   
   const { data, error } = await clientesManager.getClientes();
 
