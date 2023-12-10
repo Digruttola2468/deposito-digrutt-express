@@ -65,7 +65,7 @@ export default class ClientesManager {
 
         const [rows] = await con.query(
           "INSERT INTO clientes (id,codigo,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?,?) ;",
-          [id,codigo, cliente, domicilio, idLocalidad, mail, cuit]
+          [id,codigo.toUpperCase(), cliente, domicilio, idLocalidad, mail, cuit]
         );
 
         //add object at listClientes
