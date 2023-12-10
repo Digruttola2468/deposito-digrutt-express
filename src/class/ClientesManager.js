@@ -8,7 +8,7 @@ export default class ClientesManager {
   async getClientes() {
     try {
       const [rows] = await con.query(
-        "SELECT *,localidad.ciudad,clientes.id FROM clientes INNER JOIN localidad ON clientes.localidad = localidad.id;"
+        "SELECT *,clientes.id FROM clientes LEFT JOIN localidad ON clientes.localidad = localidad.id;"
       );
       this.listClientes = rows;
       return { data: rows };
@@ -32,10 +32,9 @@ export default class ClientesManager {
   }
 
   async createCliente(object) {
-    await this.emptyListClientes();
-    let lenghtCliente = this.getLengthList();
+    let lenghtCliente = this.getLenghtClientes();
 
-    if (lenghtCliente != -1) {
+    if (lenghtCliente != 0) {
       const id = lenghtCliente + 1;
       try {
         const { codigo, cliente, domicilio, idLocalidad, mail, cuit } = object;
@@ -66,7 +65,7 @@ export default class ClientesManager {
 
         const [rows] = await con.query(
           "INSERT INTO clientes (id,codigo,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?,?) ;",
-          [id, codigo, cliente, domicilio, idLocalidad, mail, cuit]
+          [id,codigo, cliente, domicilio, idLocalidad, mail, cuit]
         );
 
         //add object at listClientes
@@ -95,11 +94,10 @@ export default class ClientesManager {
         console.error(e);
         return { error: { message: "Something wrong" } };
       }
-    }
+    } else return { error: { message: "Something wrong" } };
   }
 
   async updateCliente(idClientes, object) {
-    await this.emptyListClientes();
     try {
       const { cliente, codigo, domicilio, localidad, mail, cuit } = object;
 
@@ -158,7 +156,6 @@ export default class ClientesManager {
   }
 
   async deleteCliente(idCliente) {
-    await this.emptyListClientes();
     try {
       const [result] = await con.query(
         "DELETE FROM clientes WHERE (`id` = ?);",
