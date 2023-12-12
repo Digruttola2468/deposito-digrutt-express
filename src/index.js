@@ -41,7 +41,7 @@ const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
 app.use(cors());
-app.use(express.urlencoded({ extended: true }));
+//app.use(express.urlencoded({ extended: true }));
 
 // Configurar el motor de plantillas
 app.engine("handlebars", handlebars.engine());

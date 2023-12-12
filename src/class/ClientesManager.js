@@ -106,7 +106,7 @@ export default class ClientesManager {
         const repeatSameCodigo = this.listClientes.find(
           (elem) => elem.codigo.toLowerCase() == codigo.toLowerCase()
         );
-        if (repeatSameCodigo != null)
+        if (repeatSameCodigo)
           return { error: { message: "Ya existe ese Codigo" } };
 
         if (codigo.length != 3)
@@ -117,7 +117,7 @@ export default class ClientesManager {
           (elem) => elem.cliente.toLowerCase() == cliente.toLowerCase()
         );
 
-        if (repeatSameCliente != null)
+        if (repeatSameCliente)
           return { error: { message: "Ya existe ese Cliente" } };
       }
 
