@@ -65,7 +65,15 @@ export default class ClientesManager {
 
         const [rows] = await con.query(
           "INSERT INTO clientes (id,codigo,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?,?) ;",
-          [id,codigo.toUpperCase(), cliente, domicilio, idLocalidad, mail, cuit]
+          [
+            id,
+            codigo.toUpperCase(),
+            cliente,
+            domicilio,
+            idLocalidad,
+            mail,
+            cuit,
+          ]
         );
 
         //add object at listClientes
@@ -99,7 +107,7 @@ export default class ClientesManager {
 
   async updateCliente(idClientes, object) {
     try {
-      const { cliente, codigo, domicilio, localidad, mail, cuit } = object;
+      let { cliente, codigo, domicilio, localidad, mail, cuit } = object;
 
       //Validar si el codigo o el cliente son los mismos
       if (codigo != null || codigo == "") {
@@ -120,6 +128,12 @@ export default class ClientesManager {
         if (repeatSameCliente)
           return { error: { message: "Ya existe ese Cliente" } };
       }
+
+      //Establecer a los string "" como nulos
+      if (domicilio == "") domicilio = null;
+      if (localidad == "") localidad = null;
+      if (mail == "") mail = null;
+      if (cuit == "") cuit = null;
 
       const [result] = await con.query(
         `UPDATE clientes SET
