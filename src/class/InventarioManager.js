@@ -28,7 +28,7 @@ export default class InventarioManager {
           nombre: element.nombre,
           descripcion: element.descripcion,
           idCliente: element.idCliente,
-          urlImage: element.url_image
+          urlImage: element.url_image,
         });
       }
       return { data: listEnviar };
@@ -162,40 +162,38 @@ export default class InventarioManager {
         articulo,
       } = object;
 
-      if (nombre != null) {
-        if (typeof nombre === "string") {
-          if (nombre != "") {
-            //Validar q no se repita el cod.Producto
-            const findSameCodProducto = this.listInventario.find(
-              (elem) => elem.nombre.toLowerCase() == nombre.toLowerCase()
-            );
+      const findInventarioById = this.listInventario.find(
+        (elem) => elem.id == idInventario
+      );
 
-            //Validamos si existe ese nombre
-            if (findSameCodProducto != null) {
-              //Si existe, validar si es igual que el anterior
-              if (findSameCodProducto.nombre != nombre)
-                return { error: { message: "Ya existe ese Cod.Producto" } };
-            }
-          } else return { error: { message: "Campo nombre Vacio" } };
-        } else return { error: { message: "Error en el tipo de dato nombre" } };
+      if (nombre != null) {
+        if (nombre != "") {
+          //Validar q no se repita el cod.Producto
+          const findSameCodProducto = this.listInventario.find(
+            (elem) => elem.nombre.toLowerCase() == nombre.toLowerCase()
+          );
+          //Validamos si existe ese nombre
+          if (findSameCodProducto) {
+            //Si existe, validar si es igual que el anterior
+            if (findSameCodProducto.nombre != findInventarioById.nombre)
+              return { error: { message: "Ya existe ese Cod.Producto" } };
+          }
+        } else return { error: { message: "Campo nombre Vacio" } };
       }
       if (articulo != null) {
-        if (typeof articulo === "string") {
-          if (articulo != "") {
-            //Validar q no se repita el cod.Producto
-            const findSameArticulo = this.listInventario.find(
-              (elem) => elem.articulo == articulo.toLowerCase()
-            );
+        if (articulo != "") {
+          //Validar q no se repita el cod.Producto
+          const findSameArticulo = this.listInventario.find(
+            (elem) => elem.articulo == articulo
+          );
 
-            //Validamos si existe ese nombre
-            if (findSameArticulo != null) {
-              //Si existe, validar si es igual que el anterior
-              if (findSameArticulo.articulo != articulo)
-                return { error: { message: "Ya existe ese Articulo" } };
-            }
-          } else return { error: { message: "Campo articulo Vacio" } };
-        } else
-          return { error: { message: "Error en el tipo de dato articulo" } };
+          //Validamos si existe ese Articulo
+          if (findSameArticulo) {
+            //Si existe, validar si es igual que el anterior
+            if (findSameArticulo.articulo != findInventarioById.articulo)
+              return { error: { message: "Ya existe ese Articulo" } };
+          }
+        } else return { error: { message: "Campo articulo Vacio" } };
       }
 
       const [result] = await con.query(
