@@ -29,6 +29,8 @@ export default class InventarioManager {
           descripcion: element.descripcion,
           idCliente: element.idCliente,
           urlImage: element.url_image,
+          entrada: element.entrada,
+          salida: element.salida,
         });
       }
       return { data: listEnviar };
