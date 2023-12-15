@@ -5,9 +5,7 @@ import { remitosManager } from '../index.js'
 const router = Router();
 
 router.get("/remito", userExtractor, async (req, res) => {
-  const page = parseInt(req.query?.page ?? 0) * 10;
-
-  const { data, error } = await remitosManager.getRemitos(page);
+  const { data, error } = await remitosManager.getRemitos();
 
   if (error != null) return res.status(404).json(error);
 
@@ -30,5 +28,14 @@ router.post("/remito", userExtractor, async (req, res) => {
 
   return res.json(data);
 });
+
+router.delete('/remito/:id', userExtractor, async (req,res) => {
+  const idRemito = req.params.id;
+  const { data, error } = await remitosManager.deleteRemito(idRemito);
+
+  if (error != null) return res.status(404).json(error);
+
+  return res.json(data);
+})
 
 export default router;

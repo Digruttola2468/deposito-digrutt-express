@@ -16,9 +16,7 @@ router.get("/facturaNegro/newNroEnvio", (req, res) => {
 });
 
 router.get("/facturaNegro", userExtractor, async (req, res) => {
-  const page = parseInt(req.query?.page ?? 0) * 10;
-
-  const { data, error } = await facturaNegroManager.getFacturaNegro(page);
+  const { data, error } = await facturaNegroManager.getFacturaNegro();
 
   if (error != null) return res.status(500).json(error);
 
