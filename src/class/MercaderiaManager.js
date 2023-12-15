@@ -1,5 +1,8 @@
 import { con } from "../config/db.js";
+
 import { inventarioManager } from "../index.js";
+import { remitosManager } from "../index.js";
+import { facturaNegroManager } from "../index.js";
 
 export default class MercaderiaManager {
   constructor() {
@@ -13,8 +16,9 @@ export default class MercaderiaManager {
               FROM mercaderia 
                   INNER JOIN inventario on mercaderia.idinventario = inventario.id
                   INNER JOIN categoria on mercaderia.idcategoria = categoria.id
-              ORDER BY mercaderia.fecha DESC;`
-      , [page]);
+              ORDER BY mercaderia.fecha DESC;`,
+        [page]
+      );
 
       this.listMercaderia = rows;
 
@@ -24,12 +28,27 @@ export default class MercaderiaManager {
     }
   }
 
+  //282 -
   getOneMercaderia(idMercaderia) {
     if (this.listMercaderia.length != 0) {
       const findInventarioById = this.listMercaderia.find(
         (e) => e.id == idMercaderia
       );
-      return { data: findInventarioById };
+      if (findInventarioById) {
+        if (findInventarioById.idremito) {
+          const { data } = remitosManager.getOne(findInventarioById.idremito);
+
+          return { data: { ...findInventarioById, remito: data.num_remito } };
+        }
+        if (findInventarioById.idFacturaNegro) {
+          const { data } = facturaNegroManager.getOne(
+            findInventarioById.idFacturaNegro
+          );
+
+          return { data: { ...findInventarioById, nroEnvio: data.nro_envio } };
+        }
+        return { data: findInventarioById };
+      } else return { error: { message: "No existe" } };
     } else return { error: { message: "Mercaderia Vacia" } };
   }
 
@@ -225,10 +244,8 @@ export default class MercaderiaManager {
       let enviar = {
         fecha: null,
         stock: null,
-        idcategoria: null,
-        categoria: null,
       };
-      const { fecha, stock, idcategoria } = object;
+      const { fecha, stock } = object;
       const id = idMercaderia;
 
       //Si se agrega los siguientes campos , validar q sean correctos
@@ -248,26 +265,13 @@ export default class MercaderiaManager {
 
         enviar.stock = stockInteger;
       }
-      if (idcategoria) {
-        const categoriaInteger = parseInt(idcategoria);
-
-        if (!Number.isInteger(categoriaInteger))
-          return { error: { message: "Algo paso con la categoria" } };
-
-        if (categoriaInteger == 2) enviar.categoria = "Entrada";
-        else if (categoriaInteger == 1) enviar.categoria = "Salida";
-        else return { error: { message: "Algo paso con la categoria" } };
-
-        enviar.idcategoria = categoriaInteger;
-      }
 
       const [result] = await con.query(
         `UPDATE mercaderia
             SET fecha = IFNULL(?,fecha),
-                stock = IFNULL(?,stock),
-                idcategoria = IFNULL(?,idcategoria)
+                stock = IFNULL(?,stock)
             WHERE id = ?;`,
-        [enviar.fecha, enviar.stock, enviar.idcategoria, id]
+        [enviar.fecha, enviar.stock, id]
       );
 
       if (result.affectedRows === 0)
@@ -277,13 +281,10 @@ export default class MercaderiaManager {
 
       if (enviar.fecha == null) enviar.fecha = data.fecha;
 
-      if (enviar.categoria == null) enviar.categoria = data.categoria;
-
       if (enviar.stock == null) enviar.stock = data.stock;
 
       const enviarUpdateList = {
         fecha: enviar.fecha,
-        categoria: enviar.categoria,
         stock: enviar.stock,
       };
 
@@ -295,7 +296,7 @@ export default class MercaderiaManager {
 
       this.listMercaderia = mapListMercaderia;
 
-      if (stock || idcategoria) {
+      if (stock) {
         try {
           await inventarioManager.suminventario(data.idinventario);
         } catch (e) {

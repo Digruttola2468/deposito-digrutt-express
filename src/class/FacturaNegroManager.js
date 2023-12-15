@@ -15,17 +15,25 @@ export default class FacturaNegroManager {
     } else return -1;
   }
 
-  async getFacturaNegro(page) {
+  async getFacturaNegro() {
     try {
       const [rows] = await con.query(
-        "SELECT * FROM facturaNegro ORDER BY fecha DESC LIMIT 10 OFFSET ?;"
-      , [page]);
+        "SELECT * FROM facturaNegro ORDER BY fecha DESC;");
       this.listFacturaNegro = rows;
       return { data: rows };
     } catch (e) {
       console.error(e);
       return { error: { message: "Something wrong" } };
     }
+  }
+
+  getOne(idFacturaNegro) {
+    if (this.listFacturaNegro.length != 0) {
+      const findByIdNotaEnvio = this.listFacturaNegro.find(
+        (elem) => elem.id == idFacturaNegro
+      );
+      return { data: findByIdNotaEnvio };
+    }else return { error: { message: "List Nota Envio Vacio" } };
   }
 
   getOneNotaEnvio(idFacturaNegro) {
