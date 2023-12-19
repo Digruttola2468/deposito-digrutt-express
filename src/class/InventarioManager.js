@@ -53,7 +53,6 @@ export default class InventarioManager {
       const findIdInventario = this.listInventario.find(
         (elem) => elem.id == idInventario
       );
-
       if (findIdInventario) return true;
       else return false;
     } else return null;

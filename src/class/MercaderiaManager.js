@@ -111,12 +111,12 @@ export default class MercaderiaManager {
         return { error: { message: "Algo paso con la categoria" } };
 
       //Validar que el idinventario exista
-      const existsIdInventario =
+      /*const existsIdInventario =
         inventarioManager.existsIdInventario(inventarioInteger);
       if (existsIdInventario != null) {
         if (!existsIdInventario)
           return { error: { message: "No existe ese cod.producto" } };
-      } else return { error: { message: "Algo paso con la idInventario" } };
+      } else return { error: { message: "Algo paso con el idInventario" } };*/
 
       //Convertimos la fecha ingresada a tipo Date
       const fechaDate = new Date(fecha);
@@ -165,7 +165,6 @@ export default class MercaderiaManager {
 
       try {
         await inventarioManager.suminventario(inventarioInteger);
-        console.log("SUMANDO AL INVENTARIO");
       } catch (e) {
         console.log(e);
         return {

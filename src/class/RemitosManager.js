@@ -26,7 +26,7 @@ export default class RemitosManager {
         (elem) => elem.id == idRemito
       );
       return { data: findByIdRemito };
-    }else return { error: { message: "List Remito Vacio" } };
+    } else return { error: { message: "List Remito Vacio" } };
   }
 
   getOneRemito(idRemito) {
@@ -122,7 +122,7 @@ export default class RemitosManager {
               idremito: idRemito,
             };
             const { error } = await mercaderiaManager.createMercaderia(enviar);
-
+            console.log(error);
             if (error != null)
               return {
                 error: { message: "Ocurrio un error en agregar mercaderia" },
@@ -151,9 +151,16 @@ export default class RemitosManager {
     }
   }
 
-  async updateRemito(object) {
+  async updateRemito(idRemito, object) {
     const { fecha, numRemito, nroOrden, products } = object;
-    let valorDeclarado = 0;
+    let valorDeclarado = null;
+
+    //Verificar que exista el idRemito
+    const findListRemitos = this.listRemitos.find(
+      (elem) => elem.id == idRemito
+    );
+    if (!findListRemitos)
+      return { error: { message: "No se encontro el Remito" } };
 
     if (fecha != null && fecha != "") {
       const fechaDate = new Date(fecha);
@@ -171,7 +178,7 @@ export default class RemitosManager {
         return { error: { message: "Error en el formato del remito" } };
     }
 
-    if (products != null) {
+    if (products != null && products != "") {
       if (!Array.isArray(products))
         return { error: { message: "Algo paso con la products" } };
 
@@ -195,10 +202,11 @@ export default class RemitosManager {
 
         if (error != null)
           return {
-            error: { message: "Ocurrio un error en agregar mercaderia" },
+            error: { message: "Ocurrio un error en actualizar mercaderia" },
           };
       }
     }
+
     //Update el valor declarado
     try {
       await con.query(
@@ -210,7 +218,7 @@ export default class RemitosManager {
           num_remito = IFNULL(?,num_remito)
           WHERE id = ?
         `,
-        [valorDeclarado, fecha, nroOrden, numRemito]
+        [valorDeclarado, fecha, nroOrden, numRemito, idRemito]
       );
     } catch (error) {
       return {
@@ -218,7 +226,7 @@ export default class RemitosManager {
       };
     }
 
-    return {data: {message: 'Se actualizo correctamente'}}
+    return { data: { message: "Se actualizo correctamente" } };
   }
 
   async updateRemitoAddNewMercaderia(idRemito, products) {
@@ -226,54 +234,70 @@ export default class RemitosManager {
     const findListRemitos = this.listRemitos.find(
       (elem) => elem.id == idRemito
     );
+
     if (!findListRemitos)
       return { error: { message: "No se encontro el Remito" } };
 
+    const listMercaderiaByIdRemito =
+      mercaderiaManager.getMercaderiaByIdRemito(idRemito);
+
+    
+    
+
     if (products != null) {
       if (!Array.isArray(products))
-        return { error: { message: "Algo paso con la products" } };
-
-      let valorDeclarado = 0;
-      for (let i = 0; i < products.length; i++) {
-        const element = products[i];
-
-        const enviar = {
-          fecha: findListRemitos.fecha,
-          stock: element.stock,
-          idinventario: element.idProduct,
-          idcategoria: 1,
-          idremito: findListRemitos.id,
-        };
-        const { error } = await mercaderiaManager.createMercaderia(enviar);
-
-        valorDeclarado += parseFloat(element.price);
-
-        if (error != null)
-          return {
-            error: { message: "Ocurrio un error en agregar mercaderia" },
-          };
-      }
-
-      valorDeclarado += parseFloat(findListRemitos.valorDeclarado);
-
-      //Update el valor declarado
+        return { error: { message: "Algo paso con los products" } };
       try {
+        let valorDeclarado = 0;
+        for (let i = 0; i < products.length; i++) {
+          const element = products[i];
+
+          for (let i = 0; i < listMercaderiaByIdRemito.length; i++) {
+            const elmMercaderia = listMercaderiaByIdRemito[i];
+            
+            if (element.idInventario == elmMercaderia.idinventario){
+              return {
+                error: { message: "Ya existe ese producto en el Remito" },
+              };
+            }
+          }
+
+          const enviar = {
+            fecha: findListRemitos.fecha,
+            stock: element.stock,
+            idinventario: element.idInventario,
+            idcategoria: 1,
+            idremito: findListRemitos.id,
+          };
+          const { error } = await mercaderiaManager.createMercaderia(enviar);
+
+          valorDeclarado += parseFloat(element.price);
+
+          if (error != null)
+            return {
+              error: { message: "Ocurrio un error en agregar mercaderia" },
+            };
+        }
+
+        valorDeclarado += parseFloat(findListRemitos.total);
+
+        //Update el valor declarado
         await con.query(
           `
           UPDATE remitos 
             SET total = IFNULL(?,total)
             WHERE id = ?
         `,
-          [valorDeclarado]
+          [valorDeclarado, findListRemitos.id]
         );
+        return { data: { message: "Se agrego con exito" } };
       } catch (error) {
         return {
           error: { message: "Ocurrio un error al actualizar" },
         };
       }
     }
-
-    return { data: { message: "Se agrego con exito" } };
+    return { error: { message: "Something wrong" } };
   }
 
   async deleteRemito(idRemito) {
@@ -288,10 +312,11 @@ export default class RemitosManager {
 
     for (let i = 0; i < listMercaderiaByIdRemito.length; i++) {
       const element = listMercaderiaByIdRemito[i];
-
-      //
-      console.log("List Mercaderia By Id Remito: ", element);
-      //await mercaderiaManager.deleteMercaderia(element.id)
+      const { error } = await mercaderiaManager.deleteMercaderia(element.id);
+      if (error)
+        return {
+          error: { message: "Ocurrio un error en eliminar mercaderia" },
+        };
     }
 
     try {
