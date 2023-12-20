@@ -14,7 +14,7 @@ import excel from "./routes/excel.routes.js";
 import facturaNegro from "./routes/facturaNegro.routes.js";
 import cloudinaryRoute from "./routes/cloudinary.routes.js";
 import views from './routes/views.routes.js';
-
+import producionRoute from './routes/producion.routes.js'
 
 //ROUTES PRODUCCION
 import clientes from "./routes/clientes.routes.js";
@@ -35,6 +35,8 @@ import ClientesManager from "./class/ClientesManager.js";
 import FacturaNegroManager from "./class/FacturaNegroManager.js";
 import RemitosManager from "./class/RemitosManager.js";
 import AuthManager from "./class/AuthManager.js";
+import ProducionManager from "./class/ProduccionManager.js";
+
 import handlebars from "express-handlebars";
 
 const app = express();
@@ -58,6 +60,7 @@ export const clientesManager = new ClientesManager();
 export const facturaNegroManager = new FacturaNegroManager();
 export const remitosManager = new RemitosManager();
 export const authManager = new AuthManager();
+export const producionManager = new ProducionManager();
 
 //
 app.use("/api", indexRoute);
@@ -68,6 +71,7 @@ app.use("/api", inventario);
 app.use("/api", excel);
 app.use("/api", cloudinaryRoute);
 
+app.use('/api', producionRoute);
 app.use("/api", clientes);
 
 app.use("/api", grafica);

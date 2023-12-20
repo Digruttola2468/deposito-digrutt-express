@@ -31,7 +31,7 @@ export default class InventarioManager {
           urlImage: element.url_image,
           entrada: element.entrada,
           salida: element.salida,
-          
+          articulo: element.articulo
         });
       }
       return { data: listEnviar };
