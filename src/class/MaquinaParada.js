@@ -5,10 +5,17 @@ export default class MaquinaParada {
     this.listMaquinaParada = [];
   }
 
+  /**
+                    Maquina
+                    N° Maquina
+                    Hrs Parada
+                    Motivo Maquina Parada
+                    Fecha */
   async getMaquinaParada() {
     try {
       const [rows] = await con.query(
-        `SELECT * FROM maquinaParada 
+        `SELECT maquinaParada.id, maquinaParada.hrs, maquinaParada.fecha, maquina.nombre, maquina.numberSerie, motivoMaquinaParada.descripcion
+            FROM maquinaParada 
             LEFT JOIN motivoMaquinaParada ON maquinaParada.idMotivoMaquinaParada = motivoMaquinaParada.id
             LEFT JOIN maquina ON maquinaParada.idMaquina = maquina.id;`
       );
