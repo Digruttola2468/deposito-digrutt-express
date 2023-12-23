@@ -17,6 +17,8 @@ import views from './routes/views.routes.js';
 import producionRoute from './routes/producion.routes.js'
 import maquinaParadaRoute from './routes/MaquinaParada.routes.js';
 
+import motivoMaquinaParadaRoute from './routes/motivoMaquinaParada.routes.js'
+
 //ROUTES PRODUCCION
 import clientes from "./routes/clientes.routes.js";
 
@@ -77,6 +79,7 @@ app.use('/api', maquinaParadaRoute);
 
 app.use('/api', producionRoute);
 app.use("/api", clientes);
+app.use('/api', motivoMaquinaParadaRoute);
 
 app.use("/api", grafica);
 
