@@ -15,6 +15,7 @@ import facturaNegro from "./routes/facturaNegro.routes.js";
 import cloudinaryRoute from "./routes/cloudinary.routes.js";
 import views from './routes/views.routes.js';
 import producionRoute from './routes/producion.routes.js'
+import maquinaParadaRoute from './routes/MaquinaParada.routes.js';
 
 //ROUTES PRODUCCION
 import clientes from "./routes/clientes.routes.js";
@@ -38,6 +39,7 @@ import AuthManager from "./class/AuthManager.js";
 import ProducionManager from "./class/ProduccionManager.js";
 
 import handlebars from "express-handlebars";
+import MaquinaParada from "./class/MaquinaParada.js";
 
 const app = express();
 
@@ -61,6 +63,7 @@ export const facturaNegroManager = new FacturaNegroManager();
 export const remitosManager = new RemitosManager();
 export const authManager = new AuthManager();
 export const producionManager = new ProducionManager();
+export const maquinaParadaManager = new MaquinaParada();
 
 //
 app.use("/api", indexRoute);
@@ -70,6 +73,7 @@ app.use("/api", tipoProductoRoute);
 app.use("/api", inventario);
 app.use("/api", excel);
 app.use("/api", cloudinaryRoute);
+app.use('/api', maquinaParadaRoute);
 
 app.use('/api', producionRoute);
 app.use("/api", clientes);
