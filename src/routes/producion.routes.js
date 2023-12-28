@@ -21,4 +21,13 @@ ruta.post("/producion", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
+ruta.post("/producion/list", userExtractor, async (req, res) => {
+  const object = req.body;
+  const { data, error } = await producionManager.postListProduccion(object);
+
+  if (error != null) return res.status(404).json(error);
+
+  return res.json(data);
+});
+
 export default ruta;
