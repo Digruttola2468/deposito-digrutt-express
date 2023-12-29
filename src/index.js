@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import handlebars from "express-handlebars";
+
 import { PORT } from "./config.js";
 import __dirname from './utils.js';
 
@@ -16,6 +18,7 @@ import cloudinaryRoute from "./routes/cloudinary.routes.js";
 import views from './routes/views.routes.js';
 import producionRoute from './routes/producion.routes.js'
 import maquinaParadaRoute from './routes/MaquinaParada.routes.js';
+import matricesRoute from './routes/matrices.routes.js'
 
 import motivoMaquinaParadaRoute from './routes/motivoMaquinaParada.routes.js'
 
@@ -40,8 +43,9 @@ import RemitosManager from "./class/RemitosManager.js";
 import AuthManager from "./class/AuthManager.js";
 import ProducionManager from "./class/ProduccionManager.js";
 
-import handlebars from "express-handlebars";
+
 import MaquinaParada from "./class/MaquinaParada.js";
+import Matrices from "./class/MatricesMaster.js";
 
 const app = express();
 
@@ -66,6 +70,7 @@ export const remitosManager = new RemitosManager();
 export const authManager = new AuthManager();
 export const producionManager = new ProducionManager();
 export const maquinaParadaManager = new MaquinaParada();
+export const matricesManager = new Matrices();
 
 //
 app.use("/api", indexRoute);
@@ -76,6 +81,7 @@ app.use("/api", inventario);
 app.use("/api", excel);
 app.use("/api", cloudinaryRoute);
 app.use('/api', maquinaParadaRoute);
+app.use('/api', matricesRoute);
 
 app.use('/api', producionRoute);
 app.use("/api", clientes);
