@@ -24,6 +24,12 @@ export default class ProducionManager {
     return this.listProduccion.length;
   }
 
+  getRangeDateListProduccion(dateInit, dateEnd) {
+    return this.listProduccion.filter(
+      (elem) => new Date(elem.fecha) >= new Date(dateInit) && new Date(elem.fecha) <= new Date(dateEnd)
+    );
+  }
+
   async postListProduccion(list) {
     //Verificamos que este todo correcto
     let verify = [{ idInventario: null, numMaquina: null }];
