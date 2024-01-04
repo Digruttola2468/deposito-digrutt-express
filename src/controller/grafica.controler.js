@@ -320,7 +320,7 @@ export const graficaProduccion = (req, res) => {
         else return e
       })
 
-      const prom = piezasSemanales.map((e,index,array) => {
+      const prom = promedioGolpesHoraSemanal.map((e,index,array) => {
         if (dayOfWeek == index) return elem.prom_golpeshora
         else return e
       });
