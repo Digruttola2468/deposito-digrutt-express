@@ -14,15 +14,15 @@ const router = Router();
 
 const getMercaderia = async (idcategoria) => {
   const [rows] = await con.query(
-    `SELECT mercaderia.id,fecha,stock,proveedor,nombre,descripcion,idinventario
+    `SELECT mercaderia.*, inventario.id AS idinventario, inventario.nombre, inventario.descripcion, inventario.articulo
                 FROM mercaderia 
-                INNER JOIN inventario on mercaderia.idinventario = inventario.id 
+                RIGHT JOIN inventario on mercaderia.idinventario = inventario.id 
                 WHERE idcategoria = ${idcategoria};`
   );
   return rows;
 };
 
-router.get("/excel/mercaderia", userExtractor, async (req, res) => {
+router.get("/excel/mercaderia",userExtractor, async (req, res) => {
   try {
     const resultEntrada = await getMercaderia(2);
     const resultSalida = await getMercaderia(1);
@@ -34,6 +34,7 @@ router.get("/excel/mercaderia", userExtractor, async (req, res) => {
 
     worksheetEntrada.columns = [
       { header: "FECHA", key: "fecha", width: 20 },
+      { header: "ARTICULO", key: "articulo", width: 20 },
       { header: "CODIGO PRODUCTO", key: "nombre", width: 15 },
       { header: "DESCRIPCION", key: "descripcion", width: 60 },
       { header: "CANTIDAD", key: "stock", width: 20 },
@@ -41,6 +42,7 @@ router.get("/excel/mercaderia", userExtractor, async (req, res) => {
 
     worksheetSalida.columns = [
       { header: "FECHA", key: "fecha", width: 20 },
+      { header: "ARTICULO", key: "articulo", width: 20 },
       { header: "CODIGO PRODUCTO", key: "nombre", width: 15 },
       { header: "DESCRIPCION", key: "descripcion", width: 60 },
       { header: "CANTIDAD", key: "stock", width: 20 },
@@ -49,44 +51,47 @@ router.get("/excel/mercaderia", userExtractor, async (req, res) => {
     worksheetEntrada.addRows(resultEntrada);
     worksheetSalida.addRows(resultSalida);
 
-    await workbook.xlsx.writeFile("./src/controller/mercaderia.xlsx");
+    await workbook.xlsx.writeFile(dir + "/mercaderia.xlsx");
 
-    res.sendFile(dir + "/mercaderia.xlsx");
+    return res.sendFile(dir + "/mercaderia.xlsx");
   } catch (error) {
     console.error(error);
   }
 });
-router.get("/excel/inventario", userExtractor, async (req, res) => {
+
+router.get("/excel/inventario",userExtractor, async (req, res) => {
   try {
     const listaEnviar = [];
 
     const listInventario = inventarioManager.getListInventario();
 
-    for (let i = 0; i < listInventario.length; i++) {
-      const element = listInventario[i];
-      const stockActual = element.entrada - element.salida;
-
-      listaEnviar.push({ ...element, stockActual });
-    }
+    if (listInventario.length == 0) return res.status(400).json({message: 'Lista Vacia'})
+    
+    listInventario.forEach(elem => {
+      const stockActual = elem.entrada - elem.salida;
+      listaEnviar.push({ ...elem, stockActual });
+    });
 
     const workbook = new ExcelJs.Workbook();
 
     const worksheet = workbook.addWorksheet("Invent de producto");
 
     worksheet.columns = [
-      { header: "CODIGO PRODUCTO", key: "nombre", width: 20 },
+      { header: "ARTICULO", key: "articulo", width: 20 },
+      { header: "CODIGO PRODUCTO", key: "nombre", width: 30 },
       { header: "DESCRIPCION", key: "descripcion", width: 60 },
       { header: "ENTRADA", key: "entrada", width: 10 },
       { header: "SALIDA", key: "salida", width: 10 },
       { header: "STOCK ACTUAL", key: "stockActual", width: 15 },
+      { header: 'Cliente', key: 'cliente', width: 30},
       { header: "Peso x Unidad (gramos)", key: "pesoUnidad", width: 50 },
     ];
 
     worksheet.addRows(listaEnviar);
 
-    await workbook.xlsx.writeFile("./src/controller/inventario.xlsx");
+    await workbook.xlsx.writeFile(dir + "/inventario.xlsx");
 
-    res.sendFile(dir + "/inventario.xlsx");
+    return res.sendFile(dir + "/inventario.xlsx");
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "something goes wrong" });
@@ -94,12 +99,12 @@ router.get("/excel/inventario", userExtractor, async (req, res) => {
 });
 
 router.get("/excel/produccion-semanal",userExtractor, async (req, res) => {
-  //const fechaInit = req.query?.start;
-  //const fechaEnd = req.query?.end;
+  const fechaInit = req.query?.start;
+  const fechaEnd = req.query?.end;
 
   const result = producionManager.getRangeDateListProduccion(
-    "2023-12-20",
-    "2023-12-23"
+    fechaInit,
+    fechaEnd
   );
 
   const numMaquinaSet = new Set();
