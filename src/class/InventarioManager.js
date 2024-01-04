@@ -9,13 +9,18 @@ export default class InventarioManager {
 
   async getInventario() {
     try {
-      const [rows] = await con.query("SELECT * FROM inventario;");
+      //const [rows] = await con.query("SELECT * FROM inventario;");
+      const [rows] = await con.query("SELECT inventario.*, clientes.cliente, clientes.id AS idCliente FROM inventario RIGHT JOIN clientes ON inventario.idCliente = clientes.id;");
       this.listInventario = rows;
       return { data: rows };
     } catch (e) {
       console.error(e);
       return { error: { message: "Something wrong" } };
     }
+  }
+
+  getListInventario() {
+    return this.listInventario;
   }
 
   getListInventarioNombre() {

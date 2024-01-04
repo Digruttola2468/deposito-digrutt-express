@@ -1,4 +1,5 @@
 import { con } from "../config/db.js";
+import { producionManager } from "../index.js";
 
 //
 const getArrayYear = (mercaderiaApi, idinventario) => {
@@ -250,7 +251,7 @@ export const getGraficaRelacionOtrosClientes = async (req, res) => {
 
       let entrada = 0;
       let salida = 0;
-      
+
       for (let j = 0; j < filterByIdCliente.length; j++) {
         const element = filterByIdCliente[j];
 
@@ -264,7 +265,7 @@ export const getGraficaRelacionOtrosClientes = async (req, res) => {
         cliente: element.cliente,
         stockEntrada: entrada,
         stockSalida: salida,
-        stockActual
+        stockActual,
       });
     }
 
@@ -274,3 +275,83 @@ export const getGraficaRelacionOtrosClientes = async (req, res) => {
     return res.status(500).send({ message: "Something wrong" });
   }
 };
+
+export const graficaProduccion = (req, res) => {
+  const init = req.query.init;
+  const end = req.query.end;
+
+  const result = producionManager.getRangeDateListProduccion(init, end);
+
+  const numMaquinaSet = new Set();
+  result.forEach((elem) => {
+    numMaquinaSet.add(elem.num_maquina);
+  });
+
+  const numMaquinaList = [];
+  numMaquinaSet.forEach((value1, value2, set) => {
+    numMaquinaList.push(value2);
+  });
+
+  const enviar = [];
+
+  for (let i = 0; i < numMaquinaList.length; i++) {
+    const numMaquina = numMaquinaList[i];
+
+    let listEnviar = [];
+    const filterByNumMaquina = result.filter(
+      (elem) => elem.num_maquina == numMaquina
+    );
+
+    let golpesSemanales = [0,0,0,0,0,0];
+    let piezasSemanales = [0,0,0,0,0,0];
+    let promedioGolpesHoraSemanal = [0,0,0,0,0,0];
+
+    filterByNumMaquina.forEach((elem) => {
+      const fechaDate = new Date(elem.fecha);
+      const dayOfWeek = fechaDate.getDay(); //Lunes
+
+      const golpe = golpesSemanales.map((e,index,array) => {
+        if (dayOfWeek == index) return elem.golpesReales
+        else return e
+      })
+
+      const pieza = piezasSemanales.map((e,index,array) => {
+        if (dayOfWeek == index) return elem.piezasProducidas
+        else return e
+      })
+
+      const prom = piezasSemanales.map((e,index,array) => {
+        if (dayOfWeek == index) return elem.prom_golpeshora
+        else return e
+      });
+      
+      golpesSemanales = golpe;
+      piezasSemanales = pieza;
+      promedioGolpesHoraSemanal = prom;
+    });
+
+    listEnviar.push(
+      { label: "Promedio Golpes/H", data: promedioGolpesHoraSemanal },
+      { label: "Piezas Producidas", data: piezasSemanales },
+      { label: "Golpes Reales", data: golpesSemanales }
+    );
+
+    enviar.push({
+      maquina: numMaquina,
+      grafica: listEnviar,
+    });
+  }
+  return res.json(enviar);
+};
+
+/**[
+        {
+          numMaquina: 1,
+          grafica: [
+            { label: "Promedio Golpes/H", data: [] },
+            { label: "Piezas Producidas", data: [] },
+            { label: "Golpes Reales", data: [] },
+          ],
+        },
+        {},
+      ] */

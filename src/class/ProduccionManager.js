@@ -30,6 +30,47 @@ export default class ProducionManager {
     );
   }
 
+  getRangeDateListByNumMaquina(dateInit, dateEnd) {
+    const result = this.getRangeDateListProduccion(
+      dateInit,
+      dateEnd
+    );
+  
+    const numMaquinaSet = new Set();
+    result.forEach((elem) => {
+      numMaquinaSet.add(elem.num_maquina);
+    });
+  
+    const numMaquinaList = [];
+    numMaquinaSet.forEach((value1, value2, set) => {
+      numMaquinaList.push(value2);
+    });
+  
+    const enviar = [];
+  
+    for (let i = 0; i < numMaquinaList.length; i++) {
+      const numMaquina = numMaquinaList[i];
+  
+      let listEnviar = [];
+      result.forEach((elem) => {
+        if (elem.num_maquina == numMaquina) {
+          listEnviar.push([
+            new Date(elem.fecha),
+            elem.golpesReales,
+            elem.piezasProducidas,
+            elem.prom_golpeshora,
+          ]);
+        }
+      });
+  
+      enviar.push({
+        maquina: numMaquina,
+        data: listEnviar,
+      });
+    }
+    return enviar
+  }
+
   async postListProduccion(list) {
     //Verificamos que este todo correcto
     let verify = [{ idInventario: null, numMaquina: null }];
