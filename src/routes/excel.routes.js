@@ -93,7 +93,7 @@ router.get("/excel/inventario", userExtractor, async (req, res) => {
   }
 });
 
-router.get("/excel/produccion-semanal", async (req, res) => {
+router.get("/excel/produccion-semanal",userExtractor, async (req, res) => {
   //const fechaInit = req.query?.start;
   //const fechaEnd = req.query?.end;
 
