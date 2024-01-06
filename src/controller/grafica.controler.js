@@ -343,15 +343,3 @@ export const graficaProduccion = (req, res) => {
   }
   return res.json(enviar);
 };
-
-/**[
-        {
-          numMaquina: 1,
-          grafica: [
-            { label: "Promedio Golpes/H", data: [] },
-            { label: "Piezas Producidas", data: [] },
-            { label: "Golpes Reales", data: [] },
-          ],
-        },
-        {},
-      ] */

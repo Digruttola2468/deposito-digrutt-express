@@ -12,6 +12,16 @@ ruta.get("/producion", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
+ruta.get('/producion/:numMaquina', async (req,res) => {
+  const numMaquina = req.params.numMaquina;
+  const init = req.query.init;
+  const end = req.query.end;
+
+  const result = producionManager.getRangeDateByNumMaquina(numMaquina,init,end)
+
+  return res.json(result)
+})
+
 ruta.post("/producion", userExtractor, async (req, res) => {
   const object = req.body;
   const { data, error } = await producionManager.postProducion(object);

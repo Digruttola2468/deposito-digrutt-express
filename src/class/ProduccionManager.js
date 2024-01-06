@@ -26,31 +26,41 @@ export default class ProducionManager {
 
   getRangeDateListProduccion(dateInit, dateEnd) {
     return this.listProduccion.filter(
-      (elem) => new Date(elem.fecha) >= new Date(dateInit) && new Date(elem.fecha) <= new Date(dateEnd)
+      (elem) =>
+        new Date(elem.fecha) >= new Date(dateInit) &&
+        new Date(elem.fecha) <= new Date(dateEnd)
     );
   }
 
-  getRangeDateListByNumMaquina(dateInit, dateEnd) {
-    const result = this.getRangeDateListProduccion(
-      dateInit,
-      dateEnd
+  getRangeDateByNumMaquina(numMaquina, dateInit, dateEnd) {
+    console.log(dateInit,dateEnd,numMaquina);
+    const rangeDateList = this.getRangeDateListProduccion(dateInit, dateEnd);
+
+    const filterByNumMaquina = rangeDateList.filter(
+      (elem) => elem.num_maquina == numMaquina
     );
-  
+
+    return filterByNumMaquina;
+  }
+
+  getRangeDateListByNumMaquina(dateInit, dateEnd) {
+    const result = this.getRangeDateListProduccion(dateInit, dateEnd);
+
     const numMaquinaSet = new Set();
     result.forEach((elem) => {
       numMaquinaSet.add(elem.num_maquina);
     });
-  
+
     const numMaquinaList = [];
     numMaquinaSet.forEach((value1, value2, set) => {
       numMaquinaList.push(value2);
     });
-  
+
     const enviar = [];
-  
+
     for (let i = 0; i < numMaquinaList.length; i++) {
       const numMaquina = numMaquinaList[i];
-  
+
       let listEnviar = [];
       result.forEach((elem) => {
         if (elem.num_maquina == numMaquina) {
@@ -62,13 +72,13 @@ export default class ProducionManager {
           ]);
         }
       });
-  
+
       enviar.push({
         maquina: numMaquina,
         data: listEnviar,
       });
     }
-    return enviar
+    return enviar;
   }
 
   async postListProduccion(list) {
@@ -113,7 +123,7 @@ export default class ProducionManager {
         idInventario: element.idInventario,
       });
     }
-    
+
     //Agregamos a la base de datos
     for (let i = 0; i < list.length; i++) {
       const element = list[i];
@@ -125,7 +135,7 @@ export default class ProducionManager {
         return { error: "something wrong" };
       }
     }
-    
+
     return {
       data: {
         message: "Operacion Exitosa",
