@@ -8,7 +8,10 @@ export default class ProducionManager {
   async getProduccion() {
     try {
       const [rows] = await con.query(
-        "SELECT producion.*,inventario.nombre,inventario.descripcion,inventario.articulo,inventario.url_image  FROM producion LEFT JOIN inventario ON producion.idinventario = inventario.id;"
+        `SELECT producion.*,inventario.nombre,inventario.descripcion,inventario.articulo,inventario.url_image 
+        FROM producion 
+        LEFT JOIN inventario ON producion.idinventario = inventario.id 
+        ORDER BY producion.fecha DESC;`
       );
       this.listProduccion = rows;
       return { data: rows };
