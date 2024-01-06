@@ -5,12 +5,6 @@ export default class MaquinaParada {
     this.listMaquinaParada = [];
   }
 
-  /**
-                    Maquina
-                    N° Maquina
-                    Hrs Parada
-                    Motivo Maquina Parada
-                    Fecha */
   async getMaquinaParada() {
     try {
       const [rows] = await con.query(
@@ -27,7 +21,9 @@ export default class MaquinaParada {
     }
   }
 
-  getOneMaquinaParada() {}
+  getOneMaquinaParada(id) {
+    return this.listMaquinaParada.find(elem => elem.id === id)
+  }
 
   getLength = () => this.listMaquinaParada.length;
 

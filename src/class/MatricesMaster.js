@@ -30,7 +30,17 @@ export default class Matrices {
     }
   }
 
-  getOneMatriz() {}
+  exitsMatriz(idMatriz) {
+    return this.listMatriz.find(elem => {
+      return elem.id == idMatriz
+    }) != null ? true : false
+  }
+
+  getOneMatriz(idMatriz) {
+    return this.listMatriz.find(elem => {
+      return elem.id == idMatriz
+    });
+  }
 
   getLength = () => this.listMatriz.length;
 

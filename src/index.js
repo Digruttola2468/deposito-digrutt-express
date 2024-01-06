@@ -19,6 +19,7 @@ import views from './routes/views.routes.js';
 import producionRoute from './routes/producion.routes.js'
 import maquinaParadaRoute from './routes/MaquinaParada.routes.js';
 import matricesRoute from './routes/matrices.routes.js'
+import historialMatricesErrorRoute from './routes/historialErrorMatriz.routes.js'
 
 import motivoMaquinaParadaRoute from './routes/motivoMaquinaParada.routes.js'
 
@@ -42,7 +43,7 @@ import FacturaNegroManager from "./class/FacturaNegroManager.js";
 import RemitosManager from "./class/RemitosManager.js";
 import AuthManager from "./class/AuthManager.js";
 import ProducionManager from "./class/ProduccionManager.js";
-
+import HistorialMatriz from "./class/HistorialErrorMatriz.js";
 
 import MaquinaParada from "./class/MaquinaParada.js";
 import Matrices from "./class/MatricesMaster.js";
@@ -71,6 +72,7 @@ export const authManager = new AuthManager();
 export const producionManager = new ProducionManager();
 export const maquinaParadaManager = new MaquinaParada();
 export const matricesManager = new Matrices();
+export const historialErrorMatrizManager = new HistorialMatriz();
 
 //
 app.use("/api", indexRoute);
@@ -86,6 +88,7 @@ app.use('/api', matricesRoute);
 app.use('/api', producionRoute);
 app.use("/api", clientes);
 app.use('/api', motivoMaquinaParadaRoute);
+app.use('/api', historialMatricesErrorRoute)
 
 app.use("/api", grafica);
 
