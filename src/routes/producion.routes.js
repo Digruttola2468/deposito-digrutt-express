@@ -12,7 +12,7 @@ ruta.get("/producion", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
-ruta.get('/producion/:numMaquina', async (req,res) => {
+ruta.get('/producion/:numMaquina',userExtractor, async (req,res) => {
   const numMaquina = req.params.numMaquina;
   const init = req.query.init;
   const end = req.query.end;
