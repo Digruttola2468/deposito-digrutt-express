@@ -106,7 +106,7 @@ export default class ProducionManager {
       if (findIdInventario)
         return {
           error: {
-            message: "Se repite el idInventario",
+            message: "Se repite el Cod Producto",
             index: i,
             campo: "idInventario",
           },

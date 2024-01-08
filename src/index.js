@@ -35,6 +35,9 @@ import user from "./routes/auth.routes.js";
 //ROUTES REMITOS
 import remito from "./routes/remitos.routes.js";
 
+//ROUTES PEDIDOS
+import PedidosRoute from "./routes/pedidos.routes.js";
+
 //CLASSES
 import InventarioManager from "./class/InventarioManager.js";
 import MercaderiaManager from "./class/MercaderiaManager.js";
@@ -47,6 +50,7 @@ import HistorialMatriz from "./class/HistorialErrorMatriz.js";
 
 import MaquinaParada from "./class/MaquinaParada.js";
 import Matrices from "./class/MatricesMaster.js";
+import PedidosManager from "./class/PedidosManager.js";
 
 const app = express();
 
@@ -73,6 +77,7 @@ export const producionManager = new ProducionManager();
 export const maquinaParadaManager = new MaquinaParada();
 export const matricesManager = new Matrices();
 export const historialErrorMatrizManager = new HistorialMatriz();
+export const pedidosManager = new PedidosManager();
 
 //
 app.use("/api", indexRoute);
@@ -84,6 +89,7 @@ app.use("/api", excel);
 app.use("/api", cloudinaryRoute);
 app.use('/api', maquinaParadaRoute);
 app.use('/api', matricesRoute);
+app.use('/api', PedidosRoute)
 
 app.use('/api', producionRoute);
 app.use("/api", clientes);

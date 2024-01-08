@@ -31,6 +31,16 @@ export default class ClientesManager {
     } else return { error: { message: "Lista Clientes Vacia" } };
   }
 
+  existsIdCliente(idCliente) {
+    if (this.listClientes.length != 0) {
+      const findByIdCliente = this.listClientes.find(
+        (elem) => elem.id == idCliente
+      );
+      if (findByIdCliente) return true;
+      else return false;
+    } else return null;
+  }
+
   async createCliente(object) {
     let lenghtCliente = this.getLenghtClientes();
 

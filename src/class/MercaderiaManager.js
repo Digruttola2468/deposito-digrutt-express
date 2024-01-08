@@ -9,15 +9,14 @@ export default class MercaderiaManager {
     this.listMercaderia = [];
   }
 
-  async getMercaderia(page) {
+  async getMercaderia() {
     try {
       const [rows] = await con.query(
         `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario,articulo,idremito,idFacturaNegro
               FROM mercaderia 
-                  INNER JOIN inventario on mercaderia.idinventario = inventario.id
-                  INNER JOIN categoria on mercaderia.idcategoria = categoria.id
-              ORDER BY mercaderia.fecha DESC;`,
-        [page]
+                  LEFT JOIN inventario on mercaderia.idinventario = inventario.id
+                  LEFT JOIN categoria on mercaderia.idcategoria = categoria.id
+              ORDER BY mercaderia.fecha DESC;`
       );
 
       this.listMercaderia = rows;
@@ -28,7 +27,7 @@ export default class MercaderiaManager {
     }
   }
 
-  //282 -
+  //
   getOneMercaderia(idMercaderia) {
     if (this.listMercaderia.length != 0) {
       const findInventarioById = this.listMercaderia.find(
