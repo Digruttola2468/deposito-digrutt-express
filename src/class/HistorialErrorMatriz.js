@@ -87,7 +87,19 @@ export default class HistorialMatriz {
           fechaTerminado: null,
         });
         return {
-          data: { message: "Operacion Exitosa", insertId: rows.insertId },
+          data: {
+            message: "Operacion Exitosa",
+            insert: {
+              id: rows.insertId,
+              idMatriz,
+              cod_matriz: getOneMatriz.cod_matriz,
+              descripcion: getOneMatriz.descripcion,
+              descripcion_deterioro,
+              isSolved: 0,
+              fecha: stringDate,
+              fechaTerminado: null,
+            },
+          },
         };
       } else return { error: { message: "No se Agrego" } };
     } catch (error) {
