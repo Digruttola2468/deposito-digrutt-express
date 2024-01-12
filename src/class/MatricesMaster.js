@@ -17,7 +17,7 @@ export default class Matrices {
   async getMatrices() {
     try {
       const [rows] = await con.query(
-        `SELECT matriz.id, matriz.cod_matriz, matriz.descripcion, matriz.cantPiezaGolpe, matriz.numero_matriz, materiaPrima.material, clientes.cliente
+        `SELECT matriz.id, matriz.cod_matriz, matriz.descripcion, matriz.cantPiezaGolpe, matriz.numero_matriz, materiaPrima.material, clientes.cliente, matriz.idcliente
             FROM matriz 
             LEFT JOIN materiaPrima ON matriz.idmaterial = materiaPrima.id
             LEFT JOIN clientes ON matriz.idcliente = clientes.id;`
