@@ -18,7 +18,7 @@ export default class FacturaNegroManager {
   async getFacturaNegro() {
     try {
       const [rows] = await con.query(
-        `SELECT *, idCliente AS idcliente FROM facturaNegro 
+        `SELECT facturaNegro.id, facturaNegro.*, clientes.cliente, clientes.cuit, clientes.domicilio, clientes.mail, idCliente AS idcliente FROM facturaNegro 
         LEFT JOIN clientes on facturaNegro.idCliente = clientes.id
         ORDER BY fecha DESC`);
       this.listFacturaNegro = rows;
