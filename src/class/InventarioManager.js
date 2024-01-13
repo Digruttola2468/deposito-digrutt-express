@@ -32,11 +32,12 @@ export default class InventarioManager {
           id: element.id,
           nombre: element.nombre,
           descripcion: element.descripcion,
-          idCliente: element.idCliente,
+          idcliente: element.idCliente,
           urlImage: element.url_image,
           entrada: element.entrada,
           salida: element.salida,
-          articulo: element.articulo
+          articulo: element.articulo,
+          cliente: element.cliente
         });
       }
       return { data: listEnviar };
