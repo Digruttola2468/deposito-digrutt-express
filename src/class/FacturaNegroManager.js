@@ -18,7 +18,9 @@ export default class FacturaNegroManager {
   async getFacturaNegro() {
     try {
       const [rows] = await con.query(
-        "SELECT * FROM facturaNegro ORDER BY fecha DESC;");
+        `SELECT *, idCliente AS idcliente FROM facturaNegro 
+        LEFT JOIN clientes on facturaNegro.idCliente = clientes.id
+        ORDER BY fecha DESC`);
       this.listFacturaNegro = rows;
       return { data: rows };
     } catch (e) {
