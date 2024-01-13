@@ -10,7 +10,7 @@ export default class RemitosManager {
   async getRemitos() {
     try {
       const [rows] = await con.query(
-        `SELECT remitos.*, clientes.cliente FROM remitos 
+        `SELECT remitos.*,idCliente AS idcliente, clientes.cliente FROM remitos 
           LEFT JOIN clientes on remitos.idCliente = clientes.id
         ORDER BY remitos.fecha DESC`
       );
