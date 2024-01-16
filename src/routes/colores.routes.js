@@ -27,7 +27,7 @@ router.get("/colores/:id", async (req, res) => {
   }
 });
 
-router.post("/colores", userExtractor, async (req, res) => {
+router.post("/colores", userExtractor([]), async (req, res) => {
   try {
     const { color } = req.body;
     const [rows] = await con.query("INSERT INTO colores (color) VALUES (?) ;", [
@@ -43,7 +43,7 @@ router.post("/colores", userExtractor, async (req, res) => {
   }
 });
 
-router.put("/colores/:id", userExtractor, async (req, res) => {
+router.put("/colores/:id", userExtractor([]), async (req, res) => {
   try {
     const { color } = req.body;
     const id = req.params.id;
@@ -63,7 +63,7 @@ router.put("/colores/:id", userExtractor, async (req, res) => {
   }
 });
 
-router.delete("/colores/:id", userExtractor, async (req, res) => {
+router.delete("/colores/:id", userExtractor([]), async (req, res) => {
   try {
     const [result] = await con.query("DELETE FROM colores WHERE (`id` = ?);", [
       req.params.id,

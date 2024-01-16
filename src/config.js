@@ -19,3 +19,6 @@ export const SUPABASE_KEY = process.env.SUPABASE_KEY;
 //Cloudinary
 export const CLOUDINARY_APIKEY = process.env.CLOUDINARY_APIKEY;
 export const CLOUDINARY_APISECRET = process.env.CLOUDINARY_APISECRET;
+
+//Permissos
+export const objPermissos = process.env.PERMISSOS;

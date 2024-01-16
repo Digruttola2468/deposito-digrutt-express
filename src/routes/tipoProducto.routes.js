@@ -27,7 +27,7 @@ router.get("/tiposproductos/:id", async (req, res) => {
   }
 });
 
-router.post("/tiposproductos", userExtractor, async (req, res) => {
+router.post("/tiposproductos", userExtractor([]), async (req, res) => {
   try {
     const { nombre } = req.body;
     const [rows] = await con.query(
@@ -44,7 +44,7 @@ router.post("/tiposproductos", userExtractor, async (req, res) => {
   }
 });
 
-router.put("/tiposproductos/:id", userExtractor, async (req, res) => {
+router.put("/tiposproductos/:id", userExtractor([]), async (req, res) => {
   try {
     const { nombre } = req.body;
     const id = req.params.id;
@@ -65,7 +65,7 @@ router.put("/tiposproductos/:id", userExtractor, async (req, res) => {
   }
 });
 
-router.delete("/tiposproductos/:id", userExtractor, async (req, res) => {
+router.delete("/tiposproductos/:id", userExtractor([]), async (req, res) => {
   try {
     const [result] = await con.query(
       "DELETE FROM tipoproducto WHERE (`id` = ?);",

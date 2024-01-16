@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { clientesManager } from "../index.js";
 import userExtractor from "../middleware/userExtractor.js";
+import allPermissions from "../config/permissos.js";
 
 const router = Router();
 
@@ -22,7 +23,7 @@ router.get("/cliente/:id", async (req, res) => {
   return res.json(data);
 });
 
-router.post("/cliente", userExtractor, async (req, res) => {
+router.post("/cliente", userExtractor([allPermissions.oficina, allPermissions.mercaderia]), async (req, res) => {
   const object = req.body;
   const { data, error } = await clientesManager.createCliente(object);
 
@@ -31,7 +32,7 @@ router.post("/cliente", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
-router.put("/cliente/:id", userExtractor, async (req, res) => {
+router.put("/cliente/:id", userExtractor([allPermissions.oficina, allPermissions.mercaderia]), async (req, res) => {
   const idCliente = req.params.id;
   const object = req.body;
   const { data, error } = await clientesManager.updateCliente(
@@ -44,7 +45,7 @@ router.put("/cliente/:id", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
-router.delete("/cliente/:id", userExtractor, async (req, res) => {
+router.delete("/cliente/:id", userExtractor([allPermissions.oficina, allPermissions.mercaderia]), async (req, res) => {
   const idCliente = req.params.id;
   const { data, error } = await clientesManager.deleteCliente(idCliente);
 

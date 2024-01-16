@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { pedidosManager } from "../index.js";
 import userExtractor from "../middleware/userExtractor.js";
+import allPermissions from "../config/permissos.js";
 
 const ruta = Router();
 
-ruta.get("/pedidos", userExtractor, async (req, res) => {
+ruta.get("/pedidos", userExtractor(allPermissions.mercaderia, allPermissions.oficina), async (req, res) => {
   const { data, error } = await pedidosManager.getPedidos();
 
   if (error) return res.status(404).json(error);
@@ -12,7 +13,7 @@ ruta.get("/pedidos", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
-ruta.get("/pedidos/list/:value", userExtractor, async (req, res) => {
+ruta.get("/pedidos/list/:value", userExtractor(allPermissions.mercaderia, allPermissions.oficina), async (req, res) => {
   const order = req.query.order;
   const id = req.params.value;
 
@@ -32,7 +33,7 @@ ruta.get("/pedidos/list/:value", userExtractor, async (req, res) => {
   return res.json(result);
 });
 
-ruta.get("/pedidos/:idPedido", userExtractor, async (req, res) => {
+ruta.get("/pedidos/:idPedido", userExtractor(allPermissions.mercaderia, allPermissions.oficina), async (req, res) => {
   const idPedido = req.params.idPedido;
 
   const result = pedidosManager.getOne(idPedido);
@@ -40,7 +41,7 @@ ruta.get("/pedidos/:idPedido", userExtractor, async (req, res) => {
   return res.json(result);
 });
 
-ruta.post("/pedidos", userExtractor, async (req, res) => {
+ruta.post("/pedidos", userExtractor(allPermissions.mercaderia, allPermissions.oficina), async (req, res) => {
   const object = req.body;
   const { data, error } = await pedidosManager.postPedidos(object);
 
@@ -50,7 +51,7 @@ ruta.post("/pedidos", userExtractor, async (req, res) => {
 });
 
 //Falta validar si esta bien realizada la lista
-ruta.post("/pedidos/list", userExtractor, async (req, res) => {
+ruta.post("/pedidos/list", userExtractor(allPermissions.mercaderia, allPermissions.oficina), async (req, res) => {
   const object = req.body;
   const { data, error } = await pedidosManager.postListPedidos(object);
 
@@ -59,7 +60,7 @@ ruta.post("/pedidos/list", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
-ruta.put("/pedidos/:idPedido", userExtractor, async (req, res) => {
+ruta.put("/pedidos/:idPedido", userExtractor(allPermissions.mercaderia, allPermissions.oficina), async (req, res) => {
   const idPedido = req.params.idPedido;
   const object = req.body;
   const { data, error } = await pedidosManager.updatePedidos(idPedido, object);
@@ -69,7 +70,7 @@ ruta.put("/pedidos/:idPedido", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
-ruta.put("/pedidos/:idPedido/doneStock", userExtractor, async (req, res) => {
+ruta.put("/pedidos/:idPedido/doneStock", userExtractor(allPermissions.mercaderia, allPermissions.oficina), async (req, res) => {
   const idPedido = req.params.idPedido;
   const { stockDisposicion, isDone } = req.body;
 
@@ -95,7 +96,7 @@ ruta.put("/pedidos/:idPedido/doneStock", userExtractor, async (req, res) => {
   }
 });
 
-ruta.delete("/pedidos/:idPedido", userExtractor, async (req, res) => {
+ruta.delete("/pedidos/:idPedido", userExtractor(allPermissions.mercaderia, allPermissions.oficina), async (req, res) => {
   const idPedido = req.params.idPedido;
   const { data, error } = await pedidosManager.deletePedido(idPedido);
 

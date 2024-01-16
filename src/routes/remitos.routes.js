@@ -1,10 +1,11 @@
 import { Router } from "express";
 import userExtractor from "../middleware/userExtractor.js";
 import { remitosManager } from "../index.js";
+import allPermissions from "../config/permissos.js";
 
 const router = Router();
 
-router.get("/remito", userExtractor, async (req, res) => {
+router.get("/remito", userExtractor(allPermissions.oficina), async (req, res) => {
   const { data, error } = await remitosManager.getRemitos();
 
   if (error != null) return res.status(404).json(error);
@@ -12,7 +13,7 @@ router.get("/remito", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
-router.get("/remito/:id", userExtractor, async (req, res) => {
+router.get("/remito/:id", userExtractor(allPermissions.oficina), async (req, res) => {
   const { id } = req.params;
 
   const resultJson = remitosManager.getOneRemito(id);
@@ -20,7 +21,7 @@ router.get("/remito/:id", userExtractor, async (req, res) => {
   res.json(resultJson);
 });
 
-router.post("/remito", userExtractor, async (req, res) => {
+router.post("/remito", userExtractor(allPermissions.oficina), async (req, res) => {
   const object = req.body;
   const { data, error } = await remitosManager.newRemito(object);
 
@@ -40,7 +41,7 @@ router.post("/remito", userExtractor, async (req, res) => {
   return res.json(data);
 });*/
 
-router.put("/remito/newProduct/:idRemito", userExtractor, async (req, res) => {
+router.put("/remito/newProduct/:idRemito", userExtractor(allPermissions.oficina), async (req, res) => {
   const { data, error } = await remitosManager.updateRemitoAddNewMercaderia(
     req.params.idRemito,
     req.body
@@ -51,7 +52,7 @@ router.put("/remito/newProduct/:idRemito", userExtractor, async (req, res) => {
   return res.json(data);
 });
 
-router.delete("/remito/:id", userExtractor, async (req, res) => {
+router.delete("/remito/:id", userExtractor(allPermissions.oficina), async (req, res) => {
   const idRemito = req.params.id;
   const { data, error } = await remitosManager.deleteRemito(idRemito);
 

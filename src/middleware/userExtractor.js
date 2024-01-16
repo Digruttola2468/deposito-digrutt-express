@@ -1,29 +1,47 @@
-import jwt from 'jsonwebtoken'
-import {JWT_SECRET} from '../config.js'
+import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "../config.js";
+import { db_supabase } from "../config/supabase.js";
+import allPermissions from "../config/permissos.js";
 
-export default (req,res,next) => {
-    const authorization = req.get("authorization");
+export default (roles) => async (req, res, next) => {
+  const authorization = req.get("authorization");
 
-    let token = "";
-    if (authorization && authorization.toLowerCase().startsWith("bearer"))
-      token = authorization.substring(7);
+  let token = "";
+  if (authorization && authorization.toLowerCase().startsWith("bearer"))
+    token = authorization.substring(7);
 
-    let decoredToken = {};
+  if (!token)
+    return res.status(401).json({ message: "token vacio o invalido" });
 
-    try {
-      decoredToken = jwt.verify(token, JWT_SECRET);
-    } catch {}
+  let decoredToken = {};
 
-    const {gmail, is_admin, is_mercaderia, is_oficina, is_produccion, is_matriceria} = decoredToken;
+  try {
+    decoredToken = jwt.verify(token, JWT_SECRET);
+  } catch {
+    return res.status(401).json({ message: "token vacio o invalido" });
+  }
 
-    if (!token)
-      return res.status(401).json({ message: "token missing or invalid" });
+  const { gmail } = decoredToken;
 
-    if (!gmail)
-      return res.status(401).json({ message: "token missing or invalid" });
+  if (!gmail)
+    return res
+      .status(404)
+      .json({ message: "No existe el usuario. Registrate" });
 
-    if (!is_admin)
-      return res.status(401).json({ message: "You dont have permission" });
+  const { data: users, error } = await db_supabase
+    .from("users")
+    .select("*")
+    .eq("gmail", gmail);
 
-    next();
-}
+  console.log(users);
+
+  if (users.length != 0) {
+    if (users[0].role === allPermissions.admin) {
+      return next();
+    } else {
+      if ([].concat(roles).includes(users[0].role)) return next();
+      else return res.status(409).json({ error: "No tienes Permisos" });
+    }
+    
+  } else return res.status(401).json({ message: "No existe el usuario" });
+};

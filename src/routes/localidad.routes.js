@@ -28,7 +28,7 @@ router.get("/localidad/:id", async (req, res) => {
   }
 });
 
-router.post("/localidad", userExtractor, async (req, res) => {
+router.post("/localidad", userExtractor([]), async (req, res) => {
   try {
     const { ciudad } = req.body;
     const [rows] = await con.query(
@@ -45,7 +45,7 @@ router.post("/localidad", userExtractor, async (req, res) => {
   }
 });
 
-router.put("/localidad/:id", userExtractor, async (req, res) => {
+router.put("/localidad/:id", userExtractor([]), async (req, res) => {
   try {
     const { ciudad } = req.body;
     const id = req.params.id;
@@ -67,7 +67,7 @@ router.put("/localidad/:id", userExtractor, async (req, res) => {
   }
 });
 
-router.delete("/localidad/:id", userExtractor, async (req, res) => {
+router.delete("/localidad/:id", userExtractor([]), async (req, res) => {
   try {
     const [result] = await con.query(
       "DELETE FROM localidad WHERE (`id` = ?);",

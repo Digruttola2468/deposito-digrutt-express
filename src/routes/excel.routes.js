@@ -6,6 +6,7 @@ import { inventarioManager, producionManager } from "../index.js";
 
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import allPermissions, { inventarioPermissions } from "../config/permissos.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const dir = dirname(__filename);
@@ -22,7 +23,7 @@ const getMercaderia = async (idcategoria) => {
   return rows;
 };
 
-router.get("/excel/mercaderia",userExtractor, async (req, res) => {
+router.get("/excel/mercaderia", userExtractor(allPermissions.mercaderia), async (req, res) => {
   try {
     const resultEntrada = await getMercaderia(2);
     const resultSalida = await getMercaderia(1);
@@ -59,7 +60,7 @@ router.get("/excel/mercaderia",userExtractor, async (req, res) => {
   }
 });
 
-router.get("/excel/inventario",userExtractor, async (req, res) => {
+router.get("/excel/inventario", userExtractor(inventarioPermissions), async (req, res) => {
   try {
     const listaEnviar = [];
 
@@ -98,7 +99,7 @@ router.get("/excel/inventario",userExtractor, async (req, res) => {
   }
 });
 
-router.get("/excel/produccion-semanal",userExtractor, async (req, res) => {
+router.get("/excel/produccion-semanal", userExtractor(allPermissions.produccion), async (req, res) => {
   const fechaInit = req.query?.start;
   const fechaEnd = req.query?.end;
 
