@@ -33,8 +33,6 @@ export default (roles) => async (req, res, next) => {
     .select("*")
     .eq("gmail", gmail);
 
-  console.log(users);
-
   if (users.length != 0) {
     if (users[0].role === allPermissions.admin) {
       return next();
