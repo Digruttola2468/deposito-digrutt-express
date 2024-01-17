@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config.js";
-import { db_supabase } from "../config/supabase.js";
 import allPermissions from "../config/permissos.js";
+
+import { authManager } from "../index.js";
 
 export default (roles) => async (req, res, next) => {
   const authorization = req.get("authorization");
@@ -28,18 +29,13 @@ export default (roles) => async (req, res, next) => {
       .status(404)
       .json({ message: "No existe el usuario. Registrate" });
 
-  const { data: users, error } = await db_supabase
-    .from("users")
-    .select("*")
-    .eq("gmail", gmail);
-
-  if (users.length != 0) {
-    if (users[0].role === allPermissions.admin) {
+  if (authManager.existUser(gmail)) {
+    const user = authManager.getUserByGmail(gmail);
+    if (user.role === allPermissions.admin) {
       return next();
     } else {
-      if ([].concat(roles).includes(users[0].role)) return next();
+      if ([].concat(roles).includes(user.role)) return next();
       else return res.status(409).json({ error: "No tienes Permisos" });
     }
-    
   } else return res.status(401).json({ message: "No existe el usuario" });
 };
