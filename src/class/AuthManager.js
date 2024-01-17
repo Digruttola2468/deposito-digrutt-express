@@ -1,114 +1,54 @@
-import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config.js";
-
-import { db_supabase } from "../config/supabase.js";
+import { con } from "../config/db.js";
 
 export default class AuthManager {
   constructor() {
     this.listUsers = [];
+    this.getUsers();
   }
 
-  async getToken(gmail) {
+  async getUsers() {
+    try {
+      const [rows] = await con.query("SELECT * FROM users;");
+      this.listUsers = rows;
+      return { data: rows };
+    } catch (e) {
+      console.error(e);
+      return { error: { message: "Something wrong" } };
+    }
+  }
+
+  getUserByGmail = (gmail) => {
     if (this.listUsers.length != 0) {
-      const findUserByGmail = this.listUsers.filter(
-        (elem) => elem.gmail == gmail
+      const findByGmail = this.listUsers.find((elem) => elem.gmail == gmail);
+      if (findByGmail) return findByGmail;
+      else return [];
+    } else return null;
+  };
+
+   existUser = (gmail) => {
+    if (this.listUsers.length != 0) {
+      const findByGmail = this.listUsers.find((elem) => elem.gmail == gmail);
+      if (findByGmail) return true;
+      else return false;
+    } else return null;
+  };
+
+  async postUser(user) {
+    try {
+      const result = await con.query(
+        "INSERT INTO users (nombre,apellido,gmail,role) VALUES (?,?,?,?) ;",
+        [user.nombre, user.apellido, user.gmail, "user"]
       );
 
-      //Si se encontro el usuario
-      if (findUserByGmail) {
-        console.log("findUserByGmail",findUserByGmail);
-        return {
-          data: {
-            ...findUserByGmail
-          },
-        };
-      }
+        console.log(result);
+
+      this.listUsers.push(user);
+
+
+      return { data: { status: "success", message: "Agregado base de datos" } };
+    } catch (error) {
+      console.log(error);
+      return { error: { status: "error", message: "Something Wrong" } };
     }
-    console.log("List: ",this.listUsers);
-    if (gmail != null) {
-      try {
-        const { data, error } = await db_supabase
-          .from("users")
-          .select()
-          .eq("gmail", gmail);
-
-        if (error)
-          return {
-            error: {
-              message: "something wrong",
-            },
-          };
-
-        if (data.length === 0)
-          return {
-            error: {
-              message: "No se encontro el usuario",
-            },
-          };
-
-        const userForToken = {
-          created_at: data[0].created_at,
-          nombre: data[0].nombre,
-          apellido: data[0].apellido,
-          is_admin: data[0].is_admin,
-          is_mercaderia: data[0].is_mercaderia,
-          is_oficina: data[0].is_oficina,
-          is_produccion: data[0].is_produccion,
-          is_matriceria: data[0].is_matriceria,
-          gmail: data[0].gmail,
-        };
-
-        if (
-          userForToken.is_admin ||
-          userForToken.is_mercaderia ||
-          userForToken.is_oficina ||
-          userForToken.is_produccion ||
-          userForToken.is_matriceria
-        ) {
-          const token = jwt.sign(userForToken, JWT_SECRET);
-
-          if (this.listUsers.length != 0) {
-            const findUserByToken = this.listUsers.filter(
-              (elem) => elem.token == token
-            );
-            if (findUserByToken == null) {
-              this.listUsers.push({
-                ...userForToken,
-                token,
-              });
-            }
-          } else {
-            this.listUsers.push({
-              ...userForToken,
-              token,
-            });
-          }
-
-          return {
-            data: {
-              ...userForToken,
-              token,
-            },
-          };
-        } else
-          return {
-            error: {
-              message:
-                "Todavia No estas habilitado, avisale al dueño de la pagina para que te habilite",
-            },
-          };
-      } catch (error) {
-        return {
-          error: {
-            message: "Something wrong",
-          },
-        };
-      }
-    } else
-      return {
-        error: {
-          message: "No se encontro",
-        },
-      };
   }
 }
