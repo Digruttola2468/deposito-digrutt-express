@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config.js";
 import { authManager } from "../index.js";
 import { db_supabase } from "../config/supabase.js";
+import passport from "passport";
 
 const router = Router();
 
@@ -30,7 +31,7 @@ router.get("/login", async (req, res) => {
           } else return res.status(404).json({ message: "Upss..." });
         }
 
-        if (!authManager.existUser(gmail)) {
+        if (!(await authManager.existUser(gmail))) {
           //Agregar a la base de datos
           const result = await authManager.postUser({
             nombre: signIn.data.user.user_metadata.first_name,
@@ -41,7 +42,7 @@ router.get("/login", async (req, res) => {
           if (result.error) return res.status(404).json({ message: "Upss..." });
         }
 
-        const user = authManager.getUserByGmail(gmail);
+        const user = await authManager.getUserByGmail(gmail);
 
         const userForToken = {
           created_at: signIn.data.user.created_at,
@@ -116,5 +117,17 @@ router.post("/register", async (req, res) => {
       .status(400)
       .json({ message: "Error en el formato del correo electronico" });
 });
+
+router.get('google', (req,res) => {
+  passport.authenticate('google', { scope: ['email', 'profile']})
+})
+
+router.get('/google/callback', (req,res) => {
+  passport.authenticate('google', { successRedirect: 'https://deposito-digrutt-produccion.onrender.com/', failureRedirect: '/google/failure'})
+})
+
+router.get('/google/failure', (req,res) => {
+  res.send('Ocurrio un error')
+})
 
 export default router;

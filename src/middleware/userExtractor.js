@@ -29,8 +29,8 @@ export default (roles) => async (req, res, next) => {
       .status(404)
       .json({ message: "No existe el usuario. Registrate" });
 
-  if (authManager.existUser(gmail)) {
-    const user = authManager.getUserByGmail(gmail);
+  if (await authManager.existUser(gmail)) {
+    const user = await authManager.getUserByGmail(gmail);
     if (user.role === allPermissions.admin) {
       return next();
     } else {

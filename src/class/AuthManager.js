@@ -3,7 +3,6 @@ import { con } from "../config/db.js";
 export default class AuthManager {
   constructor() {
     this.listUsers = [];
-    this.getUsers();
   }
 
   async getUsers() {
@@ -17,7 +16,8 @@ export default class AuthManager {
     }
   }
 
-  getUserByGmail = (gmail) => {
+  getUserByGmail = async (gmail) => {
+    await this.getUsers();
     if (this.listUsers.length != 0) {
       const findByGmail = this.listUsers.find((elem) => elem.gmail == gmail);
       if (findByGmail) return findByGmail;
@@ -25,7 +25,8 @@ export default class AuthManager {
     } else return null;
   };
 
-   existUser = (gmail) => {
+  existUser = async (gmail) => {
+    await this.getUsers();
     if (this.listUsers.length != 0) {
       const findByGmail = this.listUsers.find((elem) => elem.gmail == gmail);
       if (findByGmail) return true;
@@ -40,10 +41,9 @@ export default class AuthManager {
         [user.nombre, user.apellido, user.gmail, "user"]
       );
 
-        console.log(result);
+      console.log(result);
 
       this.listUsers.push(user);
-
 
       return { data: { status: "success", message: "Agregado base de datos" } };
     } catch (error) {
