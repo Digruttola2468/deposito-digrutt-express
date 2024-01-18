@@ -17,21 +17,17 @@ export default class AuthManager {
   }
 
   getUserByGmail = async (gmail) => {
-    await this.getUsers();
-    if (this.listUsers.length != 0) {
-      const findByGmail = this.listUsers.find((elem) => elem.gmail == gmail);
-      if (findByGmail) return findByGmail;
-      else return [];
-    } else return null;
+    const { data } = await this.getUsers();
+    const findByGmail = data.find((elem) => elem.gmail == gmail);
+    if (findByGmail) return findByGmail;
+    else return [];
   };
 
   existUser = async (gmail) => {
-    await this.getUsers();
-    if (this.listUsers.length != 0) {
-      const findByGmail = this.listUsers.find((elem) => elem.gmail == gmail);
-      if (findByGmail) return true;
-      else return false;
-    } else return null;
+    const { data } = await this.getUsers();
+    const findByGmail = data.find((elem) => elem.gmail == gmail);
+    if (findByGmail) return true;
+    else return false;
   };
 
   async postUser(user) {

@@ -21,13 +21,15 @@ router.get("/login", async (req, res) => {
 
         if (signIn.error != null) {
           if (signIn.error.message == "Email not confirmed")
-            return res
-              .status(404)
-              .json({ message: "El gmail no esta verificado" });
+            return res.status(404).json({
+              message: "El gmail no esta verificado",
+              status: "not validated gmail",
+            });
           if (signIn.error.message == "Invalid login credentials") {
-            return res
-              .status(404)
-              .json({ message: "El correo o la contraseña son incorrectos" });
+            return res.status(404).json({
+              message: "El correo o la contraseña son incorrectos",
+              status: "incorrect gmail password",
+            });
           } else return res.status(404).json({ message: "Upss..." });
         }
 
@@ -43,6 +45,12 @@ router.get("/login", async (req, res) => {
         }
 
         const user = await authManager.getUserByGmail(gmail);
+
+        if (user.length == 0)
+          return res.status(404).json({
+            message: "No se encuntra el usuario",
+            status: "not found user",
+          });
 
         const userForToken = {
           created_at: signIn.data.user.created_at,
@@ -71,16 +79,24 @@ router.post("/register", async (req, res) => {
 
   // Validar que los campos no esten vacios
   if (gmail == null || gmail == "")
-    return res.status(400).json({ message: "Campo Gmail vacio" });
+    return res
+      .status(400)
+      .json({ message: "Campo Gmail vacio", campus: "gmail" });
 
   if (password == null || password == "")
-    return res.status(400).json({ message: "Campo Contraseña vacio" });
+    return res
+      .status(400)
+      .json({ message: "Campo Contraseña vacio", campus: "contraseña" });
 
   if (nombre == null || nombre == "")
-    return res.status(400).json({ message: "Campo Nombre vacio" });
+    return res
+      .status(400)
+      .json({ message: "Campo Nombre vacio", campus: "nombre" });
 
   if (apellido == null || apellido == "")
-    return res.status(400).json({ message: "Campo Apellido vacio" });
+    return res
+      .status(400)
+      .json({ message: "Campo Apellido vacio", campus: "apellido" });
 
   // Validar que el formato del gmail sea correcto
   const pattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
@@ -104,7 +120,11 @@ router.post("/register", async (req, res) => {
         if (error.status == 422)
           return res
             .status(500)
-            .json({ message: "La contraseña tiene que ser +6 caracteres" });
+            .json({
+              message: "La contraseña tiene que ser +6 caracteres",
+              status: "long character password",
+              campus: "password",
+            });
         else return res.status(500).json({ message: "something wrong" });
       }
 
@@ -115,19 +135,26 @@ router.post("/register", async (req, res) => {
   } else
     return res
       .status(400)
-      .json({ message: "Error en el formato del correo electronico" });
+      .json({
+        message: "Error en el formato del correo electronico",
+        campus: "gmail",
+      });
 });
 
-router.get('google', (req,res) => {
-  passport.authenticate('google', { scope: ['email', 'profile']})
-})
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["user:email"] })
+);
 
-router.get('/google/callback', (req,res) => {
-  passport.authenticate('google', { successRedirect: 'https://deposito-digrutt-produccion.onrender.com/', failureRedirect: '/google/failure'})
-})
+router.get("/google/callback", (req, res) => {
+  passport.authenticate("google", {
+    successRedirect: "https://deposito-digrutt-produccion.onrender.com/",
+    failureRedirect: "/google/failure",
+  });
+});
 
-router.get('/google/failure', (req,res) => {
-  res.send('Ocurrio un error')
-})
+router.get("/google/failure", (req, res) => {
+  res.send("Ocurrio un error");
+});
 
 export default router;
