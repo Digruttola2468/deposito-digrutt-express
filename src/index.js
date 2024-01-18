@@ -52,6 +52,8 @@ import MaquinaParada from "./class/MaquinaParada.js";
 import Matrices from "./class/MatricesMaster.js";
 import PedidosManager from "./class/PedidosManager.js";
 
+import googleInicializate from "./passport/googleAuth.js";
+
 const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
@@ -65,6 +67,8 @@ app.set("view engine", "handlebars");
 
 //Habilitamos la lectura en JSON
 app.use(express.json());
+
+googleInicializate();
 
 //INIT
 export const inventarioManager = new InventarioManager();

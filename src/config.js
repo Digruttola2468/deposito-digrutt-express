@@ -22,3 +22,6 @@ export const CLOUDINARY_APISECRET = process.env.CLOUDINARY_APISECRET;
 
 //Permissos
 export const objPermissos = process.env.PERMISSOS;
+
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
