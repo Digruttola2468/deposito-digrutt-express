@@ -25,7 +25,7 @@ const getMercaderia = async (idcategoria) => {
 
 
 
-router.get("/excel/mercaderia",auth, userExtractor(allPermissions.mercaderia), async (req, res) => {
+router.get("/excel/mercaderia", userExtractor(allPermissions.mercaderia), async (req, res) => {
   try {
     const resultEntrada = await getMercaderia(2);
     const resultSalida = await getMercaderia(1);
@@ -62,7 +62,7 @@ router.get("/excel/mercaderia",auth, userExtractor(allPermissions.mercaderia), a
   }
 });
 
-router.get("/excel/inventario",auth, userExtractor(inventarioPermissions), async (req, res) => {
+router.get("/excel/inventario", userExtractor(inventarioPermissions), async (req, res) => {
   try {
     const listaEnviar = [];
 
@@ -101,7 +101,7 @@ router.get("/excel/inventario",auth, userExtractor(inventarioPermissions), async
   }
 });
 
-router.get("/excel/produccion-semanal",auth, userExtractor(allPermissions.produccion), async (req, res) => {
+router.get("/excel/produccion-semanal", userExtractor(allPermissions.produccion), async (req, res) => {
   const fechaInit = req.query?.start;
   const fechaEnd = req.query?.end;
 

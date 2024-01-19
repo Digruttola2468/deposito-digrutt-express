@@ -5,7 +5,7 @@ import allPermissions from "../config/permissos.js";
 
 const ruta = Router();
 
-ruta.get("/producion",auth, userExtractor(allPermissions.produccion), async (req, res) => {
+ruta.get("/producion", userExtractor(allPermissions.produccion), async (req, res) => {
   const { data, error } = await producionManager.getProduccion();
 
   if (error != null) return res.status(404).json(error);
@@ -13,7 +13,7 @@ ruta.get("/producion",auth, userExtractor(allPermissions.produccion), async (req
   return res.json(data);
 });
 
-ruta.get('/producion/:numMaquina',auth, userExtractor(allPermissions.produccion), async (req,res) => {
+ruta.get('/producion/:numMaquina', userExtractor(allPermissions.produccion), async (req,res) => {
   const numMaquina = req.params.numMaquina;
   const init = req.query.init;
   const end = req.query.end;
@@ -23,7 +23,7 @@ ruta.get('/producion/:numMaquina',auth, userExtractor(allPermissions.produccion)
   return res.json(result)
 })
 
-ruta.post("/producion",auth, userExtractor(allPermissions.produccion), async (req, res) => {
+ruta.post("/producion", userExtractor(allPermissions.produccion), async (req, res) => {
   const object = req.body;
   const { data, error } = await producionManager.postProducion(object);
 
@@ -32,7 +32,7 @@ ruta.post("/producion",auth, userExtractor(allPermissions.produccion), async (re
   return res.json(data);
 });
 
-ruta.post("/producion/list",auth, userExtractor(allPermissions.produccion), async (req, res) => {
+ruta.post("/producion/list", userExtractor(allPermissions.produccion), async (req, res) => {
   const object = req.body;
   const { data, error } = await producionManager.postListProduccion(object);
 

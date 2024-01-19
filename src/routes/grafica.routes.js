@@ -13,7 +13,6 @@ const router = Router();
 
 router.get(
   "/grafica/mercaderia/:idInventario",
-  auth,
   userExtractor(allPermissions.mercaderia, allPermissions.oficina),
   graficaMercaderia
 );
@@ -22,21 +21,18 @@ router.get(
 
 router.get(
   "/grafica/cliente",
-  auth,
   userExtractor(allPermissions.mercaderia, allPermissions.oficina),
   graficaCliente
 );
 
 router.get(
   "/grafica/clientes/todos",
-  auth,
   userExtractor(allPermissions.mercaderia, allPermissions.oficina),
   getGraficaRelacionOtrosClientes
 );
 
 router.get(
   "/grafica/produccion",
-  auth,
   userExtractor(allPermissions.produccion, allPermissions.oficina),
   graficaProduccion
 );

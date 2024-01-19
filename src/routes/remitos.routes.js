@@ -7,7 +7,7 @@ const router = Router();
 
 router.get(
   "/remito",
-  auth,
+  
   userExtractor(allPermissions.oficina),
   async (req, res) => {
     const { data, error } = await remitosManager.getRemitos();
@@ -20,7 +20,7 @@ router.get(
 
 router.get(
   "/remito/:id",
-  auth,
+  
   userExtractor(allPermissions.oficina),
   async (req, res) => {
     const { id } = req.params;
@@ -33,7 +33,7 @@ router.get(
 
 router.post(
   "/remito",
-  auth,
+  
   userExtractor(allPermissions.oficina),
   async (req, res) => {
     const object = req.body;
@@ -58,7 +58,7 @@ router.post(
 
 router.put(
   "/remito/newProduct/:idRemito",
-  auth,
+  
   userExtractor(allPermissions.oficina),
   async (req, res) => {
     const { data, error } = await remitosManager.updateRemitoAddNewMercaderia(
@@ -74,7 +74,7 @@ router.put(
 
 router.delete(
   "/remito/:id",
-  auth,
+  
   userExtractor(allPermissions.oficina),
   async (req, res) => {
     const idRemito = req.params.id;

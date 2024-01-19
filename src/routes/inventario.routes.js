@@ -8,7 +8,7 @@ const router = Router();
 
 router.get(
   "/inventario",
-  auth,
+  
   userExtractor(inventarioPermissions),
   async (req, res) => {
     const { data, error } = await inventarioManager.getInventario();
@@ -21,7 +21,7 @@ router.get(
 
 router.get(
   "/inventario/nombres",
-  auth,
+  
   userExtractor(inventarioPermissions),
   (req, res) => {
     const { data, error } = inventarioManager.getListInventarioNombre();
@@ -34,7 +34,7 @@ router.get(
 
 router.get(
   "/inventario/sumInventario/:id",
-  auth,
+  
   userExtractor(inventarioPermissions),
   async (req, res) => {
     const { id } = req.params;
@@ -50,7 +50,7 @@ router.get(
 
 router.get(
   "/inventario/:id",
-  auth,
+  
   userExtractor(inventarioPermissions),
   (req, res) => {
     const idInventario = req.params.id;
@@ -64,7 +64,7 @@ router.get(
 
 router.post(
   "/inventario",
-  auth,
+  
   userExtractor([
     allPermissions.oficina,
     allPermissions.mercaderia,
@@ -81,7 +81,7 @@ router.post(
 
 router.put(
   "/inventario/:id",
-  auth,
+  
   userExtractor([
     allPermissions.oficina,
     allPermissions.mercaderia,
@@ -102,7 +102,7 @@ router.put(
 
 router.delete(
   "/inventario/:id",
-  auth,
+  
   userExtractor([
     allPermissions.oficina,
     allPermissions.mercaderia,

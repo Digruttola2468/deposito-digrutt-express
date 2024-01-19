@@ -13,7 +13,7 @@ cloudinary.v2.config({
   secure: true,
 });
 
-router.get("/photo/:name",auth, (req, res) => {
+router.get("/photo/:name", (req, res) => {
   const codProducto = req.params.name;
 
   cloudinary.v2.api

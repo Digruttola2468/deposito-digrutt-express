@@ -4,7 +4,7 @@ import userExtractor, { auth } from "../middleware/userExtractor.js";
 
 const router = Router();
 
-router.get("/tiposproductos",auth, async (req, res) => {
+router.get("/tiposproductos", async (req, res) => {
   try {
     const [rows] = await con.query("SELECT * FROM tipoproducto;");
 
@@ -13,7 +13,7 @@ router.get("/tiposproductos",auth, async (req, res) => {
     return res.status(500).send({ message: "Something wrong" });
   }
 });
-router.get("/tiposproductos/:id",auth, async (req, res) => {
+router.get("/tiposproductos/:id", async (req, res) => {
   try {
     const [rows] = await con.query("SELECT * FROM tipoproducto WHERE id = ?;", [
       req.params.id,
@@ -27,7 +27,7 @@ router.get("/tiposproductos/:id",auth, async (req, res) => {
   }
 });
 
-router.post("/tiposproductos",auth, userExtractor([]), async (req, res) => {
+router.post("/tiposproductos", userExtractor([]), async (req, res) => {
   try {
     const { nombre } = req.body;
     const [rows] = await con.query(
@@ -44,7 +44,7 @@ router.post("/tiposproductos",auth, userExtractor([]), async (req, res) => {
   }
 });
 
-router.put("/tiposproductos/:id",auth, userExtractor([]), async (req, res) => {
+router.put("/tiposproductos/:id", userExtractor([]), async (req, res) => {
   try {
     const { nombre } = req.body;
     const id = req.params.id;
@@ -65,7 +65,7 @@ router.put("/tiposproductos/:id",auth, userExtractor([]), async (req, res) => {
   }
 });
 
-router.delete("/tiposproductos/:id",auth, userExtractor([]), async (req, res) => {
+router.delete("/tiposproductos/:id",userExtractor([]), async (req, res) => {
   try {
     const [result] = await con.query(
       "DELETE FROM tipoproducto WHERE (`id` = ?);",
