@@ -2,6 +2,8 @@ import passport from "passport";
 import GoogleStrategy from "passport-google-oauth2";
 
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "../config.js";
+import { authManager } from "../index.js";
+import { con } from "../config/db.js";
 
 const googleInicializate = () => {
   passport.use(
@@ -13,21 +15,27 @@ const googleInicializate = () => {
         callbackURL: "http://localhost:3000/api/google/callback",
         passReqToCallback: true,
       },
-      function (request, accessToken, refreshToken, profile, done) {
-        console.log("GOOGLE STRATEGY: ", profile);
-        return done(err, profile);
+      async function (request, accessToken, refreshToken, profile, done) {
+        const user = await authManager.getUserByGmail(profile.email);
+        if (user.length == 0) {
+          const { data } = await authManager.postUser({
+            nombre: profile.given_name,
+            apellido: profile.family_name,
+            gmail: profile.email,
+          });
+
+          return done(null, data.user);
+        } else return done(null, user);
       }
     )
   );
 
   passport.serializeUser(function (user, done) {
-    console.log("SERIALIZE USER: ", user);
     done(null, user);
   });
 
-  passport.deserializeUser(function (user, done) {
-    console.log("DESERIALIZE USER: ", user);
-    done(null, user);
+  passport.deserializeUser(async function (id, done) {
+    done(null, id);
   });
 };
 

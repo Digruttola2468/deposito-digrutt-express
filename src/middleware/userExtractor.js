@@ -4,6 +4,12 @@ import allPermissions from "../config/permissos.js";
 
 import { authManager } from "../index.js";
 
+export function auth(req, res, next) {
+  if (req.session?.user) return next();
+
+  return res.json({message: 'No estas Registrado, por favor inicia sesion'});
+}
+
 export default (roles) => async (req, res, next) => {
   const authorization = req.get("authorization");
 
@@ -31,9 +37,8 @@ export default (roles) => async (req, res, next) => {
 
   if (await authManager.existUser(gmail)) {
     const user = await authManager.getUserByGmail(gmail);
-    if (user.role === allPermissions.admin) {
-      return next();
-    } else {
+    if (user.role === allPermissions.admin) return next();
+     else {
       if ([].concat(roles).includes(user.role)) return next();
       else return res.status(409).json({ error: "No tienes Permisos" });
     }

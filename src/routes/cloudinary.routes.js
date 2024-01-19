@@ -1,5 +1,5 @@
 import { Router } from "express";
-import userExtractor from "../middleware/userExtractor.js";
+import userExtractor, { auth } from "../middleware/userExtractor.js";
 
 import cloudinary from "cloudinary";
 import { CLOUDINARY_APIKEY, CLOUDINARY_APISECRET } from "../config.js";
@@ -13,7 +13,7 @@ cloudinary.v2.config({
   secure: true,
 });
 
-router.get("/photo/:name", (req, res) => {
+router.get("/photo/:name",auth, (req, res) => {
   const codProducto = req.params.name;
 
   cloudinary.v2.api

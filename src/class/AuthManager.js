@@ -17,10 +17,18 @@ export default class AuthManager {
   }
 
   getUserByGmail = async (gmail) => {
-    const { data } = await this.getUsers();
-    const findByGmail = data.find((elem) => elem.gmail == gmail);
-    if (findByGmail) return findByGmail;
-    else return [];
+    const [rows] = await con.query(`SELECT * FROM users WHERE gmail=?`, gmail);
+
+    if (rows.length != 0) {
+      const update = this.listUsers.map((elem) => {
+        if (elem.id == rows[0].id) return rows[0];
+        else return elem;
+      });
+
+      this.listUsers = update;
+
+      return rows[0];
+    } else return [];
   };
 
   existUser = async (gmail) => {
@@ -32,16 +40,26 @@ export default class AuthManager {
 
   async postUser(user) {
     try {
-      const result = await con.query(
+      const [rows] = await con.query(
         "INSERT INTO users (nombre,apellido,gmail,role) VALUES (?,?,?,?) ;",
         [user.nombre, user.apellido, user.gmail, "user"]
       );
 
-      console.log(result);
-
       this.listUsers.push(user);
 
-      return { data: { status: "success", message: "Agregado base de datos" } };
+      return {
+        data: {
+          status: "success",
+          message: "Agregado base de datos",
+          user: {
+            nombre: user.nombre,
+            apellido: user.apellido,
+            gmail: user.gmail,
+            role: "user",
+            id: rows.insertId,
+          },
+        },
+      };
     } catch (error) {
       console.log(error);
       return { error: { status: "error", message: "Something Wrong" } };

@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { mercaderiaManager } from "../index.js";
 
-import userExtractor from "../middleware/userExtractor.js";
+import userExtractor, { auth } from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
 
 const router = Router();
 
-router.get("/mercaderia", userExtractor(allPermissions.mercaderia), async (req, res) => {
+router.get("/mercaderia",auth, userExtractor(allPermissions.mercaderia), async (req, res) => {
   const { data, error } = await mercaderiaManager.getMercaderia();
 
   if (error != null) return res.status(404).json(error);
@@ -14,7 +14,7 @@ router.get("/mercaderia", userExtractor(allPermissions.mercaderia), async (req, 
   return res.json(data);
 });
 
-router.get("/mercaderia/:mid", userExtractor(allPermissions.mercaderia), (req, res) => {
+router.get("/mercaderia/:mid",auth, userExtractor(allPermissions.mercaderia), (req, res) => {
   const mid = parseInt(req.params.mid);
   const { data, error } = mercaderiaManager.getOneMercaderia(mid);
 
@@ -23,7 +23,7 @@ router.get("/mercaderia/:mid", userExtractor(allPermissions.mercaderia), (req, r
   return res.json(data);
 });
 
-router.post("/mercaderia", userExtractor(allPermissions.mercaderia), async (req, res) => {
+router.post("/mercaderia",auth, userExtractor(allPermissions.mercaderia), async (req, res) => {
   const object = req.body;
   const { data, error } = await mercaderiaManager.createMercaderia(object);
 
@@ -32,7 +32,7 @@ router.post("/mercaderia", userExtractor(allPermissions.mercaderia), async (req,
   return res.json(data);
 });
 
-router.post("/mercaderia/list", userExtractor(allPermissions.mercaderia), async (req, res) => {
+router.post("/mercaderia/list",auth, userExtractor(allPermissions.mercaderia), async (req, res) => {
   const object = req.body;
   const { data, error } = await mercaderiaManager.postMercaderiaList(object);
 
@@ -41,7 +41,7 @@ router.post("/mercaderia/list", userExtractor(allPermissions.mercaderia), async 
   return res.json(data);
 });
 
-router.put("/mercaderia/:id", userExtractor(allPermissions.mercaderia), async (req, res) => {
+router.put("/mercaderia/:id",auth, userExtractor(allPermissions.mercaderia), async (req, res) => {
   const object = req.body;
   const idMercaderia = req.params.id;
   const { data, error } = await mercaderiaManager.updateMercaderia(
@@ -54,7 +54,7 @@ router.put("/mercaderia/:id", userExtractor(allPermissions.mercaderia), async (r
   return res.json(data);
 });
 
-router.delete("/mercaderia/:id", userExtractor(allPermissions.mercaderia), async (req, res) => {
+router.delete("/mercaderia/:id",auth, userExtractor(allPermissions.mercaderia), async (req, res) => {
   const idMercaderia = req.params.id;
   const { data, error } = await mercaderiaManager.deleteMercaderia(
     idMercaderia

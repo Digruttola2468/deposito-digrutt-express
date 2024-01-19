@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import handlebars from "express-handlebars";
 
+import session from "express-session";
+import MySQLStore from "express-mysql-session";
+
 import { PORT } from "./config.js";
 import __dirname from './utils.js';
 
@@ -53,12 +56,18 @@ import Matrices from "./class/MatricesMaster.js";
 import PedidosManager from "./class/PedidosManager.js";
 
 import googleInicializate from "./passport/googleAuth.js";
+import { con } from "./config/db.js";
+import passport from "passport";
 
 const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
 app.use(cors());
 //app.use(express.urlencoded({ extended: true }));
+
+const MysqlStorage = MySQLStore(session);
+
+const sessionStore = new MysqlStorage({},con);
 
 // Configurar el motor de plantillas
 app.engine("handlebars", handlebars.engine());
@@ -67,6 +76,18 @@ app.set("view engine", "handlebars");
 
 //Habilitamos la lectura en JSON
 app.use(express.json());
+
+app.use(
+  session({
+    store: sessionStore,
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 googleInicializate();
 
@@ -82,6 +103,8 @@ export const maquinaParadaManager = new MaquinaParada();
 export const matricesManager = new Matrices();
 export const historialErrorMatrizManager = new HistorialMatriz();
 export const pedidosManager = new PedidosManager();
+
+
 
 //
 app.use("/api", indexRoute);

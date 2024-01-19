@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { facturaNegroManager } from '../index.js'
 
-import userExtractor from "../middleware/userExtractor.js";
+import userExtractor, { auth } from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
 
 const router = Router();
 
-router.get("/facturaNegro/newNroEnvio", (req, res) => {
+router.get("/facturaNegro/newNroEnvio",auth, (req, res) => {
   const sendNewNroEnvio = facturaNegroManager.getNroEnvio();
 
   //Ocurrio un error
@@ -16,7 +16,7 @@ router.get("/facturaNegro/newNroEnvio", (req, res) => {
   return res.json({ nroEnvio: sendNewNroEnvio });
 });
 
-router.get("/facturaNegro", userExtractor(allPermissions.oficina), async (req, res) => {
+router.get("/facturaNegro",auth, userExtractor(allPermissions.oficina), async (req, res) => {
   const { data, error } = await facturaNegroManager.getFacturaNegro();
 
   if (error != null) return res.status(500).json(error);
@@ -24,14 +24,14 @@ router.get("/facturaNegro", userExtractor(allPermissions.oficina), async (req, r
   return res.json(data);
 });
 
-router.get("/facturaNegro/:id", userExtractor(allPermissions.oficina), (req, res) => {
+router.get("/facturaNegro/:id",auth, userExtractor(allPermissions.oficina), (req, res) => {
   const { id } = req.params;
   const resultJson = facturaNegroManager.getOneNotaEnvio(id);
 
   return res.json(resultJson);
 });
 
-router.post("/facturaNegro", userExtractor(allPermissions.oficina), async (req, res) => {
+router.post("/facturaNegro",auth, userExtractor(allPermissions.oficina), async (req, res) => {
   const object = req.body;
   const result = await facturaNegroManager.createFacturaNegro(object);
 

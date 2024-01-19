@@ -52,7 +52,11 @@ router.get("/login", async (req, res) => {
             status: "not found user",
           });
 
+        //Save in the session
+        req.session.user = user;
+
         const userForToken = {
+          id: user.id,
           created_at: signIn.data.user.created_at,
           nombre: user.nombre,
           apellido: user.apellido,
@@ -108,7 +112,6 @@ router.post("/register", async (req, res) => {
         email: gmail,
         password: password,
         options: {
-          emailRedirectTo: "localhost:3000/api/callback",
           data: {
             first_name: nombre,
             last_name: apellido,
@@ -118,13 +121,11 @@ router.post("/register", async (req, res) => {
 
       if (error) {
         if (error.status == 422)
-          return res
-            .status(500)
-            .json({
-              message: "La contraseña tiene que ser +6 caracteres",
-              status: "long character password",
-              campus: "password",
-            });
+          return res.status(500).json({
+            message: "La contraseña tiene que ser +6 caracteres",
+            status: "long character password",
+            campus: "password",
+          });
         else return res.status(500).json({ message: "something wrong" });
       }
 
@@ -133,28 +134,32 @@ router.post("/register", async (req, res) => {
       return res.status(500).json({ message: "something wrong" });
     }
   } else
-    return res
-      .status(400)
-      .json({
-        message: "Error en el formato del correo electronico",
-        campus: "gmail",
-      });
+    return res.status(400).json({
+      message: "Error en el formato del correo electronico",
+      campus: "gmail",
+    });
 });
 
 router.get(
   "/google",
-  passport.authenticate("google", { scope: ["user:email"] })
+  passport.authenticate("google", { scope: ["email", "profile"] })
 );
 
-router.get("/google/callback", (req, res) => {
-  passport.authenticate("google", {
-    successRedirect: "https://deposito-digrutt-produccion.onrender.com/",
-    failureRedirect: "/google/failure",
-  });
-});
+router.get(
+  "/google/callback",
+  passport.authenticate(
+    "google",
+    {
+      failureRedirect: "/google/failure",
+    }
+  ),(req, res) => {
+    req.session.user = req.user;
+    return res.send("Se registro correctamente con Google");
+  }
+);
 
 router.get("/google/failure", (req, res) => {
-  res.send("Ocurrio un error");
+  res.send("Error al Autenticar con Google");
 });
 
 export default router;
