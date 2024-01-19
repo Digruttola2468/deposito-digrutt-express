@@ -12,7 +12,8 @@ const googleInicializate = () => {
       {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/api/google/callback",
+        callbackURL:
+          "https://deposito-digrutt-express-production.up.railway.app/api/google/callback",
         passReqToCallback: true,
       },
       async function (request, accessToken, refreshToken, profile, done) {
