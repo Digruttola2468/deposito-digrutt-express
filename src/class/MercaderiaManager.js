@@ -12,7 +12,7 @@ export default class MercaderiaManager {
   async getMercaderia() {
     try {
       const [rows] = await con.query(
-        `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario,articulo,idremito,idFacturaNegro
+        `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario,articulo,idremito,idFacturaNegro,idCliente AS idcliente
               FROM mercaderia 
                   LEFT JOIN inventario on mercaderia.idinventario = inventario.id
                   LEFT JOIN categoria on mercaderia.idcategoria = categoria.id
