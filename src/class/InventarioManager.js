@@ -10,7 +10,7 @@ export default class InventarioManager {
   async getInventario() {
     try {
       //const [rows] = await con.query("SELECT * FROM inventario;");
-      const [rows] = await con.query("SELECT inventario.*, clientes.cliente, clientes.id AS idCliente FROM inventario LEFT JOIN clientes ON inventario.idCliente = clientes.id;");
+      const [rows] = await con.query("SELECT inventario.*, clientes.cliente, idCliente AS idcliente FROM inventario LEFT JOIN clientes ON inventario.idcliente = clientes.id;");
       this.listInventario = rows;
       return { data: rows };
     } catch (e) {
