@@ -5,31 +5,61 @@ import allPermissions from "../config/permissos.js";
 
 const ruta = Router();
 
-ruta.get("/maquinaParada", userExtractor([allPermissions.produccion, allPermissions.inyectora]), async (req, res) => {
-  const { data, error } = await maquinaParadaManager.getMaquinaParada();
+ruta.get(
+  "/maquinaParada",
+  userExtractor([allPermissions.produccion, allPermissions.inyectora]),
+  async (req, res) => {
+    const { data, error } = await maquinaParadaManager.getMaquinaParada();
 
-  if (error != null) return res.status(404).json(error);
+    if (error != null) return res.status(404).json(error);
 
-  return res.json(data);
-});
+    return res.json(data);
+  }
+);
 
-ruta.post("/maquinaParada", userExtractor([allPermissions.produccion, allPermissions.inyectora]), async (req, res) => {
-  const body = req.body;
-  const { data, error } = await maquinaParadaManager.postProducion(body);
-  if (error != null) return res.status(404).json(error);
+ruta.post(
+  "/maquinaParada",
+  userExtractor([allPermissions.produccion, allPermissions.inyectora]),
+  async (req, res) => {
+    const body = req.body;
+    const { data, error } = await maquinaParadaManager.postProducion(body);
+    if (error != null) return res.status(404).json(error);
 
-  return res.json(data);
-});
+    return res.json(data);
+  }
+);
 
-ruta.delete("/maquinaParada/:idMaquina", userExtractor([allPermissions.produccion, allPermissions.inyectora]), async (req, res) => {
-  const idMaquina = req.params.idMaquina;
-  const { data, error } = await maquinaParadaManager.deleteMaquinaParada(
-    idMaquina
-  );
+ruta.put(
+  "/maquinaParada/:idMaquinaParada",
+  userExtractor([allPermissions.produccion, allPermissions.inyectora]),
+  async (req, res) => {
+    const idMaquinaParada = req.params.idMaquinaParada;
+    const body = req.body;
 
-  if (error != null) return res.status(404).json(error);
+    const { data, error } = await maquinaParadaManager.updateMaquinaParada(
+      idMaquinaParada,
+      body
+    );
 
-  return res.json(data);
-});
+    if (error != null) return res.status(404).json(error);
+
+    return res.json(data);
+  }
+);
+
+ruta.delete(
+  "/maquinaParada/:idMaquina",
+  userExtractor([allPermissions.produccion, allPermissions.inyectora]),
+  async (req, res) => {
+    const idMaquina = req.params.idMaquina;
+    const { data, error } = await maquinaParadaManager.deleteMaquinaParada(
+      idMaquina
+    );
+
+    if (error != null) return res.status(404).json(error);
+
+    return res.json(data);
+  }
+);
 
 export default ruta;

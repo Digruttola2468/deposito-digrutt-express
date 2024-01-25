@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { inventarioManager } from "../index.js";
 
-import userExtractor, { auth } from "../middleware/userExtractor.js";
+import userExtractor from "../middleware/userExtractor.js";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";
 
 const router = Router();

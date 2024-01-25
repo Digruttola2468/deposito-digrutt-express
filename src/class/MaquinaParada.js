@@ -22,7 +22,7 @@ export default class MaquinaParada {
   }
 
   getOneMaquinaParada(id) {
-    return this.listMaquinaParada.find(elem => elem.id === id)
+    return this.listMaquinaParada.find((elem) => elem.id === id);
   }
 
   getLength = () => this.listMaquinaParada.length;
@@ -48,8 +48,8 @@ export default class MaquinaParada {
     if (Number.isNaN(fechaDate.getDate()))
       return { error: { message: "Error en el formato de la Fecha" } };
 
-    if (fechaDate.getFullYear() < 2023) 
-        return { error: { message: "Error en el año agregado" } };
+    if (fechaDate.getFullYear() < 2023)
+      return { error: { message: "Error en el año agregado" } };
 
     const idMotivoMaquinaParadaInteger = parseInt(idMotivoMaquinaParada);
     const hrsInteger = parseInt(hrs);
@@ -78,16 +78,108 @@ export default class MaquinaParada {
     } catch (error) {
       console.log(error);
       if (error.errno == 1452)
-        return { error: { message: "No existe tanto como maquina o motivo maquina parada" } };
+        return {
+          error: {
+            message: "No existe tanto como maquina o motivo maquina parada",
+          },
+        };
       return { error: { message: "Something Wrong" } };
     }
   }
 
+  async updateMaquinaParada(idMaquinaParada, obj) {
+    const { hrs, fecha, idMotivoMaquinaParada, idMaquina } = obj;
+
+    let enviar = {
+      hrs: null,
+      fecha: null,
+      idMotivoMaquinaParada: null,
+      idMaquina: null,
+    };
+
+    if (hrs != null && hrs != "") {
+      const hrsInteger = parseInt(hrs);
+      if (!Number.isInteger(hrsInteger)) {
+        return {
+          error: {
+            message: "Campo hrs maquina parada no es numerico",
+            campo: "hrs",
+          },
+        };
+      }
+      enviar.hrs = hrsInteger;
+    }
+    if (fecha != null && fecha != "") {
+      const fechaDate = new Date(fecha);
+
+      if (Number.isNaN(fechaDate.getDate()))
+        return {
+          error: { message: "Error en el formato de la Fecha", campo: "fecha" },
+        };
+
+      enviar.fecha = fecha;
+    }
+    if (idMotivoMaquinaParada != null && idMotivoMaquinaParada != "") {
+      const motivoMaquinaParada = parseInt(idMotivoMaquinaParada);
+      if (!Number.isInteger(motivoMaquinaParada)) {
+        return {
+          error: {
+            message: "Ocurrio un error",
+            campo: "motivomaquinaparada",
+          },
+        };
+      }
+      enviar.idMotivoMaquinaParada = motivoMaquinaParada;
+    }
+
+    if (idMaquina != null && idMaquina != "") {
+      const idMaquinaInteger = parseInt(idMaquina);
+      if (!Number.isInteger(idMaquinaInteger)) {
+        return {
+          error: {
+            message: "Ocurrio un error",
+            campo: "maquina",
+          },
+        };
+      }
+      enviar.idMaquina = idMaquinaInteger;
+    }
+
+    //Update
+    try {
+      await con.query(
+        `
+      UPDATE maquinaParada
+        SET idMotivoMaquinaParada = IFNULL(?,idMotivoMaquinaParada),
+            hrs = IFNULL(?,hrs),
+            idMaquina = IFNULL(?,idMaquina),
+            fecha = IFNULL(?,fecha)
+        WHERE id = ?;`,
+        [
+          enviar.idMotivoMaquinaParada,
+          enviar.hrs,
+          enviar.idMaquina,
+          enviar.fecha,
+          idMaquinaParada
+        ]
+      );
+    } catch (error) {
+      return {
+        error: {
+          message: "No se logro actualizar",
+        },
+      };
+    }
+
+    return { data: { message: "Operacion exitosa" } };
+  }
+
   async deleteMaquinaParada(idMaquinaParada) {
     try {
-      const [result] = await con.query("DELETE FROM maquinaParada WHERE (`id` = ?);", [
-        idMaquinaParada,
-      ]);
+      const [result] = await con.query(
+        "DELETE FROM maquinaParada WHERE (`id` = ?);",
+        [idMaquinaParada]
+      );
 
       if (result.affectedRows >= 1)
         return {
@@ -98,6 +190,5 @@ export default class MaquinaParada {
       console.log(error);
       return { error: { message: "Something Wrong" } };
     }
-
   }
 }
