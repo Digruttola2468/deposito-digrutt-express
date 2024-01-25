@@ -36,7 +36,7 @@ export default class ProducionManager {
   }
 
   getRangeDateByNumMaquina(numMaquina, dateInit, dateEnd) {
-    console.log(dateInit,dateEnd,numMaquina);
+    console.log(dateInit, dateEnd, numMaquina);
     const rangeDateList = this.getRangeDateListProduccion(dateInit, dateEnd);
 
     const filterByNumMaquina = rangeDateList.filter(
@@ -268,5 +268,136 @@ export default class ProducionManager {
       console.log(error);
       return { error: { message: "Something Wrong" } };
     }
+  }
+
+  async updateProduccion(idProduccion, obj) {
+    const {
+      fecha,
+      num_maquina,
+      golpesReales,
+      piezasProducidas,
+      prom_golpeshora,
+    } = obj;
+
+    //Validamos que exista el de produccion
+    /*try {
+      const [rows] = await con.query("SELECT * FROM producion WHERE id=?", [
+        idProduccion,
+      ]);
+      if (!rows.length != 0)
+        return {
+          error: { message: "No se encontro la produccion seleccionada" },
+        };
+    } catch (error) {
+      return {
+        error: { message: "No se encontro la produccion seleccionada" },
+      };
+    }*/
+
+    let campusEnviar = {
+      fecha: null,
+      num_maquina: null,
+      golpesReales: null,
+      piezasProducidas: null,
+      prom_golpeshora: null,
+    };
+
+    if (fecha != null && fecha != "") {
+      const validarDate = new Date(fecha);
+
+      if (Number.isNaN(validarDate.getDate()))
+        return { error: { message: "Error en el formato de la Fecha" } };
+
+      campusEnviar.fecha = fecha;
+    }
+    if (num_maquina != null && num_maquina != "") {
+      const numMaquinaInteger = parseInt(num_maquina);
+
+      if (!Number.isInteger(numMaquinaInteger))
+        return { error: { message: "Campo Num Maquina No es un numero" } };
+
+      campusEnviar.num_maquina = numMaquinaInteger;
+    }
+    if (golpesReales != null && golpesReales != "") {
+      const golpesRealesInteger = parseInt(golpesReales);
+
+      if (!Number.isInteger(golpesRealesInteger))
+        return { error: { message: "Campo Golpes Reales No es un numero" } };
+
+      campusEnviar.golpesReales = golpesRealesInteger;
+    }
+    if (piezasProducidas != null && piezasProducidas != "") {
+      const piezasProducidasInteger = parseInt(piezasProducidas);
+
+      if (!Number.isInteger(piezasProducidasInteger))
+        return {
+          error: { message: "Campo Piezas Producidas No es un numero" },
+        };
+
+      campusEnviar.piezasProducidas = piezasProducidasInteger;
+    }
+    if (prom_golpeshora != null && prom_golpeshora != "") {
+      const promGolpesHoraInteger = parseInt(prom_golpeshora);
+
+      if (!Number.isInteger(promGolpesHoraInteger))
+        return { error: { message: "Campo Prom Golpes Hora No es un numero" } };
+
+      campusEnviar.prom_golpeshora = promGolpesHoraInteger;
+    }
+
+    //Update Produccion
+    try {
+      await con.query(
+        `
+      UPDATE producion
+        SET fecha = IFNULL(?,fecha),
+            num_maquina = IFNULL(?,num_maquina),
+            golpesReales = IFNULL(?,golpesReales),
+            piezasProducidas = IFNULL(?,piezasProducidas),
+            prom_golpeshora = IFNULL(?,prom_golpeshora)
+        WHERE id = ?;`,
+        [
+          campusEnviar.fecha,
+          campusEnviar.num_maquina,
+          campusEnviar.golpesReales,
+          campusEnviar.piezasProducidas,
+          campusEnviar.prom_golpeshora,
+          idProduccion,
+        ]
+      );
+    } catch (error) {
+      return { error: { message: "Ocurrio un error al actualizar" } };
+    }
+
+    return {data: {message: 'Operacion Exitosa'}}
+  }
+
+  async deleteProduccion(idProduccion) {
+    //Validar si existe el idProduccion
+    try {
+      const [rows] = await con.query("SELECT * FROM producion WHERE id=?", [
+        idProduccion,
+      ]);
+      if (rows.length != 0) {
+        try {
+          await con.query("DELETE FROM producion WHERE (`id` = ?);", [
+            idProduccion,
+          ]);
+        } catch (error) {
+          return { error: { message: "Ocurrio un error al eliminar" } };
+        }
+      } else
+        return {
+          error: { message: "No se encontro la produccion seleccionada" },
+        };
+    } catch (error) {
+      return {
+        error: { message: "No se encontro la produccion seleccionada" },
+      };
+    }
+
+    //Eliminar
+
+    return { data: { message: "Operacion Exitosa" } };
   }
 }
