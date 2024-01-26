@@ -6,7 +6,7 @@ import session from "express-session";
 import MySQLStore from "express-mysql-session";
 
 import { PORT } from "./config.js";
-import __dirname from './utils.js';
+import __dirname from "./utils.js";
 
 //ROUTES PRINCIPAL
 import localidad from "./routes/localidad.routes.js";
@@ -18,13 +18,13 @@ import inventario from "./routes/inventario.routes.js";
 import excel from "./routes/excel.routes.js";
 import facturaNegro from "./routes/facturaNegro.routes.js";
 import cloudinaryRoute from "./routes/cloudinary.routes.js";
-import views from './routes/views.routes.js';
-import producionRoute from './routes/producion.routes.js'
-import maquinaParadaRoute from './routes/MaquinaParada.routes.js';
-import matricesRoute from './routes/matrices.routes.js'
-import historialMatricesErrorRoute from './routes/historialErrorMatriz.routes.js'
-
-import motivoMaquinaParadaRoute from './routes/motivoMaquinaParada.routes.js'
+import views from "./routes/views.routes.js";
+import producionRoute from "./routes/producion.routes.js";
+import maquinaParadaRoute from "./routes/MaquinaParada.routes.js";
+import matricesRoute from "./routes/matrices.routes.js";
+import historialMatricesErrorRoute from "./routes/historialErrorMatriz.routes.js";
+import materiaPrimaRoute from "./routes/material.routes.js";
+import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
 
 //ROUTES PRODUCCION
 import clientes from "./routes/clientes.routes.js";
@@ -67,7 +67,7 @@ app.use(cors());
 
 const MysqlStorage = MySQLStore(session);
 
-const sessionStore = new MysqlStorage({},con);
+const sessionStore = new MysqlStorage({}, con);
 
 // Configurar el motor de plantillas
 app.engine("handlebars", handlebars.engine());
@@ -104,8 +104,6 @@ export const matricesManager = new Matrices();
 export const historialErrorMatrizManager = new HistorialMatriz();
 export const pedidosManager = new PedidosManager();
 
-
-
 //
 app.use("/api", indexRoute);
 app.use("/api", mercaderiaRoute);
@@ -114,14 +112,14 @@ app.use("/api", tipoProductoRoute);
 app.use("/api", inventario);
 app.use("/api", excel);
 app.use("/api", cloudinaryRoute);
-app.use('/api', maquinaParadaRoute);
-app.use('/api', matricesRoute);
-app.use('/api', PedidosRoute)
-
-app.use('/api', producionRoute);
+app.use("/api", maquinaParadaRoute);
+app.use("/api", matricesRoute);
+app.use("/api", PedidosRoute);
+app.use("/api", materiaPrimaRoute);
+app.use("/api", producionRoute);
 app.use("/api", clientes);
-app.use('/api', motivoMaquinaParadaRoute);
-app.use('/api', historialMatricesErrorRoute)
+app.use("/api", motivoMaquinaParadaRoute);
+app.use("/api", historialMatricesErrorRoute);
 
 app.use("/api", grafica);
 
