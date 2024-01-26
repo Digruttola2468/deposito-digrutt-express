@@ -168,6 +168,7 @@ export default class InventarioManager {
         idCliente,
         idCodMatriz,
         articulo,
+        ubicacion
       } = object;
 
       const findInventarioById = this.listInventario.find(
@@ -215,7 +216,8 @@ export default class InventarioManager {
                     stockCaja = IFNULL(?,stockCaja), 
                     idCliente = IFNULL(?,idCliente),
                     idCodMatriz = IFNULL(?,idCodMatriz),
-                    articulo = IFNULL(?,articulo)
+                    articulo = IFNULL(?,articulo),
+                    ubicacion = IFUNULL(?,ubicacion)
                 WHERE id = ?`,
         [
           nombre,
@@ -228,6 +230,7 @@ export default class InventarioManager {
           idCliente,
           idCodMatriz,
           articulo,
+          ubicacion,
           idInventario,
         ]
       );
