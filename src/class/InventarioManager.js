@@ -217,7 +217,7 @@ export default class InventarioManager {
                     idCliente = IFNULL(?,idCliente),
                     idCodMatriz = IFNULL(?,idCodMatriz),
                     articulo = IFNULL(?,articulo),
-                    ubicacion = IFUNULL(?,ubicacion)
+                    ubicacion = IFNULL(?,ubicacion)
                 WHERE id = ?`,
         [
           nombre,
