@@ -117,23 +117,22 @@ export default class ClientesManager {
 
   async updateCliente(idClientes, object) {
     try {
-      let { cliente, codigo, domicilio, localidad, mail, cuit } = object;
+      let { cliente, domicilio, localidad, mail, cuit } = object;
 
-      //Validar si el codigo o el cliente son los mismos
-      if (codigo != null || codigo == "") {
-        const repeatSameCodigo = this.listClientes.find(
-          (elem) => elem.codigo.toLowerCase() == codigo.toLowerCase()
-        );
-        if (repeatSameCodigo)
-          return { error: { message: "Ya existe ese Codigo" } };
-
-        if (codigo.length != 3)
-          return { error: { message: "El Codigo tiene que ser de 3 Digitos" } };
-      }
       if (cliente != null || cliente == "") {
+        const findClienteById = this.listClientes.find(
+          (elem) => elem.id == idClientes
+        );
+        //Validar q no se repita el cod.Producto
         const repeatSameCliente = this.listClientes.find(
           (elem) => elem.cliente.toLowerCase() == cliente.toLowerCase()
         );
+        //Validamos si existe ese nombre
+        if (repeatSameCliente) {
+          //Si existe, validar si es igual que el anterior
+          if (repeatSameCliente.cliente != findClienteById.cliente)
+            return { error: { message: "Ya existe ese Cod.Producto" } };
+        }
 
         if (repeatSameCliente)
           return { error: { message: "Ya existe ese Cliente" } };
