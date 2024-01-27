@@ -80,26 +80,15 @@ export default class InventarioManager {
         pesoUnidad,
         stockCaja,
         idCliente,
-        idCodMatriz,
-        articulo,
+        idCodMatriz
       } = object;
-      //Entrada - salida
-
+      
       //Validar Campos
       if (nombre == null || nombre == "")
         return { error: { message: "Campo Cod.Producto Vacio" } };
 
       if (descripcion == null || descripcion == "")
         return { error: { message: "Campo Descripcion Vacio" } };
-
-      if (articulo != null && articulo != "") {
-        //Validar que no se repita el Articulo ya que es unico
-        const findSameArticulo = this.listInventario.find(
-          (elem) => elem.articulo.toLowerCase() == articulo.toLowerCase()
-        );
-        if (findSameArticulo != null)
-          return { error: { message: "Ya existe ese Articulo" } };
-      }
 
       //Validar q no se repita el cod.Producto
       const findSameCodProducto = this.listInventario.find(
@@ -109,7 +98,7 @@ export default class InventarioManager {
         return { error: { message: "Ya existe ese Cod.Producto" } };
 
       const [rows] = await con.query(
-        "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idCliente,idCodMatriz,articulo,entrada,salida) VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ;",
+        "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idCliente,idCodMatriz,entrada,salida) VALUES (?,?,?,?,?,?,?,?,?,?,?) ;",
         [
           nombre,
           precio,
@@ -120,7 +109,6 @@ export default class InventarioManager {
           stockCaja,
           idCliente,
           idCodMatriz,
-          articulo,
           0,
           0,
         ]

@@ -45,39 +45,25 @@ export default class ClientesManager {
     let lenghtCliente = this.getLenghtClientes();
 
     if (lenghtCliente != 0) {
-      const id = lenghtCliente + 1;
+      const id = lenghtCliente + 3;
       try {
-        const { codigo, cliente, domicilio, idLocalidad, mail, cuit } = object;
+        const { cliente, domicilio, idLocalidad, mail, cuit } = object;
 
         if (cliente == null || cliente == "")
           return { error: { message: "Campo Cliente Vacio" } };
-
-        if (codigo == null || codigo == "")
-          return { error: { message: "Campo Codigo Vacio" } };
-
-        if (codigo.length != 3)
-          return { error: { message: "El Codigo tiene que ser de 3 Digitos" } };
 
         //Validar si el codigo o el cliente son los mismos
         const repeatSameCliente = this.listClientes.find(
           (elem) => elem.cliente.toLowerCase() == cliente.toLowerCase()
         );
 
-        const repeatSameCodigo = this.listClientes.find(
-          (elem) => elem.codigo.toLowerCase() == codigo.toLowerCase()
-        );
-
         if (repeatSameCliente != null)
           return { error: { message: "Ya existe ese Cliente" } };
 
-        if (repeatSameCodigo != null)
-          return { error: { message: "Ya existe ese Codigo" } };
-
         const [rows] = await con.query(
-          "INSERT INTO clientes (id,codigo,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?,?) ;",
+          "INSERT INTO clientes (id,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?) ;",
           [
             id,
-            codigo.toUpperCase(),
             cliente,
             domicilio,
             idLocalidad,
@@ -89,7 +75,6 @@ export default class ClientesManager {
         //add object at listClientes
         this.listClientes.push({
           id,
-          codigo,
           cliente,
           domicilio,
           idLocalidad,
@@ -100,7 +85,6 @@ export default class ClientesManager {
         return {
           data: {
             id,
-            codigo,
             cliente,
             domicilio,
             idLocalidad,
