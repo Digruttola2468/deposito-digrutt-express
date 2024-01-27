@@ -62,14 +62,7 @@ export default class ClientesManager {
 
         const [rows] = await con.query(
           "INSERT INTO clientes (id,cliente,domicilio,localidad,mail,cuit) VALUES (?,?,?,?,?,?) ;",
-          [
-            id,
-            cliente,
-            domicilio,
-            idLocalidad,
-            mail,
-            cuit,
-          ]
+          [id, cliente, domicilio, idLocalidad, mail, cuit]
         );
 
         //add object at listClientes
@@ -103,23 +96,22 @@ export default class ClientesManager {
     try {
       let { cliente, domicilio, localidad, mail, cuit } = object;
 
-      if (cliente != null || cliente == "") {
+      if (cliente != null && cliente != "") {
         const findClienteById = this.listClientes.find(
           (elem) => elem.id == idClientes
         );
-        //Validar q no se repita el cod.Producto
-        const repeatSameCliente = this.listClientes.find(
+        //Validar q no se repita el Cliente
+        const findSameCliente = this.listClientes.find(
           (elem) => elem.cliente.toLowerCase() == cliente.toLowerCase()
         );
+        console.log(findClienteById);
+        console.log(findSameCliente);
         //Validamos si existe ese nombre
-        if (repeatSameCliente) {
+        if (findSameCliente) {
           //Si existe, validar si es igual que el anterior
-          if (repeatSameCliente.cliente != findClienteById.cliente)
-            return { error: { message: "Ya existe ese Cod.Producto" } };
+          if (findSameCliente.cliente.toLowerCase() != findClienteById.cliente.toLowerCase())
+            return { error: { message: "Ya existe ese Cliente" } };
         }
-
-        if (repeatSameCliente)
-          return { error: { message: "Ya existe ese Cliente" } };
       }
 
       //Establecer a los string "" como nulos
@@ -131,13 +123,12 @@ export default class ClientesManager {
       const [result] = await con.query(
         `UPDATE clientes SET
               cliente = IFNULL(?,cliente),
-              codigo = IFNULL(?,codigo),
               domicilio = IFNULL(?,domicilio),
               localidad = IFNULL(?,localidad),
               mail = IFNULL(?,mail),
               cuit = IFNULL(?,cuit)
           WHERE id = ?`,
-        [cliente, codigo, domicilio, localidad, mail, cuit, idClientes]
+        [cliente, domicilio, localidad, mail, cuit, idClientes]
       );
 
       if (result.affectedRows === 0)
