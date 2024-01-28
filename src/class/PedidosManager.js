@@ -438,7 +438,7 @@ export default class PedidosManager {
 
     this.listPedidos = updatePedido;
 
-    return { data: { message: "Se actualizo con exito" } };
+    return { data: { message: "Se actualizo con exito", update: rows[0] } };
   }
 
   async deletePedido(idPedido) {
