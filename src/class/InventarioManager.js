@@ -90,6 +90,7 @@ export default class InventarioManager {
       if (descripcion == null || descripcion == "")
         return { error: { message: "Campo Descripcion Vacio" } };
 
+
       //Validar q no se repita el cod.Producto
       const findSameCodProducto = this.listInventario.find(
         (elem) => elem.nombre.toLowerCase() == nombre.toLowerCase()
@@ -105,7 +106,7 @@ export default class InventarioManager {
           descripcion,
           idcolor,
           idtipoproducto,
-          pesoUnidad,
+          pesoUnidad != "" ? pesoUnidad : null,
           stockCaja,
           idCliente,
           idCodMatriz,
@@ -125,7 +126,6 @@ export default class InventarioManager {
         stockCaja,
         idCliente,
         idCodMatriz,
-        articulo,
         entrada: 0,
         salida: 0,
         url_image: null,
