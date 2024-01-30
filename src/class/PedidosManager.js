@@ -3,20 +3,20 @@ import { clientesManager, inventarioManager } from "../index.js";
 
 export default class PedidosManager {
   constructor() {
-    this.listPedidos = [];
+    this.productsPedidos = [];
   }
 
   async getPedidos() {
     try {
       const [rows] = await con.query(
-        `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idinventario, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
+        `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idProduct, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
                 FROM pedidos 
-                    LEFT JOIN inventario on pedidos.idinventario = inventario.id
+                    LEFT JOIN inventario on pedidos.idProduct = inventario.id
                     LEFT JOIN clientes on pedidos.idcliente = clientes.id
                 ORDER BY pedidos.fecha_entrega DESC;`
       );
 
-      this.listPedidos = rows;
+      this.productsPedidos = rows;
 
       return { data: rows };
     } catch (error) {
@@ -26,37 +26,38 @@ export default class PedidosManager {
   }
 
   getOne(idPedido) {
-    return this.listPedidos.find((elem) => elem.id == idPedido);
+    return this.productsPedidos.find((elem) => elem.id == idPedido);
   }
 
-  getListByIdInventario(idInventario) {
-    return this.listPedidos.filter((elem) => elem.idinventario == idInventario);
+  getproductsByidProduct(idProduct) {
+    return this.productsPedidos.filter((elem) => elem.idProduct == idProduct);
   }
 
-  getListByIdCliente(idCliente) {
-    return this.listPedidos.filter((elem) => elem.idcliente == idCliente);
+  getproductsByIdCliente(idCliente) {
+    return this.productsPedidos.filter((elem) => elem.idcliente == idCliente);
   }
 
-  getListByIsDone(done) {
+  getproductsByIsDone(done) {
     if (done >= 1) {
-      return this.listPedidos.filter((elem) => elem.is_done >= done);
+      return this.productsPedidos.filter((elem) => elem.is_done >= done);
     }
     if (done <= 0) {
-      return this.listPedidos.filter((elem) => elem.is_done <= done);
+      return this.productsPedidos.filter((elem) => elem.is_done <= done);
     }
   }
 
   async postPedidos(object) {
-    const { idinventario, idcliente, stock, fecha_entrega } = object;
+    const { idProduct, idcliente, cantidadEnviar, fecha_entrega, ordenCompra } =
+      object;
 
     if (fecha_entrega == null || fecha_entrega == "")
       return {
         error: { message: "Campo Fecha Entrega Vacio", campo: "fecha" },
       };
 
-    if (idinventario == null || idinventario == "")
+    if (idProduct == null || idProduct == "")
       return {
-        error: { message: "Campo Cod Producto Vacio", campo: "idinventario" },
+        error: { message: "Campo Cod Producto Vacio", campo: "idProduct" },
       };
 
     if (idcliente == null || idcliente == "")
@@ -64,22 +65,22 @@ export default class PedidosManager {
         error: { message: "Campo Cliente Vacio", campo: "cliente" },
       };
 
-    if (stock == null || stock == "")
+    if (cantidadEnviar == null || cantidadEnviar == "")
       return {
         error: {
-          message: "Campo Stock Pedido Vacia",
-          campo: "stock",
+          message: "Campo cantidadEnviar Pedido Vacia",
+          campo: "cantidadEnviar",
         },
       };
 
-    const stockInteger = parseInt(stock);
+    const cantidadEnviarInteger = parseInt(cantidadEnviar);
 
     //Verificamos que sean de tipo Integer
-    if (!Number.isInteger(stockInteger))
+    if (!Number.isInteger(cantidadEnviarInteger))
       return {
         error: {
-          message: "Campo Stock Pedido No es un numero",
-          campo: "stock",
+          message: "Campo cantidadEnviar Pedido No es un numero",
+          campo: "cantidadEnviar",
         },
       };
 
@@ -91,12 +92,12 @@ export default class PedidosManager {
         error: { message: "Error en el formato de la Fecha", campo: "fecha" },
       };
 
-    //Verificar si existe el idInventario
-    if (!inventarioManager.existsIdInventario(idinventario))
+    //Verificar si existe el idProduct
+    if (!inventarioManager.existsidProduct(idProduct))
       return {
         error: {
           message: "No existe ese Cod Producto",
-          campo: "idinventario",
+          campo: "idProduct",
         },
       };
 
@@ -105,14 +106,14 @@ export default class PedidosManager {
       return {
         error: {
           message: "No existe ese Cod Producto",
-          campo: "idinventario",
+          campo: "idProduct",
         },
       };
 
     try {
       const [rows] = await con.query(
-        "INSERT INTO pedidos (`idinventario`, `idcliente`, `stock`, `fecha_entrega`) VALUES (?,?,?,?);",
-        [idinventario, idcliente, stock, fecha_entrega]
+        "INSERT INTO pedidos (`idProduct`, `idcliente`, `cantidadEnviar`, `fecha_entrega`, `ordenCompra`) VALUES (?,?,?,?,?);",
+        [idProduct, idcliente, cantidadEnviar, fecha_entrega, ordenCompra]
       );
       if (rows.affectedRows >= 1)
         return {
@@ -123,27 +124,48 @@ export default class PedidosManager {
       return { error: { message: "Something wrong" } };
     }
   }
+  /*{
+    "cantidadEnviar": "5574",
+    "idProduct": 13,
+    "id": 13,
+    "nombre": "oreja029",
+    "descripcion": "oreja (A) grande negro x 400 unid ",
+    "idcliente": 1,
+    "urlImage": null,
+    "entrada": 2400,
+    "salida": 0,
+    "articulo": "AXE009OGN",
+    "cliente": "axel"
+},*/
+  async postListPedidos(object) {
+    const { fechaEntrega, idCliente, nroOrden, products } = object;
 
-  async postListPedidos(list) {
+    if (fechaEntrega == null || fechaEntrega == "")
+      return { error: { message: "Campo Fecha Vacio" } };
+
+    if (idCliente == null || idCliente == "")
+      return { error: { message: "Campo Cliente Vacio" } };
+
+    if (products == null || products.length == 0)
+      return { error: { message: "No seleccionaste ningun producto" } };
+
+    if (!Array.isArray(products))
+      return { error: { message: "Algo paso con la products" } };
+
+    const fechaDate = new Date(fecha);
+
+    if (Number.isNaN(fechaDate.getDate()))
+      return { error: { message: "Error en el formato de la Fecha" } };
+
     //Verificamos que este todo correcto
-    let verify = [{ idInventario: null }];
-    for (let i = 0; i < list.length; i++) {
-      const { idinventario, idcliente, stock, fecha_entrega } = list[i];
+    for (let i = 0; i < products.length; i++) {
+      const { idProduct, idcliente, cantidadEnviar } = products[i];
 
-      if (fecha_entrega == null || fecha_entrega == "")
-        return {
-          error: {
-            message: "Campo Fecha Entrega Vacio",
-            campo: "fecha",
-            index: i,
-          },
-        };
-
-      if (idinventario == null || idinventario == "")
+      if (idProduct == null || idProduct == "")
         return {
           error: {
             message: "Campo Cod Producto Vacio",
-            campo: "idinventario",
+            campo: "idProduct",
             index: i,
           },
         };
@@ -153,45 +175,33 @@ export default class PedidosManager {
           error: { message: "Campo Cliente Vacio", campo: "cliente", index: i },
         };
 
-      if (stock == null || stock == "")
+      if (cantidadEnviar == null || cantidadEnviar == "")
         return {
           error: {
-            message: "Campo Stock Pedido Vacia",
-            campo: "stock",
+            message: "Campo cantidadEnviar Pedido Vacia",
+            campo: "cantidadEnviar",
             index: i,
           },
         };
 
-      const stockInteger = parseInt(stock);
+      const cantidadEnviarInteger = parseInt(cantidadEnviar);
 
       //Verificamos que sean de tipo Integer
-      if (!Number.isInteger(stockInteger))
+      if (!Number.isInteger(cantidadEnviarInteger))
         return {
           error: {
-            message: "Campo Stock Pedido No es un numero",
-            campo: "stock",
+            message: "Campo Cantidad Enviar No es un numerico",
+            campo: "cantidadEnviar",
             index: i,
           },
         };
 
-      //Convertimos la fecha ingresada a tipo Date
-      const fechaDate = new Date(fecha_entrega);
-
-      if (Number.isNaN(fechaDate.getDate()))
-        return {
-          error: {
-            message: "Error en el formato de la Fecha",
-            campo: "fecha",
-            index: i,
-          },
-        };
-
-      //Verificar si existe el idInventario
-      if (!inventarioManager.existsIdInventario(idinventario))
+      //Verificar si existe el idProduct
+      if (!inventarioManager.existsidProduct(idProduct))
         return {
           error: {
             message: "No existe ese Cod Producto",
-            campo: "idinventario",
+            campo: "idProduct",
             index: i,
           },
         };
@@ -200,37 +210,24 @@ export default class PedidosManager {
       if (!clientesManager.existsIdCliente(idcliente))
         return {
           error: {
-            message: "No existe ese Cod Producto",
-            campo: "idinventario",
+            message: "No existe ese Cliente",
+            campo: "cliente",
             index: i,
           },
         };
-
-      const findIdInventario = verify.find(
-        (elem) => elem.idInventario == element.idInventario
-      );
-
-      if (findIdInventario)
-        return {
-          error: {
-            message: "Se repite el Cod Producto",
-            index: i,
-            campo: "idinventario",
-          },
-        };
-
-      //Agregamos el idInventario para luego validar el siguiente
-      verify.push({
-        idInventario: element.idInventario,
-      });
     }
 
     //Agregamos a la base de datos
-    for (let i = 0; i < list.length; i++) {
-      const element = list[i];
-
+    for (let i = 0; i < products.length; i++) {
+      const element = products[i];
       try {
-        const { data, error } = await this.postPedidos(element);
+        const { data, error } = await this.postPedidos({
+          fecha_entrega: fechaEntrega,
+          idCliente,
+          ordenCompra: nroOrden,
+          cantidadEnviar: element.cantidadEnviar,
+          idProduct: element.id,
+        });
         if (error) return { error };
       } catch (err) {
         return { error: "something wrong" };
@@ -252,7 +249,7 @@ export default class PedidosManager {
           return {
             error: {
               message: "No es Numerico",
-              campo: "stock",
+              campo: "cantidadEnviar",
             },
           };
         }
@@ -281,26 +278,31 @@ export default class PedidosManager {
     };
   }
 
-  async updatePedidosStockDisposicion(idPedido, stockDisposicion) {
-    if (stockDisposicion) {
-      if (stockDisposicion != "") {
-        const stockDisposicionInteger = parseInt(stockDisposicion);
-        if (!Number.isInteger(stockDisposicionInteger)) {
+  async updatePedidoscantidadEnviarDisposicion(
+    idPedido,
+    cantidadEnviarDisposicion
+  ) {
+    if (cantidadEnviarDisposicion) {
+      if (cantidadEnviarDisposicion != "") {
+        const cantidadEnviarDisposicionInteger = parseInt(
+          cantidadEnviarDisposicion
+        );
+        if (!Number.isInteger(cantidadEnviarDisposicionInteger)) {
           return {
             error: {
               message: "No es Numerico",
-              campo: "stockDisposicion",
+              campo: "cantidadEnviarDisposicion",
             },
           };
         }
 
-        //Validar el tope del stockDisposicion
+        //Validar el tope del cantidadEnviarDisposicion
 
         const [result] = await con.query(
           `UPDATE pedidos
-              SET stockDisposicion = IFNULL(?, stockDisposicion)
+              SET cantidadEnviarDisposicion = IFNULL(?, cantidadEnviarDisposicion)
               WHERE id = ?;`,
-          [stockDisposicionInteger, idPedido]
+          [cantidadEnviarDisposicionInteger, idPedido]
         );
 
         if (result.affectedRows === 0)
@@ -322,18 +324,18 @@ export default class PedidosManager {
 
   async updatePedidos(idPedido, object) {
     const {
-      idinventario,
+      idProduct,
       idcliente,
-      stock,
+      cantidadEnviar,
       fecha_entrega,
       ordenCompra,
       cantidadEnviada,
     } = object;
 
     if (
-      idinventario == "" &&
+      idProduct == "" &&
       idcliente == "" &&
-      stock == "" &&
+      cantidadEnviar == "" &&
       fecha_entrega == ""
     ) {
       return {
@@ -343,9 +345,9 @@ export default class PedidosManager {
       };
     }
     if (
-      idinventario == null &&
+      idProduct == null &&
       idcliente == null &&
-      stock == null &&
+      cantidadEnviar == null &&
       fecha_entrega == null
     ) {
       return {
@@ -356,9 +358,9 @@ export default class PedidosManager {
     }
 
     let enviar = {
-      idinventario: null,
+      idProduct: null,
       idcliente: null,
-      stock: null,
+      cantidadEnviar: null,
       fecha_entrega: null,
       ordenCompra: null,
       cantidadEnviada: null,
@@ -379,18 +381,18 @@ export default class PedidosManager {
         enviar.fecha_entrega = fecha_entrega;
       }
     }
-    if (idinventario) {
-      if (idinventario != "") {
-        //Verificar si existe el idInventario
-        if (!inventarioManager.existsIdInventario(idinventario)) {
+    if (idProduct) {
+      if (idProduct != "") {
+        //Verificar si existe el idProduct
+        if (!inventarioManager.existsidProduct(idProduct)) {
           return {
             error: {
               message: "No existe ese Cod Producto",
-              campo: "idinventario",
+              campo: "idProduct",
             },
           };
         }
-        enviar.idinventario = idinventario;
+        enviar.idProduct = idProduct;
       }
     }
 
@@ -400,7 +402,7 @@ export default class PedidosManager {
           return {
             error: {
               message: "No existe ese Cod Producto",
-              campo: "idinventario",
+              campo: "idProduct",
             },
           };
         }
@@ -408,18 +410,18 @@ export default class PedidosManager {
       }
     }
 
-    if (stock) {
-      if (stock != "") {
-        const stockInteger = parseInt(stock);
-        if (!Number.isInteger(stockInteger)) {
+    if (cantidadEnviar) {
+      if (cantidadEnviar != "") {
+        const cantidadEnviarInteger = parseInt(cantidadEnviar);
+        if (!Number.isInteger(cantidadEnviarInteger)) {
           return {
             error: {
-              message: "Campo Stock Pedido No es un numero",
-              campo: "stock",
+              message: "Campo cantidadEnviar Pedido No es un numero",
+              campo: "cantidadEnviar",
             },
           };
         }
-        enviar.stock = stockInteger;
+        enviar.cantidadEnviar = cantidadEnviarInteger;
       }
     }
 
@@ -440,17 +442,17 @@ export default class PedidosManager {
 
     const [result] = await con.query(
       `UPDATE pedidos
-          SET idinventario = IFNULL(?,idinventario),
+          SET idProduct = IFNULL(?,idProduct),
               idcliente = IFNULL(?,idcliente),
-              stock = IFNULL(?,stock),
+              cantidadEnviar = IFNULL(?,cantidadEnviar),
               fecha_entrega = IFNULL(?,fecha_entrega),
               ordenCompra = IFNULL(?,ordenCompra),
               cantidad_enviada = IFNULL(?,cantidad_enviada)
           WHERE id = ?;`,
       [
-        enviar.idinventario,
+        enviar.idProduct,
         enviar.idcliente,
-        enviar.stock,
+        enviar.cantidadEnviar,
         enviar.fecha_entrega,
         enviar.ordenCompra,
         enviar.cantidadEnviada,
@@ -462,24 +464,124 @@ export default class PedidosManager {
       return { error: { message: "No se encontro el pedido" } };
 
     const [rows] = await con.query(
-      `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idinventario, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
+      `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idProduct, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
                 FROM pedidos 
-                    LEFT JOIN inventario on pedidos.idinventario = inventario.id
+                    LEFT JOIN inventario on pedidos.idProduct = inventario.id
                     LEFT JOIN clientes on pedidos.idcliente = clientes.id
                 WHERE pedidos.id=?;`,
       [idPedido]
     );
 
-    //Update listPedidos
-    const updatePedido = this.listPedidos.map((elem) => {
+    //Update productsPedidos
+    const updatePedido = this.productsPedidos.map((elem) => {
       if (elem.id == idPedido) return rows[0];
       else return elem;
     });
 
-    this.listPedidos = updatePedido;
+    this.productsPedidos = updatePedido;
 
     return { data: { message: "Se actualizo con exito", update: rows[0] } };
   }
+
+  /**{
+    "fechaEntrega": "2024-01-29",
+    "idCliente": 1,
+    "nroOrden": "OC 1707",
+    "products": [
+        {
+            "cantidadEnviar": "500",
+            "idProduct": 3,
+            "id": 3,
+            "nombre": "arandela334",
+            "descripcion": "arandela plastica nueva axel x 2500",
+            "idcliente": 1,
+            "urlImage": null,
+            "entrada": 23520,
+            "salida": 5000,
+            "articulo": "AXE043AP0",
+            "cliente": "axel"
+        },
+        {
+            "cantidadEnviar": "541",
+            "idProduct": 11,
+            "id": 11,
+            "nombre": "biela020",
+            "descripcion": "biela gira motor x 2500 unid",
+            "idcliente": 1,
+            "urlImage": "https://res.cloudinary.com/dn8bvip6g/image/upload/v1701556826/images/biela020.png",
+            "entrada": 50000,
+            "salida": 15000,
+            "articulo": "AXE032BM0",
+            "cliente": "axel"
+        },
+        {
+            "cantidadEnviar": "124",
+            "idProduct": 12,
+            "id": 12,
+            "nombre": "oreja028",
+            "descripcion": "oreja (A) grande marron x 400 unid ",
+            "idcliente": 1,
+            "urlImage": null,
+            "entrada": 1200,
+            "salida": 0,
+            "articulo": "AXE009OGM",
+            "cliente": "axel"
+        },
+        {
+            "cantidadEnviar": "5574",
+            "idProduct": 13,
+            "id": 13,
+            "nombre": "oreja029",
+            "descripcion": "oreja (A) grande negro x 400 unid ",
+            "idcliente": 1,
+            "urlImage": null,
+            "entrada": 2400,
+            "salida": 0,
+            "articulo": "AXE009OGN",
+            "cliente": "axel"
+        },
+        {
+            "cantidadEnviar": "1547",
+            "idProduct": 14,
+            "id": 14,
+            "nombre": "oreja030",
+            "descripcion": "oreja (T) grande blanco  x 500 unid ",
+            "idcliente": 1,
+            "urlImage": null,
+            "entrada": 3600,
+            "salida": 600,
+            "articulo": "AXE009OGB",
+            "cliente": "axel"
+        },
+        {
+            "cantidadEnviar": "5471",
+            "idProduct": 15,
+            "id": 15,
+            "nombre": "oreja031",
+            "descripcion": "oreja (T) grande negro x 400 unid ",
+            "idcliente": 1,
+            "urlImage": null,
+            "entrada": 2400,
+            "salida": 0,
+            "articulo": "AXE009OGT",
+            "cliente": "axel"
+        },
+        {
+            "cantidadEnviar": "15474",
+            "idProduct": 16,
+            "id": 16,
+            "nombre": "oreja032",
+            "descripcion": "oreja (T) grande marron x 400 unid ",
+            "idcliente": 1,
+            "urlImage": null,
+            "entrada": 1200,
+            "salida": 0,
+            "articulo": "AXE009OTG",
+            "cliente": "axel"
+        }
+    ]
+} */
+  async postproductsPedidos(object) {}
 
   async deletePedido(idPedido) {
     try {
@@ -487,10 +589,10 @@ export default class PedidosManager {
         idPedido,
       ]);
 
-      const deleteByIdPedido = this.listPedidos.filter(
+      const deleteByIdPedido = this.productsPedidos.filter(
         (elem) => elem.id != idPedido
       );
-      this.listPedidos = deleteByIdPedido;
+      this.productsPedidos = deleteByIdPedido;
 
       if (result.affectedRows >= 1)
         return {
