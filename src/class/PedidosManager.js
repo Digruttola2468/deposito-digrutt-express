@@ -165,11 +165,6 @@ export default class PedidosManager {
           },
         };
 
-      if (idcliente == null || idcliente == "")
-        return {
-          error: { message: "Campo Cliente Vacio", campo: "cliente", index: i },
-        };
-
       if (cantidadEnviar == null || cantidadEnviar == "")
         return {
           error: {
