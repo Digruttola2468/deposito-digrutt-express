@@ -306,7 +306,9 @@ export default class PedidosManager {
         if (result.affectedRows === 0)
           return { error: { message: "No se encontro el pedido" } };
 
-        return { data: { message: "Se actulizo correctamente la cantidad faltante " } };
+        return {
+          data: { message: "Se actulizo correctamente la cantidad faltante " },
+        };
       }
     }
 
@@ -319,19 +321,36 @@ export default class PedidosManager {
   }
 
   async updatePedidos(idPedido, object) {
-    const { idinventario, idcliente, stock, fecha_entrega } = object;
+    const {
+      idinventario,
+      idcliente,
+      stock,
+      fecha_entrega,
+      ordenCompra,
+      cantidadEnviada,
+    } = object;
 
-    if (idinventario == "" && idcliente == "" && stock == "" && fecha_entrega == "") {
+    if (
+      idinventario == "" &&
+      idcliente == "" &&
+      stock == "" &&
+      fecha_entrega == ""
+    ) {
       return {
         error: {
-          message: "Campos Vacios"
+          message: "Campos Vacios",
         },
       };
     }
-    if (idinventario == null && idcliente == null && stock == null && fecha_entrega == null) {
+    if (
+      idinventario == null &&
+      idcliente == null &&
+      stock == null &&
+      fecha_entrega == null
+    ) {
       return {
         error: {
-          message: "Campos Vacios"
+          message: "Campos Vacios",
         },
       };
     }
@@ -341,6 +360,8 @@ export default class PedidosManager {
       idcliente: null,
       stock: null,
       fecha_entrega: null,
+      ordenCompra: null,
+      cantidadEnviada: null,
     };
 
     if (fecha_entrega) {
@@ -402,18 +423,37 @@ export default class PedidosManager {
       }
     }
 
+    if (cantidadEnviada && cantidadEnviada != "") {
+      const cantidadEnviadaInteger = parseInt(cantidadEnviada);
+      if (!Number.isInteger(cantidadEnviadaInteger)) {
+        return {
+          error: {
+            message: "Campo Cantidad Enviada No es un numero",
+            campo: "cantidadEnviada",
+          },
+        };
+      }
+      enviar.cantidadEnviada = cantidadEnviadaInteger;
+    }
+
+    if (ordenCompra && ordenCompra != "") enviar.ordenCompra = ordenCompra;
+
     const [result] = await con.query(
       `UPDATE pedidos
           SET idinventario = IFNULL(?,idinventario),
               idcliente = IFNULL(?,idcliente),
               stock = IFNULL(?,stock),
-              fecha_entrega = IFNULL(?,fecha_entrega)
+              fecha_entrega = IFNULL(?,fecha_entrega),
+              ordenCompra = IFNULL(?,ordenCompra),
+              cantidad_enviada = IFNULL(?,cantidad_enviada)
           WHERE id = ?;`,
       [
         enviar.idinventario,
         enviar.idcliente,
         enviar.stock,
         enviar.fecha_entrega,
+        enviar.ordenCompra,
+        enviar.cantidadEnviada,
         idPedido,
       ]
     );
