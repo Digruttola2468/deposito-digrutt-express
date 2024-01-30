@@ -30,7 +30,9 @@ export default class PedidosManager {
   }
 
   getproductsByidInventario(idInventario) {
-    return this.productsPedidos.filter((elem) => elem.idInventario == idInventario);
+    return this.productsPedidos.filter(
+      (elem) => elem.idInventario == idInventario
+    );
   }
 
   getproductsByIdCliente(idCliente) {
@@ -47,8 +49,13 @@ export default class PedidosManager {
   }
 
   async postPedidos(object) {
-    const { idInventario, idcliente, cantidadEnviar, fecha_entrega, ordenCompra } =
-      object;
+    const {
+      idInventario,
+      idcliente,
+      cantidadEnviar,
+      fecha_entrega,
+      ordenCompra,
+    } = object;
 
     if (fecha_entrega == null || fecha_entrega == "")
       return {
@@ -266,50 +273,6 @@ export default class PedidosManager {
     };
   }
 
-  async updatePedidoscantidadEnviarDisposicion(
-    idPedido,
-    cantidadEnviarDisposicion
-  ) {
-    if (cantidadEnviarDisposicion) {
-      if (cantidadEnviarDisposicion != "") {
-        const cantidadEnviarDisposicionInteger = parseInt(
-          cantidadEnviarDisposicion
-        );
-        if (!Number.isInteger(cantidadEnviarDisposicionInteger)) {
-          return {
-            error: {
-              message: "No es Numerico",
-              campo: "cantidadEnviarDisposicion",
-            },
-          };
-        }
-
-        //Validar el tope del cantidadEnviarDisposicion
-
-        const [result] = await con.query(
-          `UPDATE pedidos
-              SET cantidadEnviarDisposicion = IFNULL(?, cantidadEnviarDisposicion)
-              WHERE id = ?;`,
-          [cantidadEnviarDisposicionInteger, idPedido]
-        );
-
-        if (result.affectedRows === 0)
-          return { error: { message: "No se encontro el pedido" } };
-
-        return {
-          data: { message: "Se actulizo correctamente la cantidad faltante " },
-        };
-      }
-    }
-
-    return {
-      error: {
-        message: "Something Wrong",
-        campo: "isDone",
-      },
-    };
-  }
-
   async updatePedidos(idPedido, object) {
     const {
       idInventario,
@@ -372,7 +335,7 @@ export default class PedidosManager {
     if (idInventario) {
       if (idInventario != "") {
         //Verificar si existe el idInventario
-        if (!inventarioManager.existsidInventario(idInventario)) {
+        if (!inventarioManager.existsIdInventario(idInventario)) {
           return {
             error: {
               message: "No existe ese Cod Producto",

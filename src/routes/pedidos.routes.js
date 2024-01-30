@@ -72,18 +72,8 @@ ruta.put("/pedidos/:idPedido", userExtractor([allPermissions.mercaderia, allPerm
 
 ruta.put("/pedidos/:idPedido/doneStock", userExtractor([allPermissions.mercaderia, allPermissions.oficina]), async (req, res) => {
   const idPedido = req.params.idPedido;
-  const { stockDisposicion, isDone } = req.body;
+  const {  isDone } = req.body;
 
-  if (stockDisposicion != null) {
-    const { data, error } = await pedidosManager.updatePedidosStockDisposicion(
-      idPedido,
-      stockDisposicion
-    );
-
-    if (error) return res.status(404).json(error);
-
-    return res.json(data);
-  }
   if (isDone != null) {
     const { data, error } = await pedidosManager.updatePedidosIsDone(
       idPedido,
