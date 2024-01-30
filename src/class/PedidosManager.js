@@ -124,19 +124,7 @@ export default class PedidosManager {
       return { error: { message: "Something wrong" } };
     }
   }
-  /*{
-    "cantidadEnviar": "5574",
-    "idProduct": 13,
-    "id": 13,
-    "nombre": "oreja029",
-    "descripcion": "oreja (A) grande negro x 400 unid ",
-    "idcliente": 1,
-    "urlImage": null,
-    "entrada": 2400,
-    "salida": 0,
-    "articulo": "AXE009OGN",
-    "cliente": "axel"
-},*/
+
   async postListPedidos(object) {
     const { fechaEntrega, idCliente, nroOrden, products } = object;
 
@@ -442,9 +430,9 @@ export default class PedidosManager {
 
     const [result] = await con.query(
       `UPDATE pedidos
-          SET idInventario = IFNULL(?,idInventario),
+          SET idinventario = IFNULL(?,idinventario),
               idcliente = IFNULL(?,idcliente),
-              cantidadEnviar = IFNULL(?,cantidadEnviar),
+              stock = IFNULL(?,stock),
               fecha_entrega = IFNULL(?,fecha_entrega),
               ordenCompra = IFNULL(?,ordenCompra),
               cantidad_enviada = IFNULL(?,cantidad_enviada)
