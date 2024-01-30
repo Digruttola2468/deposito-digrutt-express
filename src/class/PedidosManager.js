@@ -9,9 +9,9 @@ export default class PedidosManager {
   async getPedidos() {
     try {
       const [rows] = await con.query(
-        `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idProduct, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
+        `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idInventario, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
                 FROM pedidos 
-                    LEFT JOIN inventario on pedidos.idProduct = inventario.id
+                    LEFT JOIN inventario on pedidos.idinventario = inventario.id
                     LEFT JOIN clientes on pedidos.idcliente = clientes.id
                 ORDER BY pedidos.fecha_entrega DESC;`
       );
@@ -29,8 +29,8 @@ export default class PedidosManager {
     return this.productsPedidos.find((elem) => elem.id == idPedido);
   }
 
-  getproductsByidProduct(idProduct) {
-    return this.productsPedidos.filter((elem) => elem.idProduct == idProduct);
+  getproductsByidInventario(idInventario) {
+    return this.productsPedidos.filter((elem) => elem.idInventario == idInventario);
   }
 
   getproductsByIdCliente(idCliente) {
@@ -47,7 +47,7 @@ export default class PedidosManager {
   }
 
   async postPedidos(object) {
-    const { idProduct, idcliente, cantidadEnviar, fecha_entrega, ordenCompra } =
+    const { idInventario, idcliente, cantidadEnviar, fecha_entrega, ordenCompra } =
       object;
 
     if (fecha_entrega == null || fecha_entrega == "")
@@ -55,9 +55,9 @@ export default class PedidosManager {
         error: { message: "Campo Fecha Entrega Vacio", campo: "fecha" },
       };
 
-    if (idProduct == null || idProduct == "")
+    if (idInventario == null || idInventario == "")
       return {
-        error: { message: "Campo Cod Producto Vacio", campo: "idProduct" },
+        error: { message: "Campo Cod Producto Vacio", campo: "idInventario" },
       };
 
     if (idcliente == null || idcliente == "")
@@ -92,12 +92,12 @@ export default class PedidosManager {
         error: { message: "Error en el formato de la Fecha", campo: "fecha" },
       };
 
-    //Verificar si existe el idProduct
-    if (!inventarioManager.existsidProduct(idProduct))
+    //Verificar si existe el idInventario
+    if (!inventarioManager.existsidInventario(idInventario))
       return {
         error: {
           message: "No existe ese Cod Producto",
-          campo: "idProduct",
+          campo: "idInventario",
         },
       };
 
@@ -106,14 +106,14 @@ export default class PedidosManager {
       return {
         error: {
           message: "No existe ese Cod Producto",
-          campo: "idProduct",
+          campo: "idInventario",
         },
       };
 
     try {
       const [rows] = await con.query(
-        "INSERT INTO pedidos (`idProduct`, `idcliente`, `cantidadEnviar`, `fecha_entrega`, `ordenCompra`) VALUES (?,?,?,?,?);",
-        [idProduct, idcliente, cantidadEnviar, fecha_entrega, ordenCompra]
+        "INSERT INTO pedidos (`idInventario`, `idcliente`, `cantidadEnviar`, `fecha_entrega`, `ordenCompra`) VALUES (?,?,?,?,?);",
+        [idInventario, idcliente, cantidadEnviar, fecha_entrega, ordenCompra]
       );
       if (rows.affectedRows >= 1)
         return {
@@ -165,7 +165,7 @@ export default class PedidosManager {
         return {
           error: {
             message: "Campo Cod Producto Vacio",
-            campo: "idProduct",
+            campo: "idInventario",
             index: i,
           },
         };
@@ -196,12 +196,12 @@ export default class PedidosManager {
           },
         };
 
-      //Verificar si existe el idProduct
-      if (!inventarioManager.existsidProduct(idProduct))
+      //Verificar si existe el idInventario
+      if (!inventarioManager.existsIdInventario(idProduct))
         return {
           error: {
             message: "No existe ese Cod Producto",
-            campo: "idProduct",
+            campo: "idInventario",
             index: i,
           },
         };
@@ -226,7 +226,7 @@ export default class PedidosManager {
           idCliente,
           ordenCompra: nroOrden,
           cantidadEnviar: element.cantidadEnviar,
-          idProduct: element.id,
+          idInventario: element.id,
         });
         if (error) return { error };
       } catch (err) {
@@ -324,7 +324,7 @@ export default class PedidosManager {
 
   async updatePedidos(idPedido, object) {
     const {
-      idProduct,
+      idInventario,
       idcliente,
       cantidadEnviar,
       fecha_entrega,
@@ -333,7 +333,7 @@ export default class PedidosManager {
     } = object;
 
     if (
-      idProduct == "" &&
+      idInventario == "" &&
       idcliente == "" &&
       cantidadEnviar == "" &&
       fecha_entrega == ""
@@ -345,7 +345,7 @@ export default class PedidosManager {
       };
     }
     if (
-      idProduct == null &&
+      idInventario == null &&
       idcliente == null &&
       cantidadEnviar == null &&
       fecha_entrega == null
@@ -358,7 +358,7 @@ export default class PedidosManager {
     }
 
     let enviar = {
-      idProduct: null,
+      idInventario: null,
       idcliente: null,
       cantidadEnviar: null,
       fecha_entrega: null,
@@ -381,18 +381,18 @@ export default class PedidosManager {
         enviar.fecha_entrega = fecha_entrega;
       }
     }
-    if (idProduct) {
-      if (idProduct != "") {
-        //Verificar si existe el idProduct
-        if (!inventarioManager.existsidProduct(idProduct)) {
+    if (idInventario) {
+      if (idInventario != "") {
+        //Verificar si existe el idInventario
+        if (!inventarioManager.existsidInventario(idInventario)) {
           return {
             error: {
               message: "No existe ese Cod Producto",
-              campo: "idProduct",
+              campo: "idInventario",
             },
           };
         }
-        enviar.idProduct = idProduct;
+        enviar.idInventario = idInventario;
       }
     }
 
@@ -402,7 +402,7 @@ export default class PedidosManager {
           return {
             error: {
               message: "No existe ese Cod Producto",
-              campo: "idProduct",
+              campo: "idInventario",
             },
           };
         }
@@ -442,7 +442,7 @@ export default class PedidosManager {
 
     const [result] = await con.query(
       `UPDATE pedidos
-          SET idProduct = IFNULL(?,idProduct),
+          SET idInventario = IFNULL(?,idInventario),
               idcliente = IFNULL(?,idcliente),
               cantidadEnviar = IFNULL(?,cantidadEnviar),
               fecha_entrega = IFNULL(?,fecha_entrega),
@@ -450,7 +450,7 @@ export default class PedidosManager {
               cantidad_enviada = IFNULL(?,cantidad_enviada)
           WHERE id = ?;`,
       [
-        enviar.idProduct,
+        enviar.idInventario,
         enviar.idcliente,
         enviar.cantidadEnviar,
         enviar.fecha_entrega,
@@ -464,9 +464,9 @@ export default class PedidosManager {
       return { error: { message: "No se encontro el pedido" } };
 
     const [rows] = await con.query(
-      `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idProduct, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
+      `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idInventario, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
                 FROM pedidos 
-                    LEFT JOIN inventario on pedidos.idProduct = inventario.id
+                    LEFT JOIN inventario on pedidos.idInventario = inventario.id
                     LEFT JOIN clientes on pedidos.idcliente = clientes.id
                 WHERE pedidos.id=?;`,
       [idPedido]
@@ -483,104 +483,6 @@ export default class PedidosManager {
     return { data: { message: "Se actualizo con exito", update: rows[0] } };
   }
 
-  /**{
-    "fechaEntrega": "2024-01-29",
-    "idCliente": 1,
-    "nroOrden": "OC 1707",
-    "products": [
-        {
-            "cantidadEnviar": "500",
-            "idProduct": 3,
-            "id": 3,
-            "nombre": "arandela334",
-            "descripcion": "arandela plastica nueva axel x 2500",
-            "idcliente": 1,
-            "urlImage": null,
-            "entrada": 23520,
-            "salida": 5000,
-            "articulo": "AXE043AP0",
-            "cliente": "axel"
-        },
-        {
-            "cantidadEnviar": "541",
-            "idProduct": 11,
-            "id": 11,
-            "nombre": "biela020",
-            "descripcion": "biela gira motor x 2500 unid",
-            "idcliente": 1,
-            "urlImage": "https://res.cloudinary.com/dn8bvip6g/image/upload/v1701556826/images/biela020.png",
-            "entrada": 50000,
-            "salida": 15000,
-            "articulo": "AXE032BM0",
-            "cliente": "axel"
-        },
-        {
-            "cantidadEnviar": "124",
-            "idProduct": 12,
-            "id": 12,
-            "nombre": "oreja028",
-            "descripcion": "oreja (A) grande marron x 400 unid ",
-            "idcliente": 1,
-            "urlImage": null,
-            "entrada": 1200,
-            "salida": 0,
-            "articulo": "AXE009OGM",
-            "cliente": "axel"
-        },
-        {
-            "cantidadEnviar": "5574",
-            "idProduct": 13,
-            "id": 13,
-            "nombre": "oreja029",
-            "descripcion": "oreja (A) grande negro x 400 unid ",
-            "idcliente": 1,
-            "urlImage": null,
-            "entrada": 2400,
-            "salida": 0,
-            "articulo": "AXE009OGN",
-            "cliente": "axel"
-        },
-        {
-            "cantidadEnviar": "1547",
-            "idProduct": 14,
-            "id": 14,
-            "nombre": "oreja030",
-            "descripcion": "oreja (T) grande blanco  x 500 unid ",
-            "idcliente": 1,
-            "urlImage": null,
-            "entrada": 3600,
-            "salida": 600,
-            "articulo": "AXE009OGB",
-            "cliente": "axel"
-        },
-        {
-            "cantidadEnviar": "5471",
-            "idProduct": 15,
-            "id": 15,
-            "nombre": "oreja031",
-            "descripcion": "oreja (T) grande negro x 400 unid ",
-            "idcliente": 1,
-            "urlImage": null,
-            "entrada": 2400,
-            "salida": 0,
-            "articulo": "AXE009OGT",
-            "cliente": "axel"
-        },
-        {
-            "cantidadEnviar": "15474",
-            "idProduct": 16,
-            "id": 16,
-            "nombre": "oreja032",
-            "descripcion": "oreja (T) grande marron x 400 unid ",
-            "idcliente": 1,
-            "urlImage": null,
-            "entrada": 1200,
-            "salida": 0,
-            "articulo": "AXE009OTG",
-            "cliente": "axel"
-        }
-    ]
-} */
   async postproductsPedidos(object) {}
 
   async deletePedido(idPedido) {
