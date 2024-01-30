@@ -100,7 +100,7 @@ export default class PedidosManager {
       };
 
     //Verificar si existe el idInventario
-    if (!inventarioManager.existsidInventario(idInventario))
+    if (!inventarioManager.existsIdInventario(idInventario))
       return {
         error: {
           message: "No existe ese Cod Producto",
@@ -112,8 +112,8 @@ export default class PedidosManager {
     if (!clientesManager.existsIdCliente(idcliente))
       return {
         error: {
-          message: "No existe ese Cod Producto",
-          campo: "idInventario",
+          message: "No existe ese Cliente",
+          campo: "cliente",
         },
       };
 
@@ -128,6 +128,7 @@ export default class PedidosManager {
         };
       else return { error: { message: "No se Agrego" } };
     } catch (error) {
+      console.log(error);
       return { error: { message: "Something wrong" } };
     }
   }
@@ -220,7 +221,7 @@ export default class PedidosManager {
         });
         if (error) return { error };
       } catch (err) {
-        return { error: "something wrong" };
+        return { error: "No se logro agregar" };
       }
     }
 
@@ -390,7 +391,7 @@ export default class PedidosManager {
       `UPDATE pedidos
           SET idinventario = IFNULL(?,idinventario),
               idcliente = IFNULL(?,idcliente),
-              stock = IFNULL(?,stock),
+              cantidadEnviar = IFNULL(?,cantidadEnviar),
               fecha_entrega = IFNULL(?,fecha_entrega),
               ordenCompra = IFNULL(?,ordenCompra),
               cantidad_enviada = IFNULL(?,cantidad_enviada)

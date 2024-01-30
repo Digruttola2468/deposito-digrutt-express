@@ -18,18 +18,18 @@ ruta.get("/pedidos/list/:value", userExtractor([allPermissions.mercaderia, allPe
   const id = req.params.value;
 
   if (order == "inventario") {
-    const result = pedidosManager.getListByIdInventario(id);
+    const result = pedidosManager.getproductsByidInventario(id);
     return res.json(result);
   }
   if (order == "clientes") {
-    const result = pedidosManager.getListByIdCliente(id);
+    const result = pedidosManager.getproductsByIdCliente(id);
     return res.json(result);
   }
   if (order == "done") {
-    const result = pedidosManager.getListByIsDone(id);
+    const result = pedidosManager.getproductsByIsDone(id);
     return res.json(result);
   }
-  const result = pedidosManager.getListByIsDone(id);
+  const result = pedidosManager.getproductsByIsDone(id);
   return res.json(result);
 });
 
