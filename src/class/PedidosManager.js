@@ -213,7 +213,7 @@ export default class PedidosManager {
       try {
         const { data, error } = await this.postPedidos({
           fecha_entrega: fechaEntrega,
-          idCliente,
+          idcliente: idCliente,
           ordenCompra: nroOrden,
           cantidadEnviar: element.cantidadEnviar,
           idInventario: element.id,
