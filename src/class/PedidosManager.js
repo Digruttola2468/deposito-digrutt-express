@@ -147,7 +147,7 @@ export default class PedidosManager {
     if (!Array.isArray(products))
       return { error: { message: "Algo paso con la products" } };
 
-    const fechaDate = new Date(fecha);
+    const fechaDate = new Date(fechaEntrega);
 
     if (Number.isNaN(fechaDate.getDate()))
       return { error: { message: "Error en el formato de la Fecha" } };
