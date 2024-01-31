@@ -153,7 +153,6 @@ export default class ProducionManager {
       idInventario,
       golpesReales,
       piezasProducidas,
-      promGolpesHora,
     } = object;
     //Validar Campos
     if (fecha == null || fecha == "")
@@ -177,14 +176,6 @@ export default class ProducionManager {
         },
       };
 
-    if (promGolpesHora == null || promGolpesHora == "")
-      return {
-        error: {
-          message: "Campo Promedio Golpes/hr Vacia",
-          campo: "promGolpHr",
-        },
-      };
-
     //Convertimos la fecha ingresada a tipo Date
     const fechaDate = new Date(fecha);
 
@@ -196,7 +187,6 @@ export default class ProducionManager {
     const numMaquinaInteger = parseInt(numMaquina);
     const golpesRealesInteger = parseInt(golpesReales);
     const piezasProducidasInteger = parseInt(piezasProducidas);
-    const promGolpesRealesInteger = parseFloat(promGolpesHora);
 
     //Verificamos que sean de tipo Integer
     if (!Number.isInteger(numMaquinaInteger))
@@ -220,14 +210,6 @@ export default class ProducionManager {
         error: {
           message: "Campo PiezasProducidas No es un numero",
           campo: "piezasProducidas",
-        },
-      };
-
-    if (!Number.isInteger(promGolpesRealesInteger))
-      return {
-        error: {
-          message: "Campo Promedio Golpes/hr No es un numero",
-          campo: "promGolpHr",
         },
       };
 
