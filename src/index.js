@@ -41,6 +41,8 @@ import remito from "./routes/remitos.routes.js";
 //ROUTES PEDIDOS
 import PedidosRoute from "./routes/pedidos.routes.js";
 
+import EnviosRoute from "./routes/envios.routes.js";
+
 //CLASSES
 import InventarioManager from "./class/InventarioManager.js";
 import MercaderiaManager from "./class/MercaderiaManager.js";
@@ -58,6 +60,7 @@ import PedidosManager from "./class/PedidosManager.js";
 import googleInicializate from "./passport/googleAuth.js";
 import { con } from "./config/db.js";
 import passport from "passport";
+import EnviosManager from "./class/EnviosManager.js";
 
 const app = express();
 
@@ -103,6 +106,7 @@ export const maquinaParadaManager = new MaquinaParada();
 export const matricesManager = new Matrices();
 export const historialErrorMatrizManager = new HistorialMatriz();
 export const pedidosManager = new PedidosManager();
+export const enviosManager = new EnviosManager();
 
 //
 app.use("/api", indexRoute);
@@ -130,6 +134,8 @@ app.use("/api", remito);
 app.use("/api", localidad);
 
 app.use("/api", facturaNegro);
+
+app.use("/api/envios", EnviosRoute);
 
 app.use(views);
 
