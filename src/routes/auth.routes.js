@@ -7,6 +7,12 @@ import passport from "passport";
 
 const router = Router();
 
+router.get("/user", (req, res) => {
+  if (req.session.user) {
+    return res.json({ valid: true, role: req.session.user });
+  } else return res.json({ valid: false });
+});
+
 router.get("/login", async (req, res) => {
   const gmail = req.query.email;
   const password = req.query.password;
@@ -147,12 +153,10 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate(
-    "google",
-    {
-      failureRedirect: "/google/failure",
-    }
-  ),(req, res) => {
+  passport.authenticate("google", {
+    failureRedirect: "/google/failure",
+  }),
+  (req, res) => {
     req.session.user = req.user;
     return res.send("Se registro correctamente con Google");
   }
