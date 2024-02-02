@@ -9,8 +9,9 @@ export default class InventarioManager {
 
   async getInventario() {
     try {
-      //const [rows] = await con.query("SELECT * FROM inventario;");
-      const [rows] = await con.query("SELECT inventario.*, clientes.cliente, idCliente AS idcliente FROM inventario LEFT JOIN clientes ON inventario.idcliente = clientes.id;");
+      const [rows] = await con.query(
+        "SELECT inventario.*, clientes.cliente, idCliente AS idcliente FROM inventario LEFT JOIN clientes ON inventario.idcliente = clientes.id;"
+      );
       this.listInventario = rows;
       return { data: rows };
     } catch (e) {
@@ -37,7 +38,7 @@ export default class InventarioManager {
           entrada: element.entrada,
           salida: element.salida,
           articulo: element.articulo,
-          cliente: element.cliente
+          cliente: element.cliente,
         });
       }
       return { data: listEnviar };
@@ -80,16 +81,15 @@ export default class InventarioManager {
         pesoUnidad,
         stockCaja,
         idCliente,
-        idCodMatriz
+        idCodMatriz,
       } = object;
-      
+
       //Validar Campos
       if (nombre == null || nombre == "")
         return { error: { message: "Campo Cod.Producto Vacio" } };
 
       if (descripcion == null || descripcion == "")
         return { error: { message: "Campo Descripcion Vacio" } };
-
 
       //Validar q no se repita el cod.Producto
       const findSameCodProducto = this.listInventario.find(
@@ -139,6 +139,45 @@ export default class InventarioManager {
       };
     } catch (e) {
       console.error(e);
+
+      if (e.code == "ER_NO_REFERENCED_ROW_2") {
+        if (e.sqlMessage.includes("idcolor")) {
+          return {
+            error: {
+              message: "BBDD: No existe ese color",
+              status: "error",
+              campus: "idColor",
+            },
+          };
+        }
+        if (e.sqlMessage.includes("idtipoproducto")) {
+          return {
+            error: {
+              message: "No existe ese tipo producto",
+              status: "error",
+              campus: "idtipoproducto",
+            },
+          };
+        }
+        if (e.sqlMessage.includes("idCliente")) {
+          return {
+            error: {
+              message: "No existe ese cliente",
+              status: "error",
+              campus: "idCliente",
+            },
+          };
+        }
+        if (e.sqlMessage.includes("idCodMatriz")) {
+          return {
+            error: {
+              message: "No existe esa Matriz",
+              status: "error",
+              campus: "idCodMatriz",
+            },
+          };
+        }
+      }
       return { error: { message: "Something wrong" } };
     }
   }
@@ -156,7 +195,7 @@ export default class InventarioManager {
         idCliente,
         idCodMatriz,
         articulo,
-        ubicacion
+        ubicacion,
       } = object;
 
       const findInventarioById = this.listInventario.find(
