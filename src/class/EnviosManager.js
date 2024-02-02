@@ -9,8 +9,7 @@ export default class EnviosManager {
   async getEnvios() {
     try {
       const [rows] = await con.query(
-        "SELECT envios.*, envios.id, vehiculos.modelo, vehiculos.marca FROM envios LEFT JOIN vehiculos ON envios.idVehiculo = vehiculos.id;"
-        //"SHOW CREATE TABLE envios"
+        "SELECT envios.*, envios.id, vehiculos.modelo, vehiculos.marca, localidad.ciudad FROM envios LEFT JOIN vehiculos ON envios.idVehiculo = vehiculos.id LEFT JOIN localidad ON envios.idLocalidad = localidad.id;"
       );
       this.listEnvios = rows;
       return { data: rows };
@@ -23,12 +22,11 @@ export default class EnviosManager {
   async getOneEnvio(idEnvio) {
     try {
       const [rows] = await con.query(
-        "SELECT envios.*, envios.id, vehiculos.modelo, vehiculos.marca FROM envios LEFT JOIN vehiculos ON envios.idVehiculo = vehiculos.id WHERE envios.id == ?;",
+        "SELECT envios.*, envios.id, vehiculos.modelo, vehiculos.marca, localidad.ciudad FROM envios LEFT JOIN vehiculos ON envios.idVehiculo = vehiculos.id LEFT JOIN localidad ON envios.idLocalidad = localidad.id WHERE envios.id == ?;",
         [idEnvio]
       );
       return { data: rows };
     } catch (e) {
-      console.error(e);
       return { error: { message: "Something wrong" } };
     }
   }
@@ -52,7 +50,7 @@ export default class EnviosManager {
   }
 
   async createEnvio(obj) {
-    const { idVehiculo, ubicacion, descripcion, fechaDate } = obj;
+    const { idVehiculo, ubicacion, descripcion, fechaDate, idLocalidad } = obj;
 
     if (idVehiculo == null || idVehiculo == "")
       return {
@@ -80,12 +78,20 @@ export default class EnviosManager {
     const [fecha, hora] = this.generateStringDateAndHours(date);
 
     try {
-      const [rows] = await con.query(
-        "INSERT INTO envios (idVehiculo,ubicacion,descripcion,fecha_date,hora,fecha) VALUES (?,?,?,?,?,?) ;",
-        [idVehiculo, ubicacion, descripcion, date, hora, fecha]
+      const [result] = await con.query(
+        "INSERT INTO envios (idVehiculo,ubicacion,descripcion,fecha_date,hora,fecha,idLocalidad) VALUES (?,?,?,?,?,?,?) ;",
+        [idVehiculo, ubicacion, descripcion, date, hora, fecha, idLocalidad]
       );
 
-      return { data: rows };
+      try {
+        const [rows] = await con.query(
+          "SELECT envios.*, envios.id, vehiculos.modelo, vehiculos.marca, localidad.ciudad FROM envios LEFT JOIN vehiculos ON envios.idVehiculo = vehiculos.id LEFT JOIN localidad ON envios.idLocalidad = localidad.id WHERE envios.id = ?;",
+          [result.insertId]
+        );
+        return { data: rows[0] };
+      } catch (e) {
+        return { error: { message: "No se obtuvo el objeto actualizado" } };
+      }
     } catch (e) {
       if (e.code == "ER_NO_REFERENCED_ROW_2")
         return {
@@ -101,13 +107,21 @@ export default class EnviosManager {
   }
 
   async updateEnvio(idEnvio, obj) {
-    let { idVehiculo, ubicacion, descripcion, fechaDate, fechaObj, horaObj } =
-      obj;
+    let {
+      idVehiculo,
+      ubicacion,
+      descripcion,
+      fechaDate,
+      fechaObj,
+      horaObj,
+      idLocalidad,
+    } = obj;
 
     if (idVehiculo == "") idVehiculo = null;
     if (ubicacion == "") ubicacion = null;
     if (descripcion == "") descripcion = null;
     if (fechaDate == "") fechaDate = null;
+    if (idLocalidad == "") idLocalidad = null;
 
     let date = null;
     if (fechaDate != null) {
@@ -126,16 +140,34 @@ export default class EnviosManager {
             descripcion = IFNULL(?,descripcion),
             fecha_date = IFNULL(?,fecha_date),
             hora = IFNULL(?,hora),
-            fecha = IFNULL(?,fecha)
+            fecha = IFNULL(?,fecha),
+            idLocalidad = IFNULL(?,idLocalidad)
         WHERE id = ?`,
-        [idVehiculo, ubicacion, descripcion, date, horaObj, fechaObj, idEnvio]
+        [
+          idVehiculo,
+          ubicacion,
+          descripcion,
+          date,
+          horaObj,
+          fechaObj,
+          idLocalidad,
+          idEnvio,
+        ]
       );
       if (result.affectedRows == 0)
         return { error: { message: "No se actualizo" } };
 
-      return { data: result };
+      try {
+        const [rows] = await con.query(
+          "SELECT envios.*, envios.id, vehiculos.modelo, vehiculos.marca, localidad.ciudad FROM envios LEFT JOIN vehiculos ON envios.idVehiculo = vehiculos.id LEFT JOIN localidad ON envios.idLocalidad = localidad.id WHERE envios.id = ?;",
+          [idEnvio]
+        );
+        return { data: rows[0] };
+      } catch (e) {
+        console.log(e);
+        return { error: { message: "No se obtuvo el objeto actualizado" } };
+      }
     } catch (e) {
-        
       if (e.errno == 1452)
         return { error: { message: "No existe ese vehiculo" } };
 

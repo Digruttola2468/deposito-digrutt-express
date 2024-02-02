@@ -42,6 +42,7 @@ import remito from "./routes/remitos.routes.js";
 import PedidosRoute from "./routes/pedidos.routes.js";
 
 import EnviosRoute from "./routes/envios.routes.js";
+import vehiculoRoute from './routes/vehiculos.routes.js'
 
 //CLASSES
 import InventarioManager from "./class/InventarioManager.js";
@@ -136,6 +137,7 @@ app.use("/api", localidad);
 app.use("/api", facturaNegro);
 
 app.use("/api/envios", EnviosRoute);
+app.use('/api/vehiculos', vehiculoRoute)
 
 app.use(views);
 
