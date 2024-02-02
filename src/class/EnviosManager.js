@@ -80,14 +80,21 @@ export default class EnviosManager {
     const [fecha, hora] = this.generateStringDateAndHours(date);
 
     try {
-      const [rows] = await con.query(
+      const [result] = await con.query(
         "INSERT INTO envios (idVehiculo,ubicacion,descripcion,fecha_date,hora,fecha) VALUES (?,?,?,?,?,?) ;",
         [idVehiculo, ubicacion, descripcion, date, hora, fecha]
       );
 
-      return { data: {
-        insertId: rows.insertId
-      } };
+      try {
+        const [rows] = await con.query(
+          "SELECT envios.*, envios.id, vehiculos.modelo, vehiculos.marca FROM envios LEFT JOIN vehiculos ON envios.idVehiculo = vehiculos.id WHERE envios.id = ?;",
+          [result.insertId]
+        );
+        return { data: rows[0] };
+      } catch (e) {
+        console.log(e);
+        return { error: { message: "No se obtuvo el objeto actualizado" } };
+      }
     } catch (e) {
       if (e.code == "ER_NO_REFERENCED_ROW_2")
         return {
