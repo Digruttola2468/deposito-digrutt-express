@@ -25,6 +25,7 @@ import matricesRoute from "./routes/matrices.routes.js";
 import historialMatricesErrorRoute from "./routes/historialErrorMatriz.routes.js";
 import materiaPrimaRoute from "./routes/material.routes.js";
 import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
+import placeSavedEnviosRoute from './routes/placeSavedEnvios.routes.js'
 
 //ROUTES PRODUCCION
 import clientes from "./routes/clientes.routes.js";
@@ -138,6 +139,7 @@ app.use("/api", facturaNegro);
 
 app.use("/api/envios", EnviosRoute);
 app.use('/api/vehiculos', vehiculoRoute)
+app.use('/api/savedPlacesEnviados', placeSavedEnviosRoute)
 
 app.use(views);
 
