@@ -85,7 +85,9 @@ export default class EnviosManager {
         [idVehiculo, ubicacion, descripcion, date, hora, fecha]
       );
 
-      return { data: rows };
+      return { data: {
+        insertId: rows.insertId
+      } };
     } catch (e) {
       if (e.code == "ER_NO_REFERENCED_ROW_2")
         return {
@@ -133,9 +135,17 @@ export default class EnviosManager {
       if (result.affectedRows == 0)
         return { error: { message: "No se actualizo" } };
 
-      return { data: result };
+      try {
+        const [rows] = await con.query(
+          "SELECT envios.*, envios.id, vehiculos.modelo, vehiculos.marca FROM envios LEFT JOIN vehiculos ON envios.idVehiculo = vehiculos.id WHERE envios.id = ?;",
+          [idEnvio]
+        );
+        return { data: rows[0] };
+      } catch (e) {
+        console.log(e);
+        return { error: { message: "No se obtuvo el objeto actualizado" } };
+      }
     } catch (e) {
-        
       if (e.errno == 1452)
         return { error: { message: "No existe ese vehiculo" } };
 
