@@ -1,5 +1,6 @@
 import { con } from "../config/db.js";
-
+import CustomError from "../errors/Custom_errors.js";
+import { ENUM_ERRORS } from "../errors/enums.js";
 import { mercaderiaManager } from "../index.js";
 
 export default class InventarioManager {
@@ -11,7 +12,11 @@ export default class InventarioManager {
     try {
       const [rows] = await con.query(
         "SELECT inventario.*, clientes.cliente, idCliente AS idcliente FROM inventario LEFT JOIN clientes ON inventario.idcliente = clientes.id;"
+        //"SHOW CREATE TABLE inventario"
+        //"ALTER TABLE inventario ADD CONSTRAINT UC_articulo UNIQUE (articulo)"
+        //"ALTER TABLE inventario MODIFY COLUMN articulo VARCHAR(15) "
       );
+      console.log(rows);
       this.listInventario = rows;
       return { data: rows };
     } catch (e) {
@@ -70,9 +75,121 @@ export default class InventarioManager {
     else return -1;
   }
 
+  handleErrors(e) {
+    switch (e.code) {
+      case "WARN_DATA_TRUNCATED":
+        CustomError.createError({
+          cause: "Error en el formato enviado",
+          message: "Error formato",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        });
+        break;
+      case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+        if (e.sqlMessage.includes("idcolor"))
+          CustomError.createError({
+            cause: "Error en el tipo de dato",
+            message: "Error tipo de dato",
+            code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            name: "idColor",
+          });
+        if (e.sqlMessage.includes("precio"))
+          CustomError.createError({
+            cause: "Error en el tipo de dato",
+            message: "Error tipo de dato",
+            code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            name: "precio",
+          });
+        if (e.sqlMessage.includes("idtipoproducto"))
+          CustomError.createError({
+            cause: "Error en el tipo de dato",
+            message: "Error tipo de dato",
+            code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            name: "idtipoproducto",
+          });
+        if (e.sqlMessage.includes("pesoUnidad"))
+          CustomError.createError({
+            cause: "Error en el tipo de dato",
+            message: "Error tipo de dato",
+            code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            name: "pesoUnidad",
+          });
+        if (e.sqlMessage.includes("stockCaja"))
+          CustomError.createError({
+            cause: "Error en el tipo de dato",
+            message: "Error tipo de dato",
+            code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            name: "stockCaja",
+          });
+        if (e.sqlMessage.includes("idCliente"))
+          CustomError.createError({
+            cause: "Error en el tipo de dato",
+            message: "Error tipo de dato",
+            code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            name: "idCliente",
+          });
+        if (e.sqlMessage.includes("idCodMatriz"))
+          CustomError.createError({
+            cause: "Error en el tipo de dato",
+            message: "Error tipo de dato",
+            code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            name: "idCodMatriz",
+          });
+        break;
+      case "ER_DUP_ENTRY":
+        if (e.sqlMessage.includes("UC_inventario"))
+          CustomError.createError({
+            cause: "Ya existe ese Cod.Producto",
+            message: "Error al intentar crear producto",
+            code: ENUM_ERRORS.THIS_OBJECT_ALREDY_EXISTS,
+            name: "codProducto",
+          });
+        if (e.sqlMessage.includes("UC_articulo"))
+          CustomError.createError({
+            cause: "Ya existe ese Articulo",
+            message: "Error al intentar crear producto",
+            code: ENUM_ERRORS.THIS_OBJECT_ALREDY_EXISTS,
+            name: "articulo",
+          });
+        break;
+      case "ER_NO_REFERENCED_ROW_2":
+        if (e.sqlMessage.includes("idcolor"))
+          CustomError.createError({
+            cause: "No existe ese color en BBDD",
+            message: "Error al intentar crear producto",
+            code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            name: "idColor",
+          });
+
+        if (e.sqlMessage.includes("idtipoproducto"))
+          CustomError.createError({
+            cause: "No existe ese tipo producto",
+            message: "Error al intentar crear producto",
+            code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            name: "idtipoproducto",
+          });
+
+        if (e.sqlMessage.includes("idCliente"))
+          CustomError.createError({
+            cause: "No existe ese cliente",
+            message: "Error al intentar crear producto",
+            code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            name: "idCliente",
+          });
+
+        if (e.sqlMessage.includes("idCodMatriz"))
+          CustomError.createError({
+            cause: "No existe esa Matriz",
+            message: "Error al intentar crear producto",
+            code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            name: "idMatriz",
+          });
+        break;
+    }
+  }
+
   async createInventario(object) {
     try {
-      const {
+      let {
         nombre, //Obligatorio
         precio,
         descripcion, //Obligatorio
@@ -86,27 +203,38 @@ export default class InventarioManager {
 
       //Validar Campos
       if (nombre == null || nombre == "")
-        return { error: { message: "Campo Cod.Producto Vacio" } };
+        CustomError.createError({
+          cause: "Campo Cod.Producto Vacio",
+          message: "No se creo correctamente",
+          code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+          name: "codProducto",
+        });
 
       if (descripcion == null || descripcion == "")
-        return { error: { message: "Campo Descripcion Vacio" } };
+        CustomError.createError({
+          cause: "Campo Descripcion Vacio",
+          message: "No se creo correctamente",
+          code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+          name: "descripcion",
+        });
 
-      //Validar q no se repita el cod.Producto
-      const findSameCodProducto = this.listInventario.find(
-        (elem) => elem.nombre.toLowerCase() == nombre.toLowerCase()
-      );
-      if (findSameCodProducto != null)
-        return { error: { message: "Ya existe ese Cod.Producto" } };
+      if (precio == "") precio = null;
+      if (idcolor == "") idcolor = null;
+      if (idtipoproducto == "") idtipoproducto = null;
+      if (pesoUnidad == "") pesoUnidad = null;
+      if (stockCaja == "") stockCaja = null;
+      if (idCliente == "") idCliente = null;
+      if (idCodMatriz == "") idCodMatriz = null;
 
       const [rows] = await con.query(
         "INSERT INTO inventario (nombre,precio,descripcion,idcolor,idtipoproducto,pesoUnidad,stockCaja,idCliente,idCodMatriz,entrada,salida) VALUES (?,?,?,?,?,?,?,?,?,?,?) ;",
         [
-          nombre,
+          nombre.toLowerCase(),
           precio,
           descripcion,
           idcolor,
           idtipoproducto,
-          pesoUnidad != "" ? pesoUnidad : null,
+          pesoUnidad,
           stockCaja,
           idCliente,
           idCodMatriz,
@@ -117,7 +245,7 @@ export default class InventarioManager {
 
       const enviar = {
         id: rows.insertId,
-        nombre,
+        nombre: nombre.toLowerCase(),
         precio,
         descripcion,
         idcolor,
@@ -135,56 +263,17 @@ export default class InventarioManager {
       this.listInventario.push(enviar);
 
       return {
+        status: "success",
         data: enviar,
       };
     } catch (e) {
-      console.error(e);
-
-      if (e.code == "ER_NO_REFERENCED_ROW_2") {
-        if (e.sqlMessage.includes("idcolor")) {
-          return {
-            error: {
-              message: "BBDD: No existe ese color",
-              status: "error",
-              campus: "idColor",
-            },
-          };
-        }
-        if (e.sqlMessage.includes("idtipoproducto")) {
-          return {
-            error: {
-              message: "No existe ese tipo producto",
-              status: "error",
-              campus: "idtipoproducto",
-            },
-          };
-        }
-        if (e.sqlMessage.includes("idCliente")) {
-          return {
-            error: {
-              message: "No existe ese cliente",
-              status: "error",
-              campus: "idCliente",
-            },
-          };
-        }
-        if (e.sqlMessage.includes("idCodMatriz")) {
-          return {
-            error: {
-              message: "No existe esa Matriz",
-              status: "error",
-              campus: "idCodMatriz",
-            },
-          };
-        }
-      }
-      return { error: { message: "Something wrong" } };
+      this.handleErrors(e);
     }
   }
 
   async updateInventario(idInventario, object) {
     try {
-      const {
+      let {
         nombre,
         precio,
         descripcion,
@@ -198,43 +287,17 @@ export default class InventarioManager {
         ubicacion,
       } = object;
 
-      const findInventarioById = this.listInventario.find(
-        (elem) => elem.id == idInventario
-      );
-
-      if (nombre != null) {
-        if (nombre != "") {
-          //Validar q no se repita el cod.Producto
-          const findSameCodProducto = this.listInventario.find(
-            (elem) => elem.nombre.toLowerCase() == nombre.toLowerCase()
-          );
-          //Validamos si existe ese nombre
-          if (findSameCodProducto) {
-            //Si existe, validar si es igual que el anterior
-            if (findSameCodProducto.nombre != findInventarioById.nombre)
-              return { error: { message: "Ya existe ese Cod.Producto" } };
-          }
-        } else return { error: { message: "Campo nombre Vacio" } };
-      }
-      if (articulo != null) {
-        if (articulo != "") {
-          //Validar q no se repita el cod.Producto
-          const findSameArticulo = this.listInventario.find(
-            (elem) => elem.articulo == articulo
-          );
-
-          //Validamos si existe ese Articulo
-          if (findSameArticulo) {
-            //Si existe, validar si es igual que el anterior
-            if (findSameArticulo.articulo != findInventarioById.articulo)
-              return { error: { message: "Ya existe ese Articulo" } };
-          }
-        } else return { error: { message: "Campo articulo Vacio" } };
-      }
+      if (precio == "") precio = null;
+      if (idcolor == "") idcolor = null;
+      if (idtipoproducto == "") idtipoproducto = null;
+      if (pesoUnidad == "") pesoUnidad = null;
+      if (stockCaja == "") stockCaja = null;
+      if (idCliente == "") idCliente = null;
+      if (idCodMatriz == "") idCodMatriz = null;
 
       const [result] = await con.query(
         `UPDATE inventario 
-                SET nombre = IFNULL(?,nombre),
+                SET nombre = IF(STRCMP(nombre, ?) = 0, nombre, ?),
                     precio = IFNULL(?,precio),
                     descripcion = IFNULL(?,descripcion),
                     idcolor = IFNULL(?,idcolor),
@@ -243,10 +306,11 @@ export default class InventarioManager {
                     stockCaja = IFNULL(?,stockCaja), 
                     idCliente = IFNULL(?,idCliente),
                     idCodMatriz = IFNULL(?,idCodMatriz),
-                    articulo = IFNULL(?,articulo),
+                    articulo = IF(STRCMP(articulo, ?) = 0, articulo, ?),
                     ubicacion = IFNULL(?,ubicacion)
                 WHERE id = ?`,
         [
+          nombre,
           nombre,
           precio,
           descripcion,
@@ -256,6 +320,7 @@ export default class InventarioManager {
           stockCaja,
           idCliente,
           idCodMatriz,
+          articulo,
           articulo,
           ubicacion,
           idInventario,
@@ -278,10 +343,9 @@ export default class InventarioManager {
 
       this.listInventario = mapListInventarioUpdate;
 
-      return { data: rows[0] };
+      return { status: "success", data: rows[0] };
     } catch (e) {
-      console.error(e);
-      return { error: { message: "Something wrong" } };
+      this.handleErrors(e);
     }
   }
 

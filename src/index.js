@@ -64,6 +64,8 @@ import { con } from "./config/db.js";
 import passport from "passport";
 import EnviosManager from "./class/EnviosManager.js";
 
+import errorHandle from './middleware/errors.js'
+
 const app = express();
 
 //Habilitamos que la URL pueda acceder a este proyecto
@@ -115,7 +117,7 @@ app.use("/api", indexRoute);
 app.use("/api", mercaderiaRoute);
 app.use("/api", coloresRoute);
 app.use("/api", tipoProductoRoute);
-app.use("/api", inventario);
+app.use("/api/inventario", inventario);
 app.use("/api", excel);
 app.use("/api", cloudinaryRoute);
 app.use("/api", maquinaParadaRoute);
@@ -142,6 +144,8 @@ app.use('/api/vehiculos', vehiculoRoute)
 app.use('/api/savedPlacesEnviados', placeSavedEnviosRoute)
 
 app.use(views);
+
+app.use(errorHandle);
 
 app.get("/", (req, res) => {
   res.send("Page Principal");

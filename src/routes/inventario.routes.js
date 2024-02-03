@@ -7,8 +7,8 @@ import allPermissions, { inventarioPermissions } from "../config/permissos.js";
 const router = Router();
 
 router.get(
-  "/inventario",
-  
+  "/",
+
   userExtractor(inventarioPermissions),
   async (req, res) => {
     const { data, error } = await inventarioManager.getInventario();
@@ -20,8 +20,8 @@ router.get(
 );
 
 router.get(
-  "/inventario/nombres",
-  
+  "/nombres",
+
   userExtractor(inventarioPermissions),
   (req, res) => {
     const { data, error } = inventarioManager.getListInventarioNombre();
@@ -33,8 +33,8 @@ router.get(
 );
 
 router.get(
-  "/inventario/sumInventario/:id",
-  
+  "/sumInventario/:id",
+
   userExtractor(inventarioPermissions),
   async (req, res) => {
     const { id } = req.params;
@@ -49,8 +49,8 @@ router.get(
 );
 
 router.get(
-  "/inventario/:id",
-  
+  "/:id",
+
   userExtractor(inventarioPermissions),
   (req, res) => {
     const idInventario = req.params.id;
@@ -63,50 +63,46 @@ router.get(
 );
 
 router.post(
-  "/inventario",
-  
-  userExtractor([
-    allPermissions.oficina,
-    allPermissions.mercaderia,
-  ]),
-  async (req, res) => {
+  "/",
+
+  userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
+  async (req, res, next) => {
     const object = req.body;
-    const { data, error } = await inventarioManager.createInventario(object);
+    try {
+      const result = await inventarioManager.createInventario(object);
 
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+      return res.json(result);
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
 router.put(
-  "/inventario/:id",
-  
-  userExtractor([
-    allPermissions.oficina,
-    allPermissions.mercaderia,
-  ]),
-  async (req, res) => {
+  "/:id",
+
+  userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
+  async (req, res, next) => {
     const idInventario = req.params.id;
     const object = req.body;
-    const { data, error } = await inventarioManager.updateInventario(
-      idInventario,
-      object
-    );
 
-    if (error != null) return res.status(500).json(error);
+    try {
+      const result = await inventarioManager.updateInventario(
+        idInventario,
+        object
+      );
 
-    return res.json(data);
+      return res.json(result);
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
 router.delete(
-  "/inventario/:id",
-  
-  userExtractor([
-    allPermissions.oficina,
-    allPermissions.mercaderia,
-  ]),
+  "/:id",
+
+  userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
   async (req, res) => {
     const idInventario = req.params.id;
     const { data, error } = await inventarioManager.deleteInventario(
