@@ -23,35 +23,48 @@ router.get("/cliente/:id", async (req, res) => {
   return res.json(data);
 });
 
-router.post("/cliente", userExtractor([allPermissions.oficina, allPermissions.mercaderia]), async (req, res) => {
-  const object = req.body;
-  const { data, error } = await clientesManager.createCliente(object);
+router.post(
+  "/cliente",
+  userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
+  async (req, res, next) => {
+    const object = req.body;
+    try {
+      const result = await clientesManager.createCliente(object);
+      return res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
-  if (error) return res.status(404).json(error);
+router.put(
+  "/cliente/:id",
+  userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
+  async (req, res, next) => {
+    const idCliente = req.params.id;
+    const object = req.body;
+    try {
+      const result = await clientesManager.updateCliente(idCliente, object);
 
-  return res.json(data);
-});
+      return res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
-router.put("/cliente/:id", userExtractor([allPermissions.oficina, allPermissions.mercaderia]), async (req, res) => {
-  const idCliente = req.params.id;
-  const object = req.body;
-  const { data, error } = await clientesManager.updateCliente(
-    idCliente,
-    object
-  );
-
-  if (error != null) return res.status(500).json(error);
-
-  return res.json(data);
-});
-
-router.delete("/cliente/:id", userExtractor([allPermissions.oficina, allPermissions.mercaderia]), async (req, res) => {
-  const idCliente = req.params.id;
-  const { data, error } = await clientesManager.deleteCliente(idCliente);
-
-  if (error != null) return res.status(500).json(error);
-
-  return res.json(data);
-});
+router.delete(
+  "/cliente/:id",
+  userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
+  async (req, res, next) => {
+    const idCliente = req.params.id;
+    try {
+      const result = await clientesManager.deleteCliente(idCliente);
+      return res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 export default router;

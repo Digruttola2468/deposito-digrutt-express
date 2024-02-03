@@ -3,6 +3,11 @@ import { ENUM_ERRORS } from "../errors/enums.js";
 export default (error, req, res, next) => {
   
   switch (error.code) {
+    case ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS:
+      res
+        .status(400)
+        .send({ status: "Error", campus: error.name, message: error.cause });
+      break;
     case ENUM_ERRORS.INVALID_TYPES_ERROR:
       res
         .status(400)

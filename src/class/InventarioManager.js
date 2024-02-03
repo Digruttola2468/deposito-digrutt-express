@@ -180,6 +180,8 @@ export default class InventarioManager {
             name: "idMatriz",
           });
         break;
+        default: 
+          throw e
     }
   }
 
@@ -283,6 +285,8 @@ export default class InventarioManager {
         ubicacion,
       } = object;
 
+      if (nombre == "") nombre = null;
+      if (descripcion == "") descripcion = null;
       if (precio == "") precio = null;
       if (idcolor == "") idcolor = null;
       if (idtipoproducto == "") idtipoproducto = null;
@@ -290,10 +294,12 @@ export default class InventarioManager {
       if (stockCaja == "") stockCaja = null;
       if (idCliente == "") idCliente = null;
       if (idCodMatriz == "") idCodMatriz = null;
+      if (ubicacion == "") ubicacion = null;
+      if (articulo == "") articulo = null;
 
       const [result] = await con.query(
         `UPDATE inventario 
-                SET nombre = IF(STRCMP(nombre, ?) = 0, nombre, ?),
+                SET nombre = IFNULL(IF(STRCMP(nombre, ?) = 0, nombre, ?), nombre),
                     precio = IFNULL(?,precio),
                     descripcion = IFNULL(?,descripcion),
                     idcolor = IFNULL(?,idcolor),
@@ -302,7 +308,7 @@ export default class InventarioManager {
                     stockCaja = IFNULL(?,stockCaja), 
                     idCliente = IFNULL(?,idCliente),
                     idCodMatriz = IFNULL(?,idCodMatriz),
-                    articulo = IF(STRCMP(articulo, ?) = 0, articulo, ?),
+                    articulo = IFNULL(IF(STRCMP(articulo, ?) = 0, articulo, ?), articulo),
                     ubicacion = IFNULL(?,ubicacion)
                 WHERE id = ?`,
         [
@@ -324,7 +330,12 @@ export default class InventarioManager {
       );
 
       if (result.affectedRows === 0)
-        return { error: { message: "No se encontro el Inventario" } };
+        CustomError.createError({
+          name: "idInventario",
+          code: ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS,
+          cause: "No existe ese cod.producto",
+          message: "No existe ese cod.producto",
+        });
 
       const [rows] = await con.query(
         `SELECT * FROM inventario WHERE id=?`,
