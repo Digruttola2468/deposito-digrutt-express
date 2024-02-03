@@ -1,4 +1,6 @@
 import { con } from "../config/db.js";
+import CustomError from "../errors/Custom_errors.js";
+import { ENUM_ERRORS } from "../errors/enums.js";
 
 import { inventarioManager } from "../index.js";
 import { remitosManager } from "../index.js";
@@ -354,22 +356,37 @@ export default class MercaderiaManager {
   }
 
   async deleteMercaderiaWhereIdinventario(idinventario) {
-    const list = this.getMercaderiaWhereIdInventario(idinventario);
+    try {
+      const [rows] = await con.query(
+        `SELECT mercaderia.id,fecha,stock,nombre,descripcion,categoria,idinventario,articulo,idremito,idFacturaNegro,idCliente AS idcliente
+                  FROM mercaderia 
+                    LEFT JOIN inventario on mercaderia.idinventario = inventario.id
+                    LEFT JOIN categoria on mercaderia.idcategoria = categoria.id
+                  WHERE mercaderia.idinventario = ?`,
+        [idinventario]
+      );
 
-    if (list.length != 0) {
-      if (list.length > 0) {
-        for (let i = 0; i < list.length; i++) {
-          const id = list[i];
+      if (rows.length != 0) {
+        for (let i = 0; i < rows.length; i++) {
+          const { id } = rows[i];
 
           const [result] = await con.query(
             "DELETE FROM mercaderia WHERE (`id` = ?);",
             [id]
           );
         }
-      }
-      return { data: { message: "Eliminado Correctamente", done: true } };
+
+        return { data: { message: "Eliminado Correctamente", done: true } };
+      } else
+        CustomError.createError({
+          name: "idInventario",
+          message: "No existe ese cod.producto",
+          cause: "No existe ese cod.producto",
+          code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+        });
+    } catch (error) {
+      throw error;
     }
-    return { data: { done: true } };
   }
 
   getMercaderiaWhereIdInventario(idinventario) {

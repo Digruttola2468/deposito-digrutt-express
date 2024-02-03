@@ -103,15 +103,19 @@ router.delete(
   "/:id",
 
   userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
-  async (req, res) => {
+  async (req, res,next) => {
     const idInventario = req.params.id;
-    const { data, error } = await inventarioManager.deleteInventario(
-      idInventario
-    );
-
-    if (error != null) return res.status(500).json(error);
-
-    return res.json(data);
+    try {
+      const { data, error } = await inventarioManager.deleteInventario(
+        idInventario
+      );
+  
+      if (error != null) return res.status(500).json(error);
+  
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
 );
 

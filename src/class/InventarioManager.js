@@ -12,11 +12,7 @@ export default class InventarioManager {
     try {
       const [rows] = await con.query(
         "SELECT inventario.*, clientes.cliente, idCliente AS idcliente FROM inventario LEFT JOIN clientes ON inventario.idcliente = clientes.id;"
-        //"SHOW CREATE TABLE inventario"
-        //"ALTER TABLE inventario ADD CONSTRAINT UC_articulo UNIQUE (articulo)"
-        //"ALTER TABLE inventario MODIFY COLUMN articulo VARCHAR(15) "
       );
-      console.log(rows);
       this.listInventario = rows;
       return { data: rows };
     } catch (e) {
@@ -350,44 +346,49 @@ export default class InventarioManager {
   }
 
   async deleteInventario(idInventario) {
-    if (idInventario == null) return { error: { message: "Campo Vacio" } };
-
-    //Validamos que sea de tipo integer
-    const inventarioInteger = parseInt(idInventario);
-    if (!Number.isInteger(inventarioInteger))
-      return { error: { message: "Algo paso al obtener el cod.producto" } };
-
-    const result = this.existsIdInventario(inventarioInteger);
-    if (result != null) {
-      if (!result) return { error: { message: "No existe ese cod.producto" } };
-    } else return { error: { message: "Algo paso al eliminar" } };
+    if (idInventario == null || idInventario == "")
+      CustomError.createError({
+        cause: "No existe ese inventario",
+        message: "El idInventario esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "idInventario",
+      });
 
     try {
-      const { data, error } =
-        await mercaderiaManager.deleteMercaderiaWhereIdinventario(
-          inventarioInteger
-        );
+      const result = await mercaderiaManager.deleteMercaderiaWhereIdinventario(
+        idInventario
+      );
+      if (result.data.done) {
+        try {
+          const [result] = await con.query(
+            "DELETE FROM inventario WHERE (`id` = ?);",
+            [idInventario]
+          );
 
-      if (error == null) {
-        const [result] = await con.query(
-          "DELETE FROM inventario WHERE (`id` = ?);",
-          [inventarioInteger]
-        );
+          if (result.affectedRows <= 0)
+            CustomError.createError({
+              name: "idInventario",
+              message: "No existe ese cod.producto",
+              cause: "No existe ese cod.producto",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            });
 
-        if (result.affectedRows <= 0)
-          return { error: { message: "No se encontro el inventario" } };
+          //Delete from listInventario
+          const filterListInventario = this.listInventario.filter(
+            (elem) => elem.id != idInventario
+          );
+          this.listInventario = filterListInventario;
 
-        //Delete from listInventario
-        const filterListInventario = this.listInventario.filter(
-          (elem) => elem.id != inventarioInteger
-        );
-        this.listInventario = filterListInventario;
-
-        return { data: { message: "Eliminado Correctamente" } };
-      } else return { error: { message: "Error al eliminar en mercaderia" } };
+          return { data: { message: "Eliminado Correctamente" } };
+        } catch (error) {}
+      }
     } catch (e) {
-      console.error(e);
-      return { error: { message: "Something wrong" } };
+      CustomError.createError({
+        name: e.name,
+        message: e.message,
+        cause: e.cause,
+        code: e.code,
+      });
     }
   }
 
