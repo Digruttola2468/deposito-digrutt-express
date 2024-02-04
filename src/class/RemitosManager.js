@@ -347,8 +347,19 @@ export default class RemitosManager {
       throw error;
     }
 
+    const [rows] = await con.query(
+      `SELECT remitos.*,idCliente AS idcliente, clientes.cliente, clientes.cuit, clientes.domicilio, clientes.mail FROM remitos 
+        LEFT JOIN clientes on remitos.idCliente = clientes.id
+      WHERE remitos.id = ?`,
+      [idRemito]
+    );
+
     return {
-      data: { message: "Se actualizo correctamente", status: "success" },
+      data: {
+        message: "Se actualizo correctamente",
+        status: "success",
+        data: rows[0],
+      },
     };
   }
 
