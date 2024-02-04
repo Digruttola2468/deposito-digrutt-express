@@ -114,7 +114,7 @@ export const enviosManager = new EnviosManager();
 
 //
 app.use("/api", indexRoute);
-app.use("/api", mercaderiaRoute);
+app.use("/api/mercaderia", mercaderiaRoute);
 app.use("/api", coloresRoute);
 app.use("/api", tipoProductoRoute);
 app.use("/api/inventario", inventario);

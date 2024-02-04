@@ -7,7 +7,7 @@ import { authManager } from "../index.js";
 export function auth(req, res, next) {
   if (req.session?.user) return next();
 
-  return res.json({message: 'No estas Registrado, por favor inicia sesion'});
+  return res.json({ message: "No estas Registrado, por favor inicia sesion" });
 }
 
 export default (roles) => async (req, res, next) => {
@@ -35,12 +35,13 @@ export default (roles) => async (req, res, next) => {
       .status(404)
       .json({ message: "No existe el usuario. Registrate" });
 
-  if (await authManager.existUser(gmail)) {
-    const user = await authManager.getUserByGmail(gmail);
+  const user = await authManager.getUserByGmail(gmail);
+  
+  if (user) {
     if (user.role === allPermissions.admin) return next();
-     else {
+    else {
       if ([].concat(roles).includes(user.role)) return next();
-      else return res.status(409).json({ error: "No tienes Permisos" });
+      else return res.status(409).json({ message: "No tienes Permisos" });
     }
   } else return res.status(401).json({ message: "No existe el usuario" });
 };

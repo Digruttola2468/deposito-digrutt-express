@@ -32,9 +32,8 @@ export default class AuthManager {
   };
 
   existUser = async (gmail) => {
-    const { data } = await this.getUsers();
-    const findByGmail = data.find((elem) => elem.gmail == gmail);
-    if (findByGmail) return true;
+    const result = await this.getUserByGmail(gmail);
+    if (result) return true;
     else return false;
   };
 

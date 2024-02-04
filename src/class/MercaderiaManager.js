@@ -25,6 +25,7 @@ export default class MercaderiaManager {
 
       return { data: rows };
     } catch (error) {
+      console.log(error);
       return { error: { message: "Something wrong" } };
     }
   }
@@ -54,99 +55,81 @@ export default class MercaderiaManager {
   }
 
   async createMercaderia(object) {
+    let { fecha, stock, idinventario, idcategoria, idFacturaNegro, idremito } =
+      object;
+
+    //Validar Campos
+    if (fecha == null || fecha == "")
+      CustomError.createError({
+        name: "fecha",
+        cause: "Campo Fecha Vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        message: "Campo Fecha esta vacio",
+      });
+
+    if (stock == null || stock == "")
+      CustomError.createError({
+        name: "stock",
+        cause: "Campo Cantidad Entrada Vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        message: "Campo Cantidad Entrada esta vacio",
+      });
+
+    if (idinventario == null || idinventario == "")
+      CustomError.createError({
+        name: "codProducto",
+        cause: "Campo cod.Producto Vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        message: "Campo cod.Producto esta vacio",
+      });
+
+    if (idcategoria == null || idcategoria == "")
+      CustomError.createError({
+        name: "categoria",
+        cause: "BBDD: Ocurrio un error",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        message: "BBDD: Ocurrio un error",
+      });
+
+    //
+    if (idFacturaNegro == "") idFacturaNegro = null;
+    if (idremito == "") idremito = null;
+
+    //Verificamos que sea de tipo Entrada - Salida , si no es ninguna de las dos saltar un error
+    if (idcategoria != "1" && idcategoria != "2")
+      CustomError.createError({
+        name: "categoria",
+        cause: "Categoria fuera de rango ",
+        code: ENUM_ERRORS.ROUTING_ERROR,
+        message: "Categoria fuera de rango (Entrada o Salida)",
+      });
+
+    //Convertimos la fecha ingresada a tipo Date
+    const fechaDate = new Date(fecha);
+
+    if (Number.isNaN(fechaDate.getDate()))
+      CustomError.createError({
+        name: "fecha",
+        cause: "Error en el formato date",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        message: "Error en el formato date",
+      });
+
     try {
-      const {
-        fecha,
-        stock,
-        idinventario,
-        idcategoria,
-        idFacturaNegro,
-        idremito,
-      } = object;
-
-      //Validar Campos
-      if (fecha == null || fecha == "")
-        return { error: { message: "Campo Fecha Vacio" } };
-
-      if (stock == null || stock == "")
-        return { error: { message: "Campo Stock Vacio" } };
-
-      if (idinventario == null || idinventario == "")
-        return { error: { message: "Campo Cod.Producto Vacio" } };
-
-      if (idcategoria == null || idcategoria == "")
-        return { error: { message: "Campo Categoria Vacia" } };
-
-      //Si se coloca idFacturaNegro verificar que sea de tipo integer
-      if (idFacturaNegro != null) {
-        const facturaNegroInteger = parseInt(idFacturaNegro);
-
-        if (!Number.isInteger(facturaNegroInteger))
-          return { error: { message: "Algo paso con la facturaNegro" } };
-      }
-
-      //Si se coloca idRemito verificar que sea de tipo integer
-      if (idremito != null) {
-        const remitoInteger = parseInt(idremito);
-
-        if (!Number.isInteger(remitoInteger))
-          return { error: { message: "Algo paso con el Remito" } };
-      }
-
-      const stockInteger = parseInt(stock);
-      const inventarioInteger = parseInt(idinventario);
-      const categoriaInteger = parseInt(idcategoria);
-
-      //Verificamos que sean de tipo Integer
-      if (!Number.isInteger(stockInteger))
-        return { error: { message: "Campo Stock No es un numero" } };
-
-      if (!Number.isInteger(inventarioInteger))
-        return { error: { message: "Algo paso con inventario" } };
-
-      if (!Number.isInteger(categoriaInteger))
-        return { error: { message: "Algo paso con la categoria" } };
-
-      //Verificamos que sea de tipo Entrada - Salida , si no es ninguna de las dos saltar un error
-      if (categoriaInteger !== 1 && categoriaInteger !== 2)
-        return { error: { message: "Algo paso con la categoria" } };
-
-      //Validar que el idinventario exista
-      /*const existsIdInventario =
-        inventarioManager.existsIdInventario(inventarioInteger);
-      if (existsIdInventario != null) {
-        if (!existsIdInventario)
-          return { error: { message: "No existe ese cod.producto" } };
-      } else return { error: { message: "Algo paso con el idInventario" } };*/
-
-      //Convertimos la fecha ingresada a tipo Date
-      const fechaDate = new Date(fecha);
-
-      if (Number.isNaN(fechaDate.getDate()))
-        return { error: { message: "Error en el formato de la Fecha" } };
-
       const [rows] = await con.query(
         "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`, `idremito`, `idFacturaNegro`) VALUES (?,?,?,?,?,?);",
-        [
-          fecha,
-          stockInteger,
-          categoriaInteger,
-          inventarioInteger,
-          idremito,
-          idFacturaNegro,
-        ]
+        [fecha, stock, idcategoria, idinventario, idremito, idFacturaNegro]
       );
 
       //get one listInventario
-      const getOneInventario =
-        inventarioManager.getOneInventario(inventarioInteger);
+      const getOneInventario = inventarioManager.getOneInventario(idinventario);
 
       const { nombre, descripcion, articulo } = getOneInventario.data;
 
       let categoria = "";
-      if (categoriaInteger === 1) categoria = "Salida";
+      if (idcategoria == "1") categoria = "Salida";
 
-      if (categoriaInteger === 2) categoria = "Entrada";
+      if (idcategoria == "2") categoria = "Entrada";
 
       const enviar = {
         id: rows.insertId,
@@ -154,8 +137,8 @@ export default class MercaderiaManager {
         descripcion: descripcion,
         articulo: articulo,
         fecha: fecha,
-        stock: stockInteger,
-        idinventario: inventarioInteger,
+        stock: parseInt(stock),
+        idinventario,
         categoria: categoria,
         idFacturaNegro: idFacturaNegro,
         idremito: idremito,
@@ -165,23 +148,57 @@ export default class MercaderiaManager {
       this.listMercaderia.push(enviar);
 
       try {
-        await inventarioManager.suminventario(inventarioInteger);
+        await inventarioManager.suminventario(idinventario);
       } catch (e) {
-        console.log(e);
         return {
           error: {
+            status: "error",
             message: "something wrong",
           },
         };
       }
 
       return {
+        status: "success",
         data: enviar,
       };
     } catch (e) {
       console.error(e);
+
+      switch (e.code) {
+        case "ER_NO_REFERENCED_ROW_2":
+          if (e.sqlMessage.includes("idinventario")) {
+            CustomError.createError({
+              cause: "No existe ese cod.producto",
+              message: "No existe en la tabla productos",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+              name: "idinventario",
+            });
+          }
+          break;
+        case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+          if (e.sqlMessage.includes("idinventario")) {
+            CustomError.createError({
+              cause: "No existe ese cod.producto",
+              message: "Error tipo de dato",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+              name: "idinventario",
+            });
+          }
+          if (e.sqlMessage.includes("stock")) {
+            CustomError.createError({
+              cause: "Stock tiene que ser numerico",
+              message: "Error tipo de dato",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+              name: "stock",
+            });
+          }
+          break;
+      }
+
       return {
         error: {
+          status: "error",
           message: "something wrong",
         },
       };
@@ -192,13 +209,16 @@ export default class MercaderiaManager {
     const { fecha, data } = object;
 
     if (!Array.isArray(data))
-      return { error: { message: "Algo paso al agregar mercaderia" } };
+      return {
+        error: { status: "error", message: "Algo paso al agregar mercaderia" },
+      };
 
-    if (data.length == 0) return { error: { message: "Lista vacia" } };
+    if (data.length == 0)
+      return { error: { status: "error", message: "Lista vacia" } };
 
     //Validar Campos
     if (fecha == null || fecha == "")
-      return { error: { message: "Campo Fecha Vacio" } };
+      return { error: { status: "error", message: "Campo Fecha Vacio" } };
 
     //Validar los campos de la lista sean correctas
     for (let i = 0; i < data.length; i++) {
@@ -208,20 +228,43 @@ export default class MercaderiaManager {
 
       //Validamos que sean de tipo integer
       if (!Number.isInteger(stockInteger))
-        return { error: { message: "Campo Stock No es un numero" } };
+        return {
+          error: {
+            status: "error",
+            message: "Campo Stock No es un numero",
+            index: i,
+          },
+        };
 
       if (!Number.isInteger(idInventarioInteger))
-        return { error: { message: "Algo paso al agregar mercaderia" } };
-
-      console.log(idInventarioInteger);
+        return {
+          error: {
+            status: "error",
+            message: "Algo paso al agregar mercaderia",
+            index: i,
+          },
+        };
 
       //Validar que el idinventario exista
       const existsIdInventario =
         inventarioManager.existsIdInventario(idInventarioInteger);
       if (existsIdInventario != null) {
         if (!existsIdInventario)
-          return { error: { message: "No existe ese cod.producto" } };
-      } else return { error: { message: "Algo paso con la idInventario" } };
+          return {
+            error: {
+              status: "error",
+              message: "No existe ese cod.producto",
+              index: i,
+            },
+          };
+      } else
+        return {
+          error: {
+            status: "error",
+            message: "Algo paso con la idInventario",
+            index: i,
+          },
+        };
     }
 
     //Agregamos a la mercaderia
@@ -236,36 +279,45 @@ export default class MercaderiaManager {
       });
     }
 
-    return { data: { isDone: true } };
+    return { data: { isDone: true, status: "success" } };
   }
 
   async updateMercaderia(idMercaderia, object) {
+    let enviar = {
+      fecha: null,
+      stock: null,
+    };
+    const { fecha, stock } = object;
+    const id = idMercaderia;
+
+    //Si se agrega los siguientes campos , validar q sean correctos
+    if (fecha) {
+      const validarDate = new Date(fecha);
+
+      if (Number.isNaN(validarDate.getDate()))
+        CustomError.createError({
+          name: "fecha",
+          cause: "Error en el formato",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Error en el formato",
+        });
+
+      enviar.fecha = fecha;
+    }
+    if (stock) {
+      const stockInteger = parseInt(stock);
+
+      if (!Number.isInteger(stockInteger))
+        CustomError.createError({
+          name: "stock",
+          cause: "Stock tiene que ser numerico",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Error en el tipo de dato",
+        });
+
+      enviar.stock = stockInteger;
+    }
     try {
-      let enviar = {
-        fecha: null,
-        stock: null,
-      };
-      const { fecha, stock } = object;
-      const id = idMercaderia;
-
-      //Si se agrega los siguientes campos , validar q sean correctos
-      if (fecha) {
-        const validarDate = new Date(fecha);
-
-        if (Number.isNaN(validarDate.getDate()))
-          return { error: { message: "Error en el formato de la Fecha" } };
-
-        enviar.fecha = fecha;
-      }
-      if (stock) {
-        const stockInteger = parseInt(stock);
-
-        if (!Number.isInteger(stockInteger))
-          return { error: { message: "Campo Stock No es un numero" } };
-
-        enviar.stock = stockInteger;
-      }
-
       const [result] = await con.query(
         `UPDATE mercaderia
             SET fecha = IFNULL(?,fecha),
@@ -275,7 +327,12 @@ export default class MercaderiaManager {
       );
 
       if (result.affectedRows === 0)
-        return { error: { message: "No se encontro la mercaderia" } };
+        CustomError.createError({
+          name: "idMercaderia",
+          cause: "No se encontro la mercaderia",
+          code: ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS,
+          message: "No se encontro",
+        });
 
       const { data } = this.getOneMercaderia(id);
 
@@ -300,37 +357,31 @@ export default class MercaderiaManager {
         try {
           await inventarioManager.suminventario(data.idinventario);
         } catch (e) {
-          console.error(e);
           return { error: { message: "Something Wrong" } };
         }
       }
 
       return { data: { ...data, ...enviarUpdateList } };
     } catch (e) {
-      console.error(e);
-      return {
-        error: {
-          message: "something wrong",
-        },
-      };
+      throw e
     }
   }
 
   async deleteMercaderia(idMercaderia) {
+    const { data } = this.getOneMercaderia(idMercaderia);
     try {
-      const { data } = this.getOneMercaderia(idMercaderia);
-
       const [result] = await con.query(
         "DELETE FROM mercaderia WHERE (`id` = ?);",
         [idMercaderia]
       );
 
       if (result.affectedRows <= 0)
-        return {
-          error: {
-            message: "No se encontro la mercaderia",
-          },
-        };
+        CustomError.createError({
+          name: "idMercaderia",
+          cause: "No se encuentra mercaderia",
+          message: "No existe",
+          code: ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS,
+        });
 
       //Delete from listInventario
       const filterListMercaderia = this.listMercaderia.filter(
@@ -341,17 +392,17 @@ export default class MercaderiaManager {
       try {
         await inventarioManager.suminventario(data.idinventario);
       } catch (e) {
-        console.error(e);
-        return { error: { message: "Something Wrong" } };
+        CustomError.createError({
+          name: "update inventario stock",
+          cause: "No se actualizo el inventario",
+          message: "No se actualizo el inventario",
+          code: ENUM_ERRORS.DATABASE_ERROR,
+        });
       }
 
-      return { data: { message: "Eliminado Correctamente" } };
+      return { status: "success", message: "Eliminado Correctamente" };
     } catch (error) {
-      return {
-        error: {
-          message: "something wrong",
-        },
-      };
+      throw error;
     }
   }
 

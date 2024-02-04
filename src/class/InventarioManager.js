@@ -4,7 +4,7 @@ import { ENUM_ERRORS } from "../errors/enums.js";
 import { mercaderiaManager } from "../index.js";
 
 export default class InventarioManager {
-  constructor() {
+   constructor() {
     this.listInventario = [];
   }
 
@@ -50,7 +50,7 @@ export default class InventarioManager {
   getOneInventario(idInventario) {
     if (this.listInventario.length != 0) {
       const findInventarioById = this.listInventario.find(
-        (e) => e.id == idInventario
+        (e) => e.id == parseInt(idInventario)
       );
       return { data: findInventarioById };
     } else return { error: { message: "Lista Inventario Vacio" } };
@@ -180,8 +180,8 @@ export default class InventarioManager {
             name: "idMatriz",
           });
         break;
-        default: 
-          throw e
+      default:
+        throw e;
     }
   }
 
@@ -408,39 +408,38 @@ export default class InventarioManager {
 
     if (!Number.isInteger(inventarioInteger)) return [];
 
+    let stockMercaderia = {
+      entrada: 0,
+      salida: 0,
+    };
+
+    const listMercaderia =
+      mercaderiaManager.getMercaderiaIdInventario(idInventario);
+
+    const listMercaderiaEntrada = listMercaderia.filter(
+      (elem) => elem.categoria == "Entrada"
+    );
+
+    const listMercaderiaSalida = listMercaderia.filter(
+      (elem) => elem.categoria == "Salida"
+    );
+
+    //Contamos stock mercaderia Entrada
+    if (listMercaderiaEntrada.length != 0) {
+      for (let i = 0; i < listMercaderiaEntrada.length; i++) {
+        const element = listMercaderiaEntrada[i];
+        stockMercaderia.entrada += element.stock;
+      }
+    }
+
+    //Contamos stock mercaderia Salida
+    if (listMercaderiaSalida.length != 0) {
+      for (let i = 0; i < listMercaderiaSalida.length; i++) {
+        const element = listMercaderiaSalida[i];
+        stockMercaderia.salida += element.stock;
+      }
+    }
     try {
-      let stockMercaderia = {
-        entrada: 0,
-        salida: 0,
-      };
-
-      const listMercaderia =
-        mercaderiaManager.getMercaderiaIdInventario(idInventario);
-
-      const listMercaderiaEntrada = listMercaderia.filter(
-        (elem) => elem.categoria == "Entrada"
-      );
-
-      const listMercaderiaSalida = listMercaderia.filter(
-        (elem) => elem.categoria == "Salida"
-      );
-
-      //Contamos stock mercaderia Entrada
-      if (listMercaderiaEntrada.length != 0) {
-        for (let i = 0; i < listMercaderiaEntrada.length; i++) {
-          const element = listMercaderiaEntrada[i];
-          stockMercaderia.entrada += element.stock;
-        }
-      }
-
-      //Contamos stock mercaderia Salida
-      if (listMercaderiaSalida.length != 0) {
-        for (let i = 0; i < listMercaderiaSalida.length; i++) {
-          const element = listMercaderiaSalida[i];
-          stockMercaderia.salida += element.stock;
-        }
-      }
-
       //Update BBDD
       const [result] = await con.query(
         ` UPDATE inventario 
@@ -473,7 +472,7 @@ export default class InventarioManager {
 
       return {
         data: {
-          isDone: true,
+          status: "success",
           entrada: stockMercaderia.entrada,
           salida: stockMercaderia.salida,
         },
