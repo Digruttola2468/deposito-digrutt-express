@@ -5,60 +5,56 @@ import allPermissions from "../config/permissos.js";
 
 const router = Router();
 
-router.get(
-  "/remito",
-  
-  userExtractor(allPermissions.oficina),
-  async (req, res) => {
-    const { data, error } = await remitosManager.getRemitos();
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
-  }
-);
-
-router.get(
-  "/remito/:id",
-  
-  userExtractor(allPermissions.oficina),
-  async (req, res) => {
-    const { id } = req.params;
-
-    const resultJson = remitosManager.getOneRemito(id);
-
-    res.json(resultJson);
-  }
-);
-
-router.post(
-  "/remito",
-  
-  userExtractor(allPermissions.oficina),
-  async (req, res) => {
-    const object = req.body;
-    const { data, error } = await remitosManager.newRemito(object);
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
-  }
-);
-
-/*router.put("/remito/:idRemito", userExtractor, async (req, res) => {
-  const { data, error } = await remitosManager.updateRemito(
-    req.params.idRemito,
-    req.body
-  );
+router.get("/", userExtractor(allPermissions.oficina), async (req, res) => {
+  const { data, error } = await remitosManager.getRemitos();
 
   if (error != null) return res.status(404).json(error);
 
   return res.json(data);
-});*/
+});
+
+router.get("/:id", userExtractor(allPermissions.oficina), async (req, res) => {
+  const { id } = req.params;
+
+  const resultJson = remitosManager.getOneRemito(id);
+
+  res.json(resultJson);
+});
+
+router.post(
+  "/",
+  userExtractor(allPermissions.oficina),
+  async (req, res, next) => {
+    const object = req.body;
+    try {
+      const { data, error } = await remitosManager.newRemito(object);
+
+      if (error != null) return res.status(404).json(error);
+
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.put("/:idRemito", userExtractor(allPermissions.oficina), async (req, res, next) => {
+  try {
+    const { data, error } = await remitosManager.updateRemito(
+      req.params.idRemito,
+      req.body
+    );
+
+    if (error != null) return res.status(404).json(error);
+
+    return res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.put(
-  "/remito/newProduct/:idRemito",
-  
+  "/newProduct/:idRemito",
   userExtractor(allPermissions.oficina),
   async (req, res) => {
     const { data, error } = await remitosManager.updateRemitoAddNewMercaderia(
@@ -73,16 +69,20 @@ router.put(
 );
 
 router.delete(
-  "/remito/:id",
-  
+  "/:id",
   userExtractor(allPermissions.oficina),
-  async (req, res) => {
+  async (req, res, next) => {
     const idRemito = req.params.id;
-    const { data, error } = await remitosManager.deleteRemito(idRemito);
 
-    if (error != null) return res.status(404).json(error);
+    try {
+      const { data, error } = await remitosManager.deleteRemito(idRemito);
 
-    return res.json(data);
+      if (error != null) return res.status(404).json(error);
+
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
 );
 

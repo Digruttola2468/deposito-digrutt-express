@@ -133,7 +133,7 @@ app.use("/api", grafica);
 
 app.use("/api", user);
 
-app.use("/api", remito);
+app.use("/api/remito", remito);
 
 app.use("/api", localidad);
 
