@@ -1,4 +1,6 @@
 import { con } from "../config/db.js";
+import CustomError from "../errors/Custom_errors.js";
+import { ENUM_ERRORS } from "../errors/enums.js";
 import { clientesManager, inventarioManager } from "../index.js";
 
 export default class PedidosManager {
@@ -15,12 +17,10 @@ export default class PedidosManager {
                     LEFT JOIN clientes on pedidos.idcliente = clientes.id
                 ORDER BY pedidos.fecha_entrega DESC;`
       );
-
       this.productsPedidos = rows;
 
       return { data: rows };
     } catch (error) {
-      console.log(error);
       return { error: { message: "Something wrong" } };
     }
   }
@@ -58,77 +58,105 @@ export default class PedidosManager {
     } = object;
 
     if (fecha_entrega == null || fecha_entrega == "")
-      return {
-        error: { message: "Campo Fecha Entrega Vacio", campo: "fecha" },
-      };
+      CustomError.createError({
+        cause: "Campo Fecha Entrega esta Vacia",
+        message: "Campo fecha entrega vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "fechaEntrega",
+      });
 
     if (idInventario == null || idInventario == "")
-      return {
-        error: { message: "Campo Cod Producto Vacio", campo: "idInventario" },
-      };
+      CustomError.createError({
+        cause: "Campo Cod.Producto esta Vacio",
+        message: "Campo Cod.Producto vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "idInventario",
+      });
 
     if (idcliente == null || idcliente == "")
-      return {
-        error: { message: "Campo Cliente Vacio", campo: "cliente" },
-      };
+      CustomError.createError({
+        cause: "Campo Cliente esta Vacio",
+        message: "Campo Cliente esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "cliente",
+      });
 
     if (cantidadEnviar == null || cantidadEnviar == "")
-      return {
-        error: {
-          message: "Campo cantidadEnviar Pedido Vacia",
-          campo: "cantidadEnviar",
-        },
-      };
-
-    const cantidadEnviarInteger = parseInt(cantidadEnviar);
-
-    //Verificamos que sean de tipo Integer
-    if (!Number.isInteger(cantidadEnviarInteger))
-      return {
-        error: {
-          message: "Campo cantidadEnviar Pedido No es un numero",
-          campo: "cantidadEnviar",
-        },
-      };
+      CustomError.createError({
+        cause: "Campo Cantidad a Enviar esta Vacio",
+        message: "Campo Cantidad a Enviar esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "cantidadEnviar",
+      });
 
     //Convertimos la fecha ingresada a tipo Date
     const fechaDate = new Date(fecha_entrega);
 
     if (Number.isNaN(fechaDate.getDate()))
-      return {
-        error: { message: "Error en el formato de la Fecha", campo: "fecha" },
-      };
-
-    //Verificar si existe el idInventario
-    if (!inventarioManager.existsIdInventario(idInventario))
-      return {
-        error: {
-          message: "No existe ese Cod Producto",
-          campo: "idInventario",
-        },
-      };
-
-    //Verificar si existe el idCliente
-    if (!clientesManager.existsIdCliente(idcliente))
-      return {
-        error: {
-          message: "No existe ese Cliente",
-          campo: "cliente",
-        },
-      };
+      CustomError.createError({
+        name: "fecha",
+        cause: "Error en el formato",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        message: "Error en el formato",
+      });
 
     try {
       const [rows] = await con.query(
         "INSERT INTO pedidos (`idInventario`, `idcliente`, `cantidadEnviar`, `fecha_entrega`, `ordenCompra`) VALUES (?,?,?,?,?);",
         [idInventario, idcliente, cantidadEnviar, fecha_entrega, ordenCompra]
       );
-      if (rows.affectedRows >= 1)
+
+      try {
+        const [result] = await con.query(
+          `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idInventario, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
+            FROM pedidos 
+              LEFT JOIN inventario on pedidos.idinventario = inventario.id
+              LEFT JOIN clientes on pedidos.idcliente = clientes.id
+            WHERE pedidos.id = ?;`,
+          [rows.insertId]
+        );
+
         return {
-          data: { message: "Operacion Exitosa", insertId: rows.insertId },
+          data: {
+            message: "Operacion Exitosa",
+            data: result[0],
+            status: "success",
+          },
         };
-      else return { error: { message: "No se Agrego" } };
+      } catch (error) {
+        throw error;
+      }
     } catch (error) {
-      console.log(error);
+      switch (error.code) {
+        case "ER_NO_REFERENCED_ROW_2":
+        case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+          if (error.sqlMessage.includes("idinventario")) {
+            CustomError.createError({
+              name: "idinventario",
+              cause: "No existe ese cod.producto",
+              message: "No existe ese cod.producto",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+          }
+          if (error.sqlMessage.includes("idcliente")) {
+            CustomError.createError({
+              name: "idcliente",
+              cause: "No existe ese cliente",
+              message: "No existe ese cliente",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+          }
+          if (error.sqlMessage.includes("cantidadEnviar")) {
+            CustomError.createError({
+              name: "cantidadEnviar",
+              cause: "Cantidad Enviar no es numerico",
+              message: "Cantidad Enviar no es numerico",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            });
+          }
+          break;
+      }
+
       return { error: { message: "Something wrong" } };
     }
   }
@@ -137,25 +165,49 @@ export default class PedidosManager {
     const { fechaEntrega, idCliente, nroOrden, products } = object;
 
     if (fechaEntrega == null || fechaEntrega == "")
-      return { error: { message: "Campo Fecha Vacio" } };
+      CustomError.createError({
+        cause: "Campo Fecha Entrega esta Vacio",
+        message: "Campo Fecha Entrega esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "fechaEntrega",
+      });
 
     if (idCliente == null || idCliente == "")
-      return { error: { message: "Campo Cliente Vacio" } };
+      CustomError.createError({
+        cause: "Campo Cliente esta Vacio",
+        message: "Campo Cliente esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "cliente",
+      });
 
     if (products == null || products.length == 0)
-      return { error: { message: "No seleccionaste ningun producto" } };
+      CustomError.createError({
+        cause: "No seleccionaste ningun producto",
+        message: "No seleccionaste ningun producto",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "products",
+      });
 
     if (!Array.isArray(products))
-      return { error: { message: "Algo paso con la products" } };
+      CustomError.createError({
+        cause: "Algo paso en la lista products",
+        message: "Algo paso en la lista products",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        name: "products",
+      });
 
     const fechaDate = new Date(fechaEntrega);
-
     if (Number.isNaN(fechaDate.getDate()))
-      return { error: { message: "Error en el formato de la Fecha" } };
+      CustomError.createError({
+        name: "fecha",
+        cause: "Error en el formato",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        message: "Error en el formato",
+      });
 
     //Verificamos que este todo correcto
     for (let i = 0; i < products.length; i++) {
-      const { idProduct, idcliente, cantidadEnviar } = products[i];
+      const { idProduct, cantidadEnviar } = products[i];
 
       if (idProduct == null || idProduct == "")
         return {
@@ -186,48 +238,28 @@ export default class PedidosManager {
             index: i,
           },
         };
-
-      //Verificar si existe el idInventario
-      if (!inventarioManager.existsIdInventario(idProduct))
-        return {
-          error: {
-            message: "No existe ese Cod Producto",
-            campo: "idInventario",
-            index: i,
-          },
-        };
-
-      //Verificar si existe el idCliente
-      if (!clientesManager.existsIdCliente(idcliente))
-        return {
-          error: {
-            message: "No existe ese Cliente",
-            campo: "cliente",
-            index: i,
-          },
-        };
     }
 
     //Agregamos a la base de datos
     for (let i = 0; i < products.length; i++) {
       const element = products[i];
       try {
-        const { data, error } = await this.postPedidos({
+        await this.postPedidos({
           fecha_entrega: fechaEntrega,
           idcliente: idCliente,
           ordenCompra: nroOrden,
           cantidadEnviar: element.cantidadEnviar,
           idInventario: element.id,
         });
-        if (error) return { error };
       } catch (err) {
-        return { error: "No se logro agregar" };
+        throw err;
       }
     }
 
     return {
       data: {
         message: "Operacion Exitosa",
+        status: "success",
       },
     };
   }
@@ -241,6 +273,7 @@ export default class PedidosManager {
             error: {
               message: "No es Numerico",
               campo: "cantidadEnviar",
+              status: "error",
             },
           };
         }
@@ -255,14 +288,19 @@ export default class PedidosManager {
         );
 
         if (result.affectedRows === 0)
-          return { error: { message: "No se encontro el pedido" } };
+          return {
+            error: { message: "No se encontro el pedido", status: "error" },
+          };
 
-        return { data: { message: "Se actulizo correctamente" } };
+        return {
+          data: { message: "Se actulizo correctamente", status: "success" },
+        };
       }
     }
 
     return {
       error: {
+        status: "error",
         message: "Something Wrong",
         campo: "isDone",
       },
@@ -279,31 +317,6 @@ export default class PedidosManager {
       cantidadEnviada,
     } = object;
 
-    if (
-      idInventario == "" &&
-      idcliente == "" &&
-      cantidadEnviar == "" &&
-      fecha_entrega == ""
-    ) {
-      return {
-        error: {
-          message: "Campos Vacios",
-        },
-      };
-    }
-    if (
-      idInventario == null &&
-      idcliente == null &&
-      cantidadEnviar == null &&
-      fecha_entrega == null
-    ) {
-      return {
-        error: {
-          message: "Campos Vacios",
-        },
-      };
-    }
-
     let enviar = {
       idInventario: null,
       idcliente: null,
@@ -313,124 +326,132 @@ export default class PedidosManager {
       cantidadEnviada: null,
     };
 
-    if (fecha_entrega) {
-      if (fecha_entrega != "") {
-        const fechaDate = new Date(fecha_entrega);
+    if (fecha_entrega && fecha_entrega != "") {
+      const fechaDate = new Date(fecha_entrega);
 
-        if (Number.isNaN(fechaDate.getDate())) {
-          return {
-            error: {
-              message: "Error en el formato de la Fecha",
-              campo: "fecha",
-            },
-          };
-        }
-        enviar.fecha_entrega = fecha_entrega;
-      }
-    }
-    if (idInventario) {
-      if (idInventario != "") {
-        //Verificar si existe el idInventario
-        if (!inventarioManager.existsIdInventario(idInventario)) {
-          return {
-            error: {
-              message: "No existe ese Cod Producto",
-              campo: "idInventario",
-            },
-          };
-        }
-        enviar.idInventario = idInventario;
-      }
+      if (Number.isNaN(fechaDate.getDate()))
+        CustomError.createError({
+          name: "fecha",
+          cause: "Error en el formato",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Error en el formato",
+        });
+
+      enviar.fecha_entrega = fecha_entrega;
     }
 
-    if (idcliente) {
-      if (idcliente != "") {
-        if (!clientesManager.existsIdCliente(idcliente)) {
-          return {
-            error: {
-              message: "No existe ese Cod Producto",
-              campo: "idInventario",
-            },
-          };
-        }
-        enviar.idcliente = idcliente;
-      }
-    }
+    if (idInventario && idInventario != "") enviar.idInventario = idInventario;
 
-    if (cantidadEnviar) {
-      if (cantidadEnviar != "") {
-        const cantidadEnviarInteger = parseInt(cantidadEnviar);
-        if (!Number.isInteger(cantidadEnviarInteger)) {
-          return {
-            error: {
-              message: "Campo cantidadEnviar Pedido No es un numero",
-              campo: "cantidadEnviar",
-            },
-          };
-        }
-        enviar.cantidadEnviar = cantidadEnviarInteger;
-      }
+    if (idcliente && idcliente != "") enviar.idcliente = idcliente;
+
+    if (cantidadEnviar != null && cantidadEnviar != "") {
+      const cantidadEnviarInteger = parseInt(cantidadEnviar);
+      if (!Number.isInteger(cantidadEnviarInteger))
+        CustomError.createError({
+          name: "cantidadEnviar",
+          cause: "Cantidad a Enviar no es numerico",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Cantidad a Enviar no es numerico",
+        });
+
+      enviar.cantidadEnviar = cantidadEnviarInteger;
     }
 
     if (cantidadEnviada && cantidadEnviada != "") {
       const cantidadEnviadaInteger = parseInt(cantidadEnviada);
-      if (!Number.isInteger(cantidadEnviadaInteger)) {
-        return {
-          error: {
-            message: "Campo Cantidad Enviada No es un numero",
-            campo: "cantidadEnviada",
-          },
-        };
-      }
+      if (!Number.isInteger(cantidadEnviadaInteger))
+        CustomError.createError({
+          name: "cantidadEnviada",
+          cause: "Cantidad Enviada no es numerico",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Cantidad Enviada no es numerico",
+        });
+
       enviar.cantidadEnviada = cantidadEnviadaInteger;
     }
 
     if (ordenCompra && ordenCompra != "") enviar.ordenCompra = ordenCompra;
 
-    const [result] = await con.query(
-      `UPDATE pedidos
-          SET idinventario = IFNULL(?,idinventario),
-              idcliente = IFNULL(?,idcliente),
-              cantidadEnviar = IFNULL(?,cantidadEnviar),
-              fecha_entrega = IFNULL(?,fecha_entrega),
-              ordenCompra = IFNULL(?,ordenCompra),
-              cantidad_enviada = IFNULL(?,cantidad_enviada)
-          WHERE id = ?;`,
-      [
-        enviar.idInventario,
-        enviar.idcliente,
-        enviar.cantidadEnviar,
-        enviar.fecha_entrega,
-        enviar.ordenCompra,
-        enviar.cantidadEnviada,
-        idPedido,
-      ]
-    );
+    try {
+      const [result] = await con.query(
+        `UPDATE pedidos
+            SET idinventario = IFNULL(?,idinventario),
+                idcliente = IFNULL(?,idcliente),
+                cantidadEnviar = IFNULL(?,cantidadEnviar),
+                fecha_entrega = IFNULL(?,fecha_entrega),
+                ordenCompra = IFNULL(?,ordenCompra),
+                cantidad_enviada = IFNULL(?,cantidad_enviada)
+            WHERE id = ?;`,
+        [
+          enviar.idInventario,
+          enviar.idcliente,
+          enviar.cantidadEnviar,
+          enviar.fecha_entrega,
+          enviar.ordenCompra,
+          enviar.cantidadEnviada,
+          idPedido,
+        ]
+      );
 
-    if (result.affectedRows === 0)
-      return { error: { message: "No se encontro el pedido" } };
+      if (result.affectedRows === 0)
+        return { error: { message: "No se encontro el pedido" } };
 
-    const [rows] = await con.query(
-      `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idInventario, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
-                FROM pedidos 
-                    LEFT JOIN inventario on pedidos.idInventario = inventario.id
-                    LEFT JOIN clientes on pedidos.idcliente = clientes.id
-                WHERE pedidos.id=?;`,
-      [idPedido]
-    );
+      const [rows] = await con.query(
+        `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idInventario, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
+                  FROM pedidos 
+                      LEFT JOIN inventario on pedidos.idInventario = inventario.id
+                      LEFT JOIN clientes on pedidos.idcliente = clientes.id
+                  WHERE pedidos.id=?;`,
+        [idPedido]
+      );
 
-    //Update productsPedidos
-    const updatePedido = this.productsPedidos.map((elem) => {
-      if (elem.id == idPedido) return rows[0];
-      else return elem;
-    });
+      //Update productsPedidos
+      const updatePedido = this.productsPedidos.map((elem) => {
+        if (elem.id == idPedido) return rows[0];
+        else return elem;
+      });
 
-    this.productsPedidos = updatePedido;
+      this.productsPedidos = updatePedido;
 
-    return { data: { message: "Se actualizo con exito", update: rows[0] } };
+      return {
+        data: {
+          message: "Se actualizo con exito",
+          update: rows[0],
+          status: "success",
+        },
+      };
+    } catch (error) {
+      switch (error.code) {
+        case "ER_NO_REFERENCED_ROW_2":
+        case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+          if (error.sqlMessage.includes("idinventario")) {
+            CustomError.createError({
+              name: "idinventario",
+              cause: "No existe ese cod.producto",
+              message: "No existe ese cod.producto",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+          }
+          if (error.sqlMessage.includes("idcliente")) {
+            CustomError.createError({
+              name: "idcliente",
+              cause: "No existe ese cliente",
+              message: "No existe ese cliente",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+          }
+          if (error.sqlMessage.includes("cantidadEnviar")) {
+            CustomError.createError({
+              name: "cantidadEnviar",
+              cause: "Cantidad Enviar no es numerico",
+              message: "Cantidad Enviar no es numerico",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            });
+          }
+          break;
+      }
+    }
   }
-
-  async postproductsPedidos(object) {}
 
   async deletePedido(idPedido) {
     try {
@@ -445,12 +466,17 @@ export default class PedidosManager {
 
       if (result.affectedRows >= 1)
         return {
-          data: { message: "Se elimino Correctamente" },
+          data: { message: "Se elimino Correctamente", status: "success" },
         };
-      else return { error: { message: "No existe" } };
+      else
+        CustomError.createError({
+          name: "idPedido",
+          cause: "No se encuentra el pedido",
+          message: "No existe pedido",
+          code: ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS,
+        });
     } catch (error) {
-      console.log(error);
-      return { error: { message: "Something Wrong" } };
+      throw error;
     }
   }
 }

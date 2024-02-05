@@ -122,7 +122,7 @@ app.use("/api", excel);
 app.use("/api", cloudinaryRoute);
 app.use("/api", maquinaParadaRoute);
 app.use("/api", matricesRoute);
-app.use("/api", PedidosRoute);
+app.use("/api/pedidos", PedidosRoute);
 app.use("/api", materiaPrimaRoute);
 app.use("/api", producionRoute);
 app.use("/api/clientes", clientes);
