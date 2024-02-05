@@ -5,7 +5,7 @@ import allPermissions from "../config/permissos.js";
 
 const router = Router();
 
-router.get("/clientes", async (req, res) => {
+router.get("/", async (req, res) => {
   const { data, error } = await clientesManager.getClientes();
 
   if (error != null) return res.status(500).json(error);
@@ -13,7 +13,7 @@ router.get("/clientes", async (req, res) => {
   return res.json(data);
 });
 
-router.get("/cliente/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   const idCliente = req.params.id;
 
   const { data, error } = clientesManager.getOneCliente(idCliente);
@@ -24,7 +24,7 @@ router.get("/cliente/:id", async (req, res) => {
 });
 
 router.post(
-  "/cliente",
+  "/",
   userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
   async (req, res, next) => {
     const object = req.body;
@@ -38,7 +38,7 @@ router.post(
 );
 
 router.put(
-  "/cliente/:id",
+  "/:id",
   userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
   async (req, res, next) => {
     const idCliente = req.params.id;
@@ -54,7 +54,7 @@ router.put(
 );
 
 router.delete(
-  "/cliente/:id",
+  "/:id",
   userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
   async (req, res, next) => {
     const idCliente = req.params.id;

@@ -25,7 +25,7 @@ import matricesRoute from "./routes/matrices.routes.js";
 import historialMatricesErrorRoute from "./routes/historialErrorMatriz.routes.js";
 import materiaPrimaRoute from "./routes/material.routes.js";
 import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
-import placeSavedEnviosRoute from './routes/placeSavedEnvios.routes.js'
+import placeSavedEnviosRoute from "./routes/placeSavedEnvios.routes.js";
 
 //ROUTES PRODUCCION
 import clientes from "./routes/clientes.routes.js";
@@ -43,7 +43,7 @@ import remito from "./routes/remitos.routes.js";
 import PedidosRoute from "./routes/pedidos.routes.js";
 
 import EnviosRoute from "./routes/envios.routes.js";
-import vehiculoRoute from './routes/vehiculos.routes.js'
+import vehiculoRoute from "./routes/vehiculos.routes.js";
 
 //CLASSES
 import InventarioManager from "./class/InventarioManager.js";
@@ -64,7 +64,7 @@ import { con } from "./config/db.js";
 import passport from "passport";
 import EnviosManager from "./class/EnviosManager.js";
 
-import errorHandle from './middleware/errors.js'
+import errorHandle from "./middleware/errors.js";
 
 const app = express();
 
@@ -125,9 +125,9 @@ app.use("/api", matricesRoute);
 app.use("/api", PedidosRoute);
 app.use("/api", materiaPrimaRoute);
 app.use("/api", producionRoute);
-app.use("/api", clientes);
+app.use("/api/clientes", clientes);
 app.use("/api", motivoMaquinaParadaRoute);
-app.use("/api", historialMatricesErrorRoute);
+app.use("/api/historialMatriz", historialMatricesErrorRoute);
 
 app.use("/api", grafica);
 
@@ -140,8 +140,8 @@ app.use("/api", localidad);
 app.use("/api", facturaNegro);
 
 app.use("/api/envios", EnviosRoute);
-app.use('/api/vehiculos', vehiculoRoute)
-app.use('/api/savedPlacesEnviados', placeSavedEnviosRoute)
+app.use("/api/vehiculos", vehiculoRoute);
+app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 
 app.use(views);
 

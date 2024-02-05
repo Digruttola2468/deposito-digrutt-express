@@ -1,4 +1,6 @@
 import { con } from "../config/db.js";
+import CustomError from "../errors/Custom_errors.js";
+import { ENUM_ERRORS } from "../errors/enums.js";
 import { matricesManager } from "../index.js";
 
 export default class HistorialMatriz {
@@ -9,11 +11,13 @@ export default class HistorialMatriz {
   async getHistorial() {
     try {
       const [rows] = await con.query(
-        `SELECT historialFallosMatriz.id,historialFallosMatriz.idMatriz, historialFallosMatriz.descripcion_deterioro, historialFallosMatriz.fecha, historialFallosMatriz.isSolved, historialFallosMatriz.fechaTerminado , matriz.cod_matriz, matriz.descripcion
+        `SELECT historialFallosMatriz.id,historialFallosMatriz.idMatriz, historialFallosMatriz.descripcion_deterioro, historialFallosMatriz.fecha, historialFallosMatriz.isSolved, historialFallosMatriz.fechaTerminado , matriz.cod_matriz, matriz.descripcion, categoria.categoria
             FROM historialFallosMatriz 
             LEFT JOIN matriz ON historialFallosMatriz.idMatriz = matriz.id
+            LEFT JOIN categoria ON historialFallosMatriz.idCategoria = categoria.id
             ORDER BY historialFallosMatriz.fecha DESC;`
       );
+
       this.listHistorial = rows;
       return { data: rows };
     } catch (e) {
@@ -51,13 +55,39 @@ export default class HistorialMatriz {
   }
 
   async postHistorialMatriz(object) {
-    const { idMatriz, descripcion_deterioro } = object;
+    const { idMatriz, descripcion_deterioro, idCategoria } = object;
 
     if (idMatriz == null || idMatriz == "")
-      return { error: { message: "Campo Cod Matriz Vacio" } };
+      CustomError.createError({
+        cause: "Campo Matriz esta Vacio",
+        message: "Campo Matriz esta Vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "matriz",
+      });
+
+    if (idCategoria == null || idCategoria == "")
+      CustomError.createError({
+        cause: "Campo Categoria esta Vacio",
+        message: "Campo Categoria esta Vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "categoria",
+      });
 
     if (descripcion_deterioro == null || descripcion_deterioro == "")
-      return { error: { message: "Campo Descripcion del Deterioro Vacio" } };
+      CustomError.createError({
+        cause: "Campo descripcion esta Vacio",
+        message: "Campo descripcion esta Vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        name: "descripcion",
+      });
+
+    if (idCategoria != "3" && idCategoria != "4")
+      CustomError.createError({
+        name: "categoria",
+        cause: "Categoria fuera de rango ",
+        code: ENUM_ERRORS.ROUTING_ERROR,
+        message: "Categoria fuera de rango (Mantenimiento o Falla)",
+      });
 
     //Obtenemos la fecha actual
     const fechaDate = new Date();
@@ -65,17 +95,19 @@ export default class HistorialMatriz {
       fechaDate.getMonth() + 1
     }-${fechaDate.getDate()}`;
 
-    //Validar si existe ese idMatriz
-    if (!matricesManager.exitsMatriz(parseInt(idMatriz)))
-      return { error: { message: "No existe esa Matriz" } };
-
     try {
       const [rows] = await con.query(
-        "INSERT INTO historialFallosMatriz (`idMatriz`, `descripcion_deterioro`, `fecha`) VALUES (?,?,?);",
-        [idMatriz, descripcion_deterioro, stringDate]
+        "INSERT INTO historialFallosMatriz (`idMatriz`, `descripcion_deterioro`, `fecha`, `idCategoria`) VALUES (?,?,?,?);",
+        [idMatriz, descripcion_deterioro, stringDate, idCategoria]
       );
       if (rows.affectedRows >= 1) {
         const getOneMatriz = matricesManager.getOneMatriz(idMatriz);
+
+        let categoria = "";
+        if (idCategoria == "3") categoria = "Mantenimiento";
+
+        if (idCategoria == "4") categoria = "Falla";
+
         this.listHistorial.push({
           id: rows.insertId,
           idMatriz,
@@ -85,11 +117,13 @@ export default class HistorialMatriz {
           isSolved: 0,
           fecha: stringDate,
           fechaTerminado: null,
+          categoria: categoria,
         });
         return {
           data: {
+            status: "success",
             message: "Operacion Exitosa",
-            insert: {
+            data: {
               id: rows.insertId,
               idMatriz,
               cod_matriz: getOneMatriz.cod_matriz,
@@ -98,20 +132,20 @@ export default class HistorialMatriz {
               isSolved: 0,
               fecha: stringDate,
               fechaTerminado: null,
+              categoria: categoria,
             },
           },
         };
       } else return { error: { message: "No se Agrego" } };
     } catch (error) {
+      console.log(error);
       return { error: { message: "Something Wrong" } };
     }
   }
 
   async updateHistorialMatriz(idHistorial, object) {
-    const { descripcion_deterioro, fecha } = object;
-    let enviar = { descripcion_deterioro: null, fecha: null };
-
-    const findIdHistorial = this.getOne(idHistorial);
+    const { descripcion_deterioro, fecha, idCategoria } = object;
+    let enviar = { descripcion_deterioro: null, fecha: null, categoria: null };
 
     if (descripcion_deterioro && descripcion_deterioro != "")
       enviar.descripcion_deterioro = descripcion_deterioro;
@@ -120,40 +154,84 @@ export default class HistorialMatriz {
       //Convertimos la fecha ingresada a tipo Date
       const fechaDate = new Date(fecha);
       if (Number.isNaN(fechaDate.getDate()))
-        return { error: { message: "Error en el formato de la Fecha" } };
+        CustomError.createError({
+          name: "fecha",
+          cause: "Error en el formato date",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Error en el formato date",
+        });
       if (fechaDate.getFullYear() < 2024)
-        return { error: { message: "Error en el año agregado" } };
+        CustomError.createError({
+          name: "fecha",
+          cause: "Error en el Año agregado",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Error en el Año agregado",
+        });
       enviar.fecha = fecha;
     }
 
-    const [result] = await con.query(
-      `
-      UPDATE historialFallosMatriz
-      SET descripcion_deterioro = IFNULL(?,descripcion_deterioro),
-          fecha = IFNULL(?,fecha)
-      WHERE id = ?;`,
-      [enviar.descripcion_deterioro, enviar.fecha, idHistorial]
-    );
+    if (idCategoria && idCategoria != "") {
+      if (idCategoria != "3" && idCategoria != "4")
+        CustomError.createError({
+          name: "categoria",
+          cause: "Categoria fuera de rango ",
+          code: ENUM_ERRORS.ROUTING_ERROR,
+          message: "Categoria fuera de rango (Mantenimiento o Falla)",
+        });
 
-    if (result.affectedRows === 0)
-      return { error: { message: "No se encontro la Matriz" } };
+      enviar.categoria = idCategoria;
+    }
 
-    const [rows] = await con.query(
-      `SELECT historialFallosMatriz.id,historialFallosMatriz.idMatriz, historialFallosMatriz.descripcion_deterioro, historialFallosMatriz.fecha, historialFallosMatriz.isSolved, historialFallosMatriz.fechaTerminado , matriz.cod_matriz, matriz.descripcion
-        FROM historialFallosMatriz 
-        LEFT JOIN matriz ON historialFallosMatriz.idMatriz = matriz.id
-        WHERE historialFallosMatriz.id=?;`,
-      idHistorial
-    );
+    try {
+      const [result] = await con.query(
+        `
+        UPDATE historialFallosMatriz
+        SET descripcion_deterioro = IFNULL(?,descripcion_deterioro),
+            fecha = IFNULL(?,fecha),
+            idCategoria = IFNULL(?,idCategoria)
+        WHERE id = ?;`,
+        [
+          enviar.descripcion_deterioro,
+          enviar.fecha,
+          enviar.categoria,
+          idHistorial,
+        ]
+      );
 
-    const update = this.listHistorial.map((elem) => {
-      if (elem.id == idHistorial) return rows[0];
-      else return elem;
-    });
+      if (result.affectedRows === 0)
+        CustomError.createError({
+          name: "historialMatriz",
+          cause: "No se encontro el historial de dicha matriz",
+          code: ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS,
+          message: "No se encontro el historial de dicha matriz",
+        });
 
-    this.listHistorial = update;
+      const [rows] = await con.query(
+        `SELECT historialFallosMatriz.id,historialFallosMatriz.idMatriz, historialFallosMatriz.descripcion_deterioro, historialFallosMatriz.fecha, historialFallosMatriz.isSolved, historialFallosMatriz.fechaTerminado , matriz.cod_matriz, matriz.descripcion, categoria.categoria
+          FROM historialFallosMatriz 
+          LEFT JOIN matriz ON historialFallosMatriz.idMatriz = matriz.id LEFT JOIN categoria ON historialFallosMatriz.idCategoria = categoria.id
+          WHERE historialFallosMatriz.id = ?;`,
+        idHistorial
+      );
 
-    return { data: rows[0] };
+      const update = this.listHistorial.map((elem) => {
+        if (elem.id == idHistorial) return rows[0];
+        else return elem;
+      });
+
+      this.listHistorial = update;
+
+      return {
+        data: {
+          status: "success",
+          data: rows[0],
+          message: "Operacion Exitosa",
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   async updateIsSolved(idHistorial, isSolved) {
@@ -223,12 +301,17 @@ export default class HistorialMatriz {
         );
         this.listHistorial = filter;
         return {
-          data: { message: "Se elimino Correctamente" },
+          data: { message: "Se elimino Correctamente", status: "success" },
         };
-      } else return { error: { message: "No existe" } };
+      } else
+        CustomError.createError({
+          name: "idHistorialMatriz",
+          cause: "No existe ese historial",
+          message: "No existe ese historial",
+          code: ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS,
+        });
     } catch (error) {
-      console.log(error);
-      return { error: { message: "Something Wrong" } };
+      throw error;
     }
   }
 }
