@@ -112,7 +112,7 @@ export const historialErrorMatrizManager = new HistorialMatriz();
 export const pedidosManager = new PedidosManager();
 export const enviosManager = new EnviosManager();
 
-//
+//envios - maquinaParadaRoute - matricesRoute - producionRoute - facturaNegro
 app.use("/api", indexRoute);
 app.use("/api/mercaderia", mercaderiaRoute);
 app.use("/api", coloresRoute);
@@ -137,7 +137,7 @@ app.use("/api/remito", remito);
 
 app.use("/api", localidad);
 
-app.use("/api", facturaNegro);
+app.use("/api/facturaNegro", facturaNegro);
 
 app.use("/api/envios", EnviosRoute);
 app.use("/api/vehiculos", vehiculoRoute);
