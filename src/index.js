@@ -112,36 +112,31 @@ export const historialErrorMatrizManager = new HistorialMatriz();
 export const pedidosManager = new PedidosManager();
 export const enviosManager = new EnviosManager();
 
-//envios - maquinaParadaRoute - matricesRoute - producionRoute - facturaNegro
+//envios - maquinaParadaRoute - matricesRoute
 app.use("/api", indexRoute);
 app.use("/api/mercaderia", mercaderiaRoute);
-app.use("/api", coloresRoute);
-app.use("/api", tipoProductoRoute);
+app.use("/api/colores", coloresRoute);
+app.use("/api/tiposproductos", tipoProductoRoute);
 app.use("/api/inventario", inventario);
-app.use("/api", excel);
+app.use("/api/excel", excel);
 app.use("/api", cloudinaryRoute);
-app.use("/api", maquinaParadaRoute);
-app.use("/api", matricesRoute);
 app.use("/api/pedidos", PedidosRoute);
-app.use("/api", materiaPrimaRoute);
+app.use("/api/materiaPrima", materiaPrimaRoute);
 app.use("/api/producion", producionRoute);
 app.use("/api/clientes", clientes);
-app.use("/api", motivoMaquinaParadaRoute);
+app.use("/api/motivoMaquinaParada", motivoMaquinaParadaRoute);
 app.use("/api/historialMatriz", historialMatricesErrorRoute);
-
-app.use("/api", grafica);
-
+app.use("/api/grafica", grafica);
 app.use("/api", user);
-
 app.use("/api/remito", remito);
-
-app.use("/api", localidad);
-
+app.use("/api/localidad", localidad);
 app.use("/api/facturaNegro", facturaNegro);
-
-app.use("/api/envios", EnviosRoute);
 app.use("/api/vehiculos", vehiculoRoute);
 app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
+
+app.use("/api/envios", EnviosRoute);
+app.use("/api", maquinaParadaRoute);
+app.use("/api", matricesRoute);
 
 app.use(views);
 

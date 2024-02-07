@@ -12,7 +12,7 @@ import allPermissions from "../config/permissos.js";
 const router = Router();
 
 router.get(
-  "/grafica/mercaderia/:idInventario",
+  "/mercaderia/:idInventario",
   userExtractor(allPermissions.mercaderia, allPermissions.oficina),
   graficaMercaderia
 );
@@ -20,19 +20,19 @@ router.get(
 //router.get('/grafica/cliente/:idCliente', graficaCliente);
 
 router.get(
-  "/grafica/cliente",
+  "/cliente",
   userExtractor(allPermissions.mercaderia, allPermissions.oficina),
   graficaCliente
 );
 
 router.get(
-  "/grafica/clientes/todos",
+  "/clientes/todos",
   userExtractor(allPermissions.mercaderia, allPermissions.oficina),
   getGraficaRelacionOtrosClientes
 );
 
 router.get(
-  "/grafica/produccion",
+  "/produccion",
   userExtractor(allPermissions.produccion, allPermissions.oficina),
   graficaProduccion
 );
