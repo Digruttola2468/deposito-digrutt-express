@@ -45,6 +45,37 @@ router.post(
 );
 
 router.post(
+  "/salida",
+  userExtractor([allPermissions.mercaderia]),
+  async (req, res, next) => {
+    const { fecha, stock, idinventario, observacion } = req.body;
+
+    if (observacion == null || observacion == "")
+      return res.status(400).json({
+        status: "error",
+        message: "Campo observacion vacio",
+        campus: "observacion",
+      });
+
+    try {
+      const { data, error } = await mercaderiaManager.createMercaderia({
+        fecha,
+        stock,
+        idinventario,
+        idcategoria: "1",
+        observacion,
+      });
+
+      if (error != null) return res.status(404).json(error);
+
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
   "/list",
   userExtractor([allPermissions.mercaderia]),
   async (req, res) => {
@@ -60,7 +91,7 @@ router.post(
 router.put(
   "/:id",
   userExtractor([allPermissions.mercaderia]),
-  async (req, res,next) => {
+  async (req, res, next) => {
     const object = req.body;
     const idMercaderia = req.params.id;
     try {
@@ -68,9 +99,9 @@ router.put(
         idMercaderia,
         object
       );
-  
+
       if (error != null) return res.status(404).json(error);
-  
+
       return res.json(data);
     } catch (error) {
       next(error);

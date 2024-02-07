@@ -55,7 +55,7 @@ export default class MercaderiaManager {
   }
 
   async createMercaderia(object) {
-    let { fecha, stock, idinventario, idcategoria, idFacturaNegro, idremito } =
+    let { fecha, stock, idinventario, idcategoria, idFacturaNegro, idremito, observacion } =
       object;
 
     //Validar Campos
@@ -70,7 +70,7 @@ export default class MercaderiaManager {
     if (stock == null || stock == "")
       CustomError.createError({
         name: "stock",
-        cause: "Campo Cantidad Entrada Vacio",
+        cause: "Campo Cantidad Vacio",
         code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
         message: "Campo Cantidad Entrada esta vacio",
       });
@@ -94,6 +94,7 @@ export default class MercaderiaManager {
     //
     if (idFacturaNegro == "") idFacturaNegro = null;
     if (idremito == "") idremito = null;
+    if (observacion == "") observacion = null;
 
     //Verificamos que sea de tipo Entrada - Salida , si no es ninguna de las dos saltar un error
     if (idcategoria != "1" && idcategoria != "2")
@@ -117,8 +118,8 @@ export default class MercaderiaManager {
 
     try {
       const [rows] = await con.query(
-        "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`, `idremito`, `idFacturaNegro`) VALUES (?,?,?,?,?,?);",
-        [fecha, stock, idcategoria, idinventario, idremito, idFacturaNegro]
+        "INSERT INTO mercaderia (`fecha`, `stock`, `idcategoria`, `idinventario`, `idremito`, `idFacturaNegro`, `observacion`) VALUES (?,?,?,?,?,?,?);",
+        [fecha, stock, idcategoria, idinventario, idremito, idFacturaNegro, observacion]
       );
 
       //get one listInventario
@@ -142,6 +143,7 @@ export default class MercaderiaManager {
         categoria: categoria,
         idFacturaNegro: idFacturaNegro,
         idremito: idremito,
+        observacion: observacion
       };
 
       //add this.listMercaderia
