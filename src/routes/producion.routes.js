@@ -1,24 +1,20 @@
 import { Router } from "express";
 import { producionManager } from "../index.js";
-import userExtractor, { auth } from "../middleware/userExtractor.js";
+import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
 
 const ruta = Router();
 
-ruta.get(
-  "/producion",
-  userExtractor([allPermissions.produccion]),
-  async (req, res) => {
-    const { data, error } = await producionManager.getProduccion();
+ruta.get("/", userExtractor([allPermissions.produccion]), async (req, res) => {
+  const { data, error } = await producionManager.getProduccion();
 
-    if (error != null) return res.status(404).json(error);
+  if (error != null) return res.status(404).json(error);
 
-    return res.json(data);
-  }
-);
+  return res.json(data);
+});
 
 ruta.get(
-  "/producion/:numMaquina",
+  "/:numMaquina",
   userExtractor([allPermissions.produccion]),
   async (req, res) => {
     const numMaquina = req.params.numMaquina;
@@ -36,62 +32,78 @@ ruta.get(
 );
 
 ruta.post(
-  "/producion",
+  "/",
   userExtractor([allPermissions.produccion]),
-  async (req, res) => {
+  async (req, res, next) => {
     const object = req.body;
-    const { data, error } = await producionManager.postProducion(object);
+    try {
+      const { data, error } = await producionManager.postProducion(object, true);
 
-    if (error != null) return res.status(404).json(error);
+      if (error != null) return res.status(404).json(error);
 
-    return res.json(data);
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
 ruta.post(
-  "/producion/list",
+  "/list",
   userExtractor([allPermissions.produccion]),
-  async (req, res) => {
+  async (req, res, next) => {
     const object = req.body;
-    const { data, error } = await producionManager.postListProduccion(object);
+    try {
+      const { data, error } = await producionManager.postListProduccion(object);
 
-    if (error != null) return res.status(404).json(error);
+      if (error != null) return res.status(404).json(error);
 
-    return res.json(data);
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
 ruta.put(
-  "/producion/:idProduccion",
+  "/:idProduccion",
   userExtractor([allPermissions.produccion]),
-  async (req, res) => {
+  async (req, res, next) => {
     const idProduccion = req.params.idProduccion;
     const body = req.body;
 
-    const { data, error } = await producionManager.updateProduccion(
-      idProduccion,
-      body
-    );
+    try {
+      const { data, error } = await producionManager.updateProduccion(
+        idProduccion,
+        body
+      );
 
-    if (error != null) return res.status(404).json(error);
+      if (error != null) return res.status(404).json(error);
 
-    return res.json(data);
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
 ruta.delete(
-  "/producion/:idProduccion",
+  "/:idProduccion",
   userExtractor([allPermissions.produccion]),
-  async (req, res) => {
+  async (req, res, next) => {
     const idProduccion = req.params.idProduccion;
 
-    const { data, error } = await producionManager.deleteProduccion(
-      idProduccion
-    );
+    try {
+      const { data, error } = await producionManager.deleteProduccion(
+        idProduccion
+      );
 
-    if (error != null) return res.status(404).json(error);
+      if (error != null) return res.status(404).json(error);
 
-    return res.json(data);
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
   }
 );
 

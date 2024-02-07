@@ -124,7 +124,7 @@ app.use("/api", maquinaParadaRoute);
 app.use("/api", matricesRoute);
 app.use("/api/pedidos", PedidosRoute);
 app.use("/api", materiaPrimaRoute);
-app.use("/api", producionRoute);
+app.use("/api/producion", producionRoute);
 app.use("/api/clientes", clientes);
 app.use("/api", motivoMaquinaParadaRoute);
 app.use("/api/historialMatriz", historialMatricesErrorRoute);

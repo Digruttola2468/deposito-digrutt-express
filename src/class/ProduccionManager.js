@@ -1,4 +1,6 @@
 import { con } from "../config/db.js";
+import CustomError from "../errors/Custom_errors.js";
+import { ENUM_ERRORS } from "../errors/enums.js";
 
 export default class ProducionManager {
   constructor() {
@@ -8,23 +10,31 @@ export default class ProducionManager {
   async getProduccion() {
     try {
       const [rows] = await con.query(
-        `SELECT producion.*,inventario.nombre,inventario.descripcion,inventario.articulo,inventario.url_image 
-        FROM producion 
-        LEFT JOIN inventario ON producion.idinventario = inventario.id 
-        ORDER BY producion.fecha DESC;`
+        ` SELECT producion.*,
+                inventario.nombre,inventario.descripcion,inventario.articulo,inventario.url_image,
+                matriz.cod_matriz,matriz.cantPiezaGolpe,
+                maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina
+          FROM producion 
+                LEFT JOIN inventario ON producion.idinventario = inventario.id 
+                LEFT JOIN matriz ON producion.idMatriz = matriz.id
+                LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
+          ORDER BY producion.fecha DESC; `
       );
       this.listProduccion = rows;
       return { data: rows };
     } catch (e) {
-      console.error(e);
       return { error: { message: "Something wrong" } };
     }
   }
 
-  getOneProducion() {}
-
-  getLength() {
-    return this.listProduccion.length;
+  getOneProducion(idProduccion) {
+    if (this.listProduccion.length != 0) {
+      const findProduccionById = this.listProduccion.find(
+        (e) => e.id == parseInt(idProduccion)
+      );
+      return { data: findProduccionById };
+    } else
+      return { error: { message: "Lista Produccion Vacio", status: "error" } };
   }
 
   getRangeDateListProduccion(dateInit, dateEnd) {
@@ -135,54 +145,64 @@ export default class ProducionManager {
         const { data, error } = await this.postProducion(element);
         if (error) return { error };
       } catch (err) {
-        return { error: "something wrong" };
+        return { error: "something wrong", status: "error" };
       }
     }
 
     return {
       data: {
         message: "Operacion Exitosa",
+        status: "success",
       },
     };
   }
 
   verifyCampus(object) {
-    const {
-      numMaquina,
-      fecha,
-      idInventario,
-      golpesReales,
-      piezasProducidas,
-    } = object;
+    const { numMaquina, fecha, idInventario, golpesReales, piezasProducidas } =
+      object;
     //Validar Campos
     if (fecha == null || fecha == "")
-      return { error: { message: "Campo Fecha Vacio", campo: "fecha" } };
+      CustomError.createError({
+        name: "fecha",
+        cause: "Campo Fecha esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        message: "Campo Fecha esta vacio",
+      });
 
     if (numMaquina == null || numMaquina == "")
-      return {
-        error: { message: "Campo N° Maquina Vacio", campo: "numMaquina" },
-      };
+      CustomError.createError({
+        name: "numMaquina",
+        cause: "Campo N° Maquina esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        message: "Campo N° Maquina esta vacio",
+      });
 
     if (golpesReales == null || golpesReales == "")
-      return {
-        error: { message: "Campo Golpes Reales Vacio", campo: "golpeReale" },
-      };
+      CustomError.createError({
+        name: "golpesReale",
+        cause: "Campo Golpes Reales esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        message: "Campo Golpes Reales esta vacio",
+      });
 
     if (piezasProducidas == null || piezasProducidas == "")
-      return {
-        error: {
-          message: "Campo PiezasProducidas Vacia",
-          campo: "piezasProducidas",
-        },
-      };
+      CustomError.createError({
+        name: "piezasProducidas",
+        cause: "Campo piezas producidas esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        message: "Campo piezas producidas esta vacio",
+      });
 
     //Convertimos la fecha ingresada a tipo Date
     const fechaDate = new Date(fecha);
 
     if (Number.isNaN(fechaDate.getDate()))
-      return {
-        error: { message: "Error en el formato de la Fecha", campo: "fecha" },
-      };
+      CustomError.createError({
+        name: "fecha",
+        cause: "Error en el formato date",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        message: "Error en el formato date",
+      });
 
     const numMaquinaInteger = parseInt(numMaquina);
     const golpesRealesInteger = parseInt(golpesReales);
@@ -190,33 +210,33 @@ export default class ProducionManager {
 
     //Verificamos que sean de tipo Integer
     if (!Number.isInteger(numMaquinaInteger))
-      return {
-        error: {
-          message: "Campo N° Maquina No es un numero",
-          campo: "numMaquina",
-        },
-      };
+      CustomError.createError({
+        name: "numMaquina",
+        cause: "Campo N° Maquina no es numerico",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        message: "Campo N° Maquina no es numerico",
+      });
 
     if (!Number.isInteger(golpesRealesInteger))
-      return {
-        error: {
-          message: "Campo Golpes Reales No es un numero",
-          campo: "golpeReale",
-        },
-      };
+      CustomError.createError({
+        name: "golpesReale",
+        cause: "Campo Golpes Reales no es numerico",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        message: "Campo Golpes Reales no es numerico",
+      });
 
     if (!Number.isInteger(piezasProducidasInteger))
-      return {
-        error: {
-          message: "Campo PiezasProducidas No es un numero",
-          campo: "piezasProducidas",
-        },
-      };
+      CustomError.createError({
+        name: "piezasProducidas",
+        cause: "Campo PiezasProducidas No es un numero",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        message: "Campo PiezasProducidas No es un numero",
+      });
 
     return { data: true };
   }
 
-  async postProducion(object) {
+  async postProducion(object, returnOne = false) {
     const {
       numMaquina,
       fecha,
@@ -226,8 +246,7 @@ export default class ProducionManager {
       promGolpesHora,
     } = object;
 
-    const { error } = this.verifyCampus(object);
-    if (error) return { error };
+    this.verifyCampus(object);
 
     try {
       const [rows] = await con.query(
@@ -241,14 +260,64 @@ export default class ProducionManager {
           promGolpesHora,
         ]
       );
-      if (rows.affectedRows >= 1)
-        return {
-          data: { message: "Operacion Exitosa", insertId: rows.insertId },
-        };
-      else return { error: { message: "No se Agrego" } };
-    } catch (error) {
-      console.log(error);
-      return { error: { message: "Something Wrong" } };
+      if (rows.affectedRows >= 1) {
+        if (returnOne) {
+          const [result] = await con.query(
+            ` SELECT producion.*,
+                    inventario.nombre,inventario.descripcion,inventario.articulo,inventario.url_image,
+                    matriz.cod_matriz,matriz.cantPiezaGolpe,
+                    maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina
+              FROM producion 
+                    LEFT JOIN inventario ON producion.idinventario = inventario.id 
+                    LEFT JOIN matriz ON producion.idMatriz = matriz.id
+                    LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
+              WHERE producion.id = ?; `,
+            [rows.insertId]
+          );
+
+          return {
+            data: {
+              message: "Operacion Exitosa",
+              status: "success",
+              data: result[0],
+            },
+          };
+        } else {
+          return {
+            data: { message: "Operacion Exitosa", insertId: rows.insertId },
+          };
+        }
+      } else return { error: { message: "No se Agrego", status: "error" } };
+    } catch (e) {
+      switch (e.code) {
+        case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+        case "ER_NO_REFERENCED_ROW_2":
+          if (e.sqlMessage.includes("fk_idNumMaquina_producion"))
+            CustomError.createError({
+              name: "numMaquina",
+              cause: "No existe esa maquina",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+              message: "No existe esa maquina",
+            });
+          if (e.sqlMessage.includes("idinventario"))
+            CustomError.createError({
+              name: "inventario",
+              cause: "No existe esa pieza",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+              message: "No existe esa pieza",
+            });
+          break;
+        case "WARN_DATA_TRUNCATED":
+          if (e.sqlMessage.includes("prom_golpeshora"))
+            CustomError.createError({
+              name: "promGolpeshora",
+              cause: "Promedio Golpes hora no es numerico",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+              message: "Promedio Golpes hora no es numerico",
+            });
+          break;
+      }
+      //return { error: { message: "Something Wrong", status: "error" } };
     }
   }
 
@@ -260,21 +329,6 @@ export default class ProducionManager {
       piezasProducidas,
       prom_golpeshora,
     } = obj;
-
-    //Validamos que exista el de produccion
-    /*try {
-      const [rows] = await con.query("SELECT * FROM producion WHERE id=?", [
-        idProduccion,
-      ]);
-      if (!rows.length != 0)
-        return {
-          error: { message: "No se encontro la produccion seleccionada" },
-        };
-    } catch (error) {
-      return {
-        error: { message: "No se encontro la produccion seleccionada" },
-      };
-    }*/
 
     let campusEnviar = {
       fecha: null,
@@ -288,33 +342,48 @@ export default class ProducionManager {
       const validarDate = new Date(fecha);
 
       if (Number.isNaN(validarDate.getDate()))
-        return { error: { message: "Error en el formato de la Fecha" } };
-
+        CustomError.createError({
+          name: "fecha",
+          cause: "Error en el formato date",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Error en el formato date",
+        });
       campusEnviar.fecha = fecha;
     }
     if (num_maquina != null && num_maquina != "") {
       const numMaquinaInteger = parseInt(num_maquina);
 
       if (!Number.isInteger(numMaquinaInteger))
-        return { error: { message: "Campo Num Maquina No es un numero" } };
-
+        CustomError.createError({
+          name: "numMaquina",
+          cause: "Campo Num Maquina no es numerico",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Campo Num Maquina no es numerico",
+        });
       campusEnviar.num_maquina = numMaquinaInteger;
     }
     if (golpesReales != null && golpesReales != "") {
       const golpesRealesInteger = parseInt(golpesReales);
 
       if (!Number.isInteger(golpesRealesInteger))
-        return { error: { message: "Campo Golpes Reales No es un numero" } };
-
+        CustomError.createError({
+          name: "golpesReale",
+          cause: "Campo Golpes Reales no es numerico",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Campo Golpes Reales no es numerico",
+        });
       campusEnviar.golpesReales = golpesRealesInteger;
     }
     if (piezasProducidas != null && piezasProducidas != "") {
       const piezasProducidasInteger = parseInt(piezasProducidas);
 
       if (!Number.isInteger(piezasProducidasInteger))
-        return {
-          error: { message: "Campo Piezas Producidas No es un numero" },
-        };
+        CustomError.createError({
+          name: "piezasProducidas",
+          cause: "Campo Piezas Producidas no es numerico",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Campo Piezas Producidas no es numerico",
+        });
 
       campusEnviar.piezasProducidas = piezasProducidasInteger;
     }
@@ -322,9 +391,13 @@ export default class ProducionManager {
       const promGolpesHoraInteger = parseInt(prom_golpeshora);
 
       if (!Number.isInteger(promGolpesHoraInteger))
-        return { error: { message: "Campo Prom Golpes Hora No es un numero" } };
-
-      campusEnviar.prom_golpeshora = promGolpesHoraInteger;
+        CustomError.createError({
+          name: "promGolpesHora",
+          cause: "Campo promedio golpes hora no es numerico",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Campo promedio golpes hora no es numerico",
+        });
+      campusEnviar.prom_golpeshora = prom_golpeshora;
     }
 
     //Update Produccion
@@ -347,39 +420,78 @@ export default class ProducionManager {
           idProduccion,
         ]
       );
-    } catch (error) {
-      return { error: { message: "Ocurrio un error al actualizar" } };
+    } catch (e) {
+      console.log(e);
+
+      switch (e.code) {
+        case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+        case "ER_NO_REFERENCED_ROW_2":
+          if (e.sqlMessage.includes("fk_idNumMaquina_producion"))
+            CustomError.createError({
+              name: "numMaquina",
+              cause: "No existe esa maquina",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+              message: "No existe esa maquina",
+            });
+          if (e.sqlMessage.includes("idinventario"))
+            CustomError.createError({
+              name: "inventario",
+              cause: "No existe esa pieza",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+              message: "No existe esa pieza",
+            });
+          break;
+        case "WARN_DATA_TRUNCATED":
+          if (e.sqlMessage.includes("prom_golpeshora"))
+            CustomError.createError({
+              name: "promGolpeshora",
+              cause: "Promedio Golpes hora no es numerico",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+              message: "Promedio Golpes hora no es numerico",
+            });
+          break;
+      }
     }
 
-    return {data: {message: 'Operacion Exitosa'}}
+    const [rows] = await con.query(
+      ` SELECT producion.*,
+              inventario.nombre,inventario.descripcion,inventario.articulo,inventario.url_image,
+              matriz.cod_matriz,matriz.cantPiezaGolpe,
+              maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina
+        FROM producion 
+              LEFT JOIN inventario ON producion.idinventario = inventario.id 
+              LEFT JOIN matriz ON producion.idMatriz = matriz.id
+              LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
+        WHERE producion.id = ?; `,
+      [idProduccion]
+    );
+
+    return {
+      data: { message: "Operacion Exitosa", status: "success", data: rows[0] },
+    };
   }
 
   async deleteProduccion(idProduccion) {
-    //Validar si existe el idProduccion
     try {
-      const [rows] = await con.query("SELECT * FROM producion WHERE id=?", [
-        idProduccion,
-      ]);
-      if (rows.length != 0) {
-        try {
-          await con.query("DELETE FROM producion WHERE (`id` = ?);", [
-            idProduccion,
-          ]);
-        } catch (error) {
-          return { error: { message: "Ocurrio un error al eliminar" } };
-        }
-      } else
-        return {
-          error: { message: "No se encontro la produccion seleccionada" },
-        };
+      const result = await con.query(
+        "DELETE FROM producion WHERE (`id` = ?);",
+        [idProduccion]
+      );
+      if (result.affectedRows <= 0)
+        CustomError.createError({
+          name: "idProduccion",
+          message: "No existe ese registro de produccion",
+          cause: "No existe ese registro de produccion",
+          code: ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS,
+        });
     } catch (error) {
       return {
-        error: { message: "No se encontro la produccion seleccionada" },
+        error: {
+          message: "No se encontro la produccion seleccionada",
+          status: "error",
+        },
       };
     }
-
-    //Eliminar
-
-    return { data: { message: "Operacion Exitosa" } };
+    return { data: { message: "Operacion Exitosa", status: "success" } };
   }
 }
