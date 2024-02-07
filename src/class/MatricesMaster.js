@@ -1,4 +1,6 @@
 import { con } from "../config/db.js";
+import CustomError from "../errors/Custom_errors.js";
+import { ENUM_ERRORS } from "../errors/enums.js";
 
 export default class Matrices {
   constructor() {
@@ -31,18 +33,18 @@ export default class Matrices {
   }
 
   exitsMatriz(idMatriz) {
-    return this.listMatriz.find(elem => {
-      return elem.id == idMatriz
-    }) != null ? true : false
+    return this.listMatriz.find((elem) => {
+      return elem.id == idMatriz;
+    }) != null
+      ? true
+      : false;
   }
 
   getOneMatriz(idMatriz) {
-    return this.listMatriz.find(elem => {
-      return elem.id == idMatriz
+    return this.listMatriz.find((elem) => {
+      return elem.id == idMatriz;
     });
   }
-
-  getLength = () => this.listMatriz.length;
 
   verifyCampus(object) {
     //Object importants
@@ -50,51 +52,37 @@ export default class Matrices {
 
     //Validar Campos
     if (cod_matriz == null || cod_matriz == "")
-      return {
-        error: {
-          message: "Campo Cod Matriz Vacio",
-          campo: this.enumCampos.COD_MATRIZ,
-        },
-      };
+      CustomError.createError({
+        name: "cod_matriz",
+        message: "Campo cod_matriz esta vacio",
+        cause: "Campo cod_matriz esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+      });
 
     if (descripcion == null || descripcion == "")
-      return {
-        error: {
-          message: "Campo Descripcion Vacio",
-          campo: this.enumCampos.DESCRIPCION,
-        },
-      };
+      CustomError.createError({
+        name: "descripcion",
+        message: "Campo Descripcion Matriz esta vacio",
+        cause: "Campo Descripcion Matriz esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+      });
 
     if (cantPiezaGolpe == null || cantPiezaGolpe == "")
-      return {
-        error: {
-          message: "Campo Cantidad Piezas x Golpe Vacio",
-          campo: this.enumCampos.CANT_PIEZA_GOLPE,
-        },
-      };
-
-    // Verificar que no se repita el Cod Matriz
-    const findSameCodMatriz = this.listMatriz.find((elem) => {
-      const resultCodMatriz =
-        cod_matriz.slice(0, 3).toUpperCase() + "-" + cod_matriz.slice(3);
-      return elem.cod_matriz == resultCodMatriz;
-    });
-    if (findSameCodMatriz)
-      return {
-        error: {
-          message: "Ya existe ese codigo matriz",
-          campo: this.enumCampos.COD_MATRIZ,
-        },
-      };
+      CustomError.createError({
+        name: "cantPiezaxGolpe",
+        message: "Campo cantidad Pieza x Golpe esta vacio",
+        cause: "Campo cantidad Pieza x Golpe esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+      });
 
     // Verificar que sea de 6 codigos el CodMatriz
     if (cod_matriz.length !== 6)
-      return {
-        error: {
-          message: "No contiene 6 digitos el codigo matriz",
-          campo: this.enumCampos.COD_MATRIZ,
-        },
-      };
+      CustomError.createError({
+        name: "cod_matriz",
+        message: "No contiene 6 digitos, EJ: AXE001",
+        cause: "No contiene 6 digitos, EJ: AXE001",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+      });
 
     const objectString = new String(cod_matriz);
 
@@ -102,36 +90,35 @@ export default class Matrices {
     const primeros = objectString.slice(0, 3);
 
     const primerosInteger = parseInt(primeros);
-    if (Number.isInteger(primerosInteger)) {
-      return {
-        error: {
-          message: "Error en el formato de enviar codProducto",
-          campo: this.enumCampos.NUM_MATRIZ,
-        },
-      };
-    }
+    if (Number.isInteger(primerosInteger))
+      CustomError.createError({
+        name: "cod_matriz",
+        message: "Los primeros 3 son del codigo cliente",
+        cause: "Los primeros 3 son del codigo cliente",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+      });
 
     // Verificar que los ultimo 3 digitos sean Number
     const ultimos = objectString.slice(3);
     const ultimosInteger = parseInt(ultimos);
     if (!Number.isInteger(ultimosInteger))
-      return {
-        error: {
-          message: "Error en el formato de enviar codProducto",
-          campo: this.enumCampos.NUM_MATRIZ,
-        },
-      };
+      CustomError.createError({
+        name: "cod_matriz",
+        message: "Los ultimos 3 son del numero matriz",
+        cause: "Los ultimos 3 son del numero matriz",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+      });
 
     const cantPiezaGolpeInteger = parseInt(cantPiezaGolpe);
 
     //Verificamos que sean de tipo Integer
     if (!Number.isInteger(cantPiezaGolpeInteger))
-      return {
-        error: {
-          message: "Campo Cantidad Pieza x Golpe No es un numero",
-          campo: this.enumCampos.CANT_PIEZA_GOLPE,
-        },
-      };
+      CustomError.createError({
+        name: "cantPiezaGolpe",
+        message: "Campo cantidad Pieza x Golpe no es numerico",
+        cause: "Campo cantidad Pieza x Golpe no es numerico",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+      });
 
     return { data: true };
   }
@@ -146,8 +133,7 @@ export default class Matrices {
       ubicacion,
     } = object;
 
-    const { error } = this.verifyCampus(object);
-    if (error) return { error };
+    this.verifyCampus(object);
 
     // Colocar un '-' entre los 3 digitos
     const objectString = new String(cod_matriz);
@@ -170,110 +156,112 @@ export default class Matrices {
         ]
       );
       if (rows.affectedRows >= 1) {
-        //Tengo que agregar ya para el futuro poder verificar que no se repita el codProducto
-        this.listMatriz.push({});
+        const [result] = await con.query(
+          `SELECT matriz.id, matriz.cod_matriz, matriz.descripcion, matriz.cantPiezaGolpe, matriz.numero_matriz, materiaPrima.material, clientes.cliente, matriz.idcliente
+            FROM matriz 
+              LEFT JOIN materiaPrima ON matriz.idmaterial = materiaPrima.id
+              LEFT JOIN clientes ON matriz.idcliente = clientes.id
+            WHERE matriz.id = ?;`,
+          [rows.insertId]
+        );
+
         return {
-          data: { message: "Operacion Exitosa", insertId: rows.insertId },
+          data: {
+            message: "Operacion Exitosa",
+            data: result[0],
+            status: "success",
+          },
         };
-      } else return { error: { message: "No se Agrego" } };
-    } catch (error) {
-      console.log(error);
+      } else
+        return {
+          error: { message: "No se Agrego la matriz", status: "error" },
+        };
+    } catch (e) {
+      console.log(e);
+      switch (e.code) {
+        case "ER_NO_REFERENCED_ROW_2":
+          if (e.sqlMessage.includes("idmaterial"))
+            CustomError.createError({
+              name: "idmaterial",
+              message: "No existe ese material en la BBDD",
+              cause: "No existe ese material en el BBDD",
+              code: ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS,
+            });
+          if (e.sqlMessage.includes("idcliente"))
+            CustomError.createError({
+              name: "idcliente",
+              message: "No existe ese cliente",
+              cause: "No existe ese cliente",
+              code: ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS,
+            });
+          break;
+        case "ER_DUP_ENTRY":
+          if (e.sqlMessage.includes("cod_matriz")) {
+            CustomError.createError({
+              name: "cod_matriz",
+              message: "Ya existe esa matriz",
+              cause: "Ya existe esa matriz",
+              code: ENUM_ERRORS.THIS_OBJECT_ALREDY_EXISTS,
+            });
+          }
+          break;
+      }
       return { error: { message: "Something Wrong" } };
     }
   }
 
   async updateMatriz(idMatriz, object) {
     const {
-      cod_matriz, //Importante
-      descripcion, //Importante
+      descripcion,
       idmaterial,
       idcliente,
-      cantPiezaGolpe, //Importante
+      cantPiezaGolpe,
       ubicacion,
-      numero_matriz, //Importante
+      numero_matriz,
     } = object;
 
-    let enviar = {};
+    let enviar = {
+      codMatriz: null, //
+      descripcion: null, //
+      idmaterial: null, //
+      idcliente: null, //
+      cantPiezaGolpe: null, //
+      ubicacion: null, //
+      numMatriz: null, //
+    };
 
-    const findMatrizById = this.listMatriz.find((elem) => elem.id == idMatriz);
+    if (descripcion != null && descripcion != "")
+      enviar.descripcion = descripcion;
+    if (idmaterial != null && idmaterial != "") enviar.idmaterial = idmaterial;
+    if (idcliente != null && idcliente != "") enviar.idcliente = idcliente;
+    if (ubicacion != null && ubicacion != "") enviar.ubicacion = ubicacion;
 
-    if (cod_matriz) {
-      if (cod_matriz != "") {
-        // Verificar que no se repita el Cod Matriz
-        const findSameCodMatriz = this.listMatriz.find((elem) => {
-          const resultCodMatriz =
-            cod_matriz.slice(0, 3).toUpperCase() + "-" + cod_matriz.slice(3);
-          return elem.cod_matriz.toLowerCase() == resultCodMatriz.toLowerCase();
-        });
-        if (findSameCodMatriz) {
-          if (findSameCodMatriz.cod_matriz != findMatrizById.cod_matriz)
-            return {
-              error: {
-                message: "Ya existe ese Cod Matriz",
-                campo: this.enumCampos.COD_MATRIZ,
-              },
-            };
-        }
-
-        // Verificar que sea de 6 codigos el CodMatriz
-        if (cod_matriz.length !== 6)
-          return {
-            error: {
-              message: "No contiene 6 digitos el codigo matriz",
-              campo: this.enumCampos.COD_MATRIZ,
-            },
-          };
-
-        const objectString = new String(cod_matriz);
-
-        // Verificar que los primeros 3 digitos no sean numericos
-        const primeros = objectString.slice(0, 3);
-
-        const primerosInteger = parseInt(primeros);
-        if (Number.isInteger(primerosInteger))
-          return {
-            error: {
-              message: "Error en el formato de enviar codProducto",
-              campo: this.enumCampos.NUM_MATRIZ,
-            },
-          };
-
-        // Verificar que los ultimo 3 digitos sean Number
-        const ultimos = objectString.slice(3);
-        if (!Number.isInteger(ultimos))
-          return {
-            error: {
-              message: "Error en el formato de enviar codProducto",
-              campo: this.enumCampos.NUM_MATRIZ,
-            },
-          };
-        // Colocar un '-' entre los 3 digitos
-        const resultCodMatriz =
-          objectString.slice(0, 3).toUpperCase() + "-" + objectString.slice(3);
-
-        enviar.codMatriz = resultCodMatriz;
-      } else return { error: { message: "Campo cod Matriz Vacio" } };
-    }
-    if (numero_matriz) {
+    if (numero_matriz && numero_matriz != "") {
       const numMatriz = parseInt(numero_matriz);
 
       if (!Number.isInteger(numMatriz))
-        return { error: { message: "Campo Numero Matriz No es un numero" } };
+        CustomError.createError({
+          name: "numMatriz",
+          message: "Campo Numero Matriz no es numerico",
+          cause: "Campo Numero Matriz no es numerico",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        });
 
       enviar.numMatriz = numMatriz;
     }
-    if (cantPiezaGolpe) {
+    if (cantPiezaGolpe && cantPiezaGolpe != "") {
       const cantPiezaGolpeInteger = parseInt(cantPiezaGolpe);
 
       if (!Number.isInteger(cantPiezaGolpeInteger))
-        return {
-          error: { message: "Campo Cantidad Pieza x Golpe No es un numero" },
-        };
+        CustomError.createError({
+          name: "cantPiezaGolpe",
+          message: "Campo cantidad Pieza x Golpe no es numerico",
+          cause: "Campo cantidad Pieza x Golpe no es numerico",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        });
 
       enviar.cantPiezaGolpe = cantPiezaGolpe;
     }
-
-    //Verificar que existan el cliente y el material
 
     try {
       const [result] = await con.query(
@@ -288,17 +276,19 @@ export default class Matrices {
           WHERE id = ?;`,
         [
           enviar.codMatriz,
-          descripcion,
-          idmaterial,
-          idcliente,
+          enviar.descripcion,
+          enviar.idmaterial,
+          enviar.idcliente,
           enviar.cantPiezaGolpe,
-          ubicacion,
+          enviar.ubicacion,
           enviar.numMatriz,
           idMatriz,
         ]
       );
       if (result.affectedRows === 0)
-        return { error: { message: "No se encontro la Matriz" } };
+        return {
+          error: { message: "No existe esa matriz", status: "error" },
+        };
 
       const [rows] = await con.query(
         ` SELECT matriz.id, matriz.cod_matriz, matriz.descripcion, matriz.cantPiezaGolpe, matriz.numero_matriz, materiaPrima.material, clientes.cliente
@@ -309,10 +299,36 @@ export default class Matrices {
         idMatriz
       );
 
-      return { data: rows[0] };
-    } catch (error) {
-      console.log(error);
-      return { error: { message: "Something Wrong" } };
+      return {
+        data: {
+          data: rows[0],
+          message: "Operacion Exitosa",
+          status: "success",
+        },
+      };
+    } catch (e) {
+      switch (e.code) {
+        case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+        case "ER_NO_REFERENCED_ROW_2":
+          if (e.sqlMessage.includes("idmaterial"))
+            CustomError.createError({
+              name: "idmaterial",
+              message: "No existe ese material en la BBDD",
+              cause: "No existe ese material en la BBDD",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+
+          if (e.sqlMessage.includes("idcliente"))
+            CustomError.createError({
+              name: "idcliente",
+              message: "No existe ese cliente",
+              cause: "No existe ese cliente",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+          break;
+      }
+
+      return { error: { message: "Something Wrong", status: "error" } };
     }
   }
 
@@ -326,12 +342,11 @@ export default class Matrices {
 
       if (result.affectedRows >= 1)
         return {
-          data: { message: "Se elimino Correctamente" },
+          data: { message: "Se elimino Correctamente", status: "success" },
         };
-      else return { error: { message: "No existe" } };
+      else return { error: { message: "No existe", status: "error" } };
     } catch (error) {
-      console.log(error);
-      return { error: { message: "Something Wrong" } };
+      return { error: { message: "Something Wrong", status: "error" } };
     }
   }
 }

@@ -5,39 +5,70 @@ import allPermissions from "../config/permissos.js";
 
 const ruta = Router();
 
-ruta.get("/matrices", userExtractor([allPermissions.produccion, allPermissions.matriceria]), async (req, res) => {
-  const { data, error } = await matricesManager.getMatrices();
+ruta.get(
+  "/matrices",
+  userExtractor([allPermissions.produccion, allPermissions.matriceria]),
+  async (req, res) => {
+    const { data, error } = await matricesManager.getMatrices();
 
-  if (error != null) return res.status(404).json(error);
+    if (error != null) return res.status(404).json(error);
 
-  return res.json(data);
-});
+    return res.json(data);
+  }
+);
 
-ruta.post("/matrices", userExtractor([allPermissions.produccion, allPermissions.matriceria]), async (req, res) => {
-  const object = req.body;
-  const { data, error } = await matricesManager.postMatriz(object);
-  if (error != null) return res.status(404).json(error);
+ruta.post(
+  "/matrices",
+  userExtractor([allPermissions.produccion, allPermissions.matriceria]),
+  async (req, res, next) => {
+    const object = req.body;
+    try {
+      const { data, error } = await matricesManager.postMatriz(object);
+      if (error != null) return res.status(404).json(error);
 
-  return res.json(data);
-});
-  
-ruta.put("/matriz/:idMatriz", userExtractor([allPermissions.produccion, allPermissions.matriceria]), async (req, res) => {
-  const idMatriz = req.params.idMatriz;
-  const body = req.body;
-  const { data, error } = await matricesManager.updateMatriz(idMatriz, body);
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
-  if (error != null) return res.status(404).json(error);
+ruta.put(
+  "/matrices/:idMatriz",
+  userExtractor([allPermissions.produccion, allPermissions.matriceria]),
+  async (req, res, next) => {
+    const idMatriz = req.params.idMatriz;
+    const body = req.body;
+    try {
+      const { data, error } = await matricesManager.updateMatriz(
+        idMatriz,
+        body
+      );
 
-  return res.json(data);
-});
+      if (error != null) return res.status(404).json(error);
 
-ruta.delete('/matriz/:idMatriz', userExtractor([allPermissions.produccion, allPermissions.matriceria]), async (req,res) => {
-  const idMatriz = req.params.idMatriz;
-  const { data, error } = await matricesManager.deleteMatriz(idMatriz);
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
-  if (error != null) return res.status(404).json(error);
+ruta.delete(
+  "/matrices/:idMatriz",
+  userExtractor([allPermissions.produccion, allPermissions.matriceria]),
+  async (req, res, next) => {
+    const idMatriz = req.params.idMatriz;
+    try {
+      const { data, error } = await matricesManager.deleteMatriz(idMatriz);
 
-  return res.json(data);
-})
+      if (error != null) return res.status(404).json(error);
+
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 export default ruta;
