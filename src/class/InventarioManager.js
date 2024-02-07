@@ -375,7 +375,7 @@ export default class InventarioManager {
             "DELETE FROM inventario WHERE (`id` = ?);",
             [idInventario]
           );
-
+            console.log(result);
           if (result.affectedRows <= 0)
             CustomError.createError({
               name: "idInventario",
@@ -390,7 +390,7 @@ export default class InventarioManager {
           );
           this.listInventario = filterListInventario;
 
-          return { data: { message: "Eliminado Correctamente" } };
+          return { data: { message: "Eliminado Correctamente", status: 'success' } };
         } catch (error) {}
       }
     } catch (e) {

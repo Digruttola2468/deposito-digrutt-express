@@ -428,15 +428,9 @@ export default class MercaderiaManager {
             [id]
           );
         }
+      }
 
-        return { data: { message: "Eliminado Correctamente", done: true } };
-      } else
-        CustomError.createError({
-          name: "idInventario",
-          message: "No existe ese cod.producto",
-          cause: "No existe ese cod.producto",
-          code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
-        });
+      return { data: { message: "Eliminado Correctamente", done: true } };
     } catch (error) {
       throw error;
     }
