@@ -136,7 +136,7 @@ app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 
 app.use("/api/envios", EnviosRoute);
 app.use("/api", maquinaParadaRoute);
-app.use("/api", matricesRoute);
+app.use("/api/matrices", matricesRoute);
 
 app.use(views);
 

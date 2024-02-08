@@ -4,7 +4,7 @@ import { ENUM_ERRORS } from "../errors/enums.js";
 import { mercaderiaManager } from "../index.js";
 
 export default class InventarioManager {
-   constructor() {
+  constructor() {
     this.listInventario = [];
   }
 
@@ -260,11 +260,17 @@ export default class InventarioManager {
       //Agregar a la lista
       this.listInventario.push(enviar);
 
+      const [result] = await con.query(
+        "SELECT inventario.*, clientes.cliente, idCliente AS idcliente FROM inventario LEFT JOIN clientes ON inventario.idcliente = clientes.id WHERE inventario.id = ?;",
+        rows.insertId
+      );
+
       return {
         status: "success",
-        data: enviar,
+        data: result[0],
       };
     } catch (e) {
+      console.log(e);
       this.handleErrors(e);
     }
   }
@@ -338,7 +344,7 @@ export default class InventarioManager {
         });
 
       const [rows] = await con.query(
-        `SELECT * FROM inventario WHERE id=?`,
+        "SELECT inventario.*, clientes.cliente, idCliente AS idcliente FROM inventario LEFT JOIN clientes ON inventario.idcliente = clientes.id WHERE inventario.id = ?;",
         idInventario
       );
 
@@ -357,6 +363,9 @@ export default class InventarioManager {
   }
 
   async deleteInventario(idInventario) {
+    // Eliminar todo lo que este relacionado con idInventario
+    // Eliminar de mercaderia - produccion - controlCalidad - pedidos
+
     if (idInventario == null || idInventario == "")
       CustomError.createError({
         cause: "No existe ese inventario",
@@ -375,7 +384,7 @@ export default class InventarioManager {
             "DELETE FROM inventario WHERE (`id` = ?);",
             [idInventario]
           );
-            console.log(result);
+          console.log(result);
           if (result.affectedRows <= 0)
             CustomError.createError({
               name: "idInventario",
@@ -390,7 +399,9 @@ export default class InventarioManager {
           );
           this.listInventario = filterListInventario;
 
-          return { data: { message: "Eliminado Correctamente", status: 'success' } };
+          return {
+            data: { message: "Eliminado Correctamente", status: "success" },
+          };
         } catch (error) {}
       }
     } catch (e) {
