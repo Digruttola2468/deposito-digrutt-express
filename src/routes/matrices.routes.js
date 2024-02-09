@@ -6,7 +6,7 @@ import allPermissions from "../config/permissos.js";
 const ruta = Router();
 
 ruta.get(
-  "/matrices",
+  "/",
   userExtractor([allPermissions.produccion, allPermissions.matriceria]),
   async (req, res) => {
     const { data, error } = await matricesManager.getMatrices();
@@ -18,7 +18,7 @@ ruta.get(
 );
 
 ruta.post(
-  "/matrices",
+  "/",
   userExtractor([allPermissions.produccion, allPermissions.matriceria]),
   async (req, res, next) => {
     const object = req.body;
@@ -34,7 +34,7 @@ ruta.post(
 );
 
 ruta.put(
-  "/matrices/:idMatriz",
+  "/:idMatriz",
   userExtractor([allPermissions.produccion, allPermissions.matriceria]),
   async (req, res, next) => {
     const idMatriz = req.params.idMatriz;
@@ -55,7 +55,7 @@ ruta.put(
 );
 
 ruta.delete(
-  "/matrices/:idMatriz",
+  "/:idMatriz",
   userExtractor([allPermissions.produccion, allPermissions.matriceria]),
   async (req, res, next) => {
     const idMatriz = req.params.idMatriz;
