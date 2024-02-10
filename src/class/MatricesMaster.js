@@ -1,6 +1,7 @@
 import { con } from "../config/db.js";
 import CustomError from "../errors/Custom_errors.js";
 import { ENUM_ERRORS } from "../errors/enums.js";
+import { clientesManager, historialErrorMatrizManager } from "../index.js";
 
 export default class Matrices {
   constructor() {
@@ -27,7 +28,6 @@ export default class Matrices {
       this.listMatriz = rows;
       return { data: rows };
     } catch (e) {
-      console.error(e);
       return { error: { message: "Something wrong" } };
     }
   }
@@ -48,14 +48,21 @@ export default class Matrices {
 
   verifyCampus(object) {
     //Object importants
-    const { cod_matriz, descripcion, cantPiezaGolpe } = object;
+    const { descripcion, idcliente, cantPiezaGolpe, numero_matriz } = object;
 
-    //Validar Campos
-    if (cod_matriz == null || cod_matriz == "")
+    if (idcliente == null || idcliente == "")
       CustomError.createError({
-        name: "cod_matriz",
-        message: "Campo cod_matriz esta vacio",
-        cause: "Campo cod_matriz esta vacio",
+        name: "idcliente",
+        message: "Campo Cliente esta vacio",
+        cause: "Campo Cliente esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+      });
+
+    if (numero_matriz == null || numero_matriz == "")
+      CustomError.createError({
+        name: "numeroMatriz",
+        message: "El numero matriz esta vacio",
+        cause: "El numero matriz esta vacio",
         code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
       });
 
@@ -75,42 +82,7 @@ export default class Matrices {
         code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
       });
 
-    // Verificar que sea de 6 codigos el CodMatriz
-    if (cod_matriz.length !== 6)
-      CustomError.createError({
-        name: "cod_matriz",
-        message: "No contiene 6 digitos, EJ: AXE001",
-        cause: "No contiene 6 digitos, EJ: AXE001",
-        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
-      });
-
-    const objectString = new String(cod_matriz);
-
-    // Verificar que los primeros 3 digitos no sean numericos
-    const primeros = objectString.slice(0, 3);
-
-    const primerosInteger = parseInt(primeros);
-    if (Number.isInteger(primerosInteger))
-      CustomError.createError({
-        name: "cod_matriz",
-        message: "Los primeros 3 son del codigo cliente",
-        cause: "Los primeros 3 son del codigo cliente",
-        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
-      });
-
-    // Verificar que los ultimo 3 digitos sean Number
-    const ultimos = objectString.slice(3);
-    const ultimosInteger = parseInt(ultimos);
-    if (!Number.isInteger(ultimosInteger))
-      CustomError.createError({
-        name: "cod_matriz",
-        message: "Los ultimos 3 son del numero matriz",
-        cause: "Los ultimos 3 son del numero matriz",
-        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
-      });
-
     const cantPiezaGolpeInteger = parseInt(cantPiezaGolpe);
-
     //Verificamos que sean de tipo Integer
     if (!Number.isInteger(cantPiezaGolpeInteger))
       CustomError.createError({
@@ -120,39 +92,61 @@ export default class Matrices {
         code: ENUM_ERRORS.INVALID_TYPES_ERROR,
       });
 
+    const numeroMatrizInteger = parseInt(numero_matriz);
+    //Verificamos que sean de tipo Integer
+    if (!Number.isInteger(numeroMatrizInteger))
+      CustomError.createError({
+        name: "numMatriz",
+        message: "El numero de la matriz no es numerico",
+        cause: "El numero de la matriz no es numerico",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+      });
+
+    const idclienteInteger = parseInt(idcliente);
+    //Verificamos que sean de tipo Integer
+    if (!Number.isInteger(idclienteInteger))
+      CustomError.createError({
+        name: "idcliente",
+        message: "No existe ese cliente",
+        cause: "No existe ese cliente",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+      });
+
     return { data: true };
   }
 
   async postMatriz(object) {
     const {
-      cod_matriz, //Importante
       descripcion, //Importante
-      idmaterial,
-      idcliente,
+      idcliente, //Importante
       cantPiezaGolpe, //Importante
+      numero_matriz, //Importante
+      idmaterial,
       ubicacion,
     } = object;
 
     this.verifyCampus(object);
 
-    // Colocar un '-' entre los 3 digitos
-    const objectString = new String(cod_matriz);
-    const resultCodMatriz =
-      objectString.slice(0, 3).toUpperCase() + "-" + objectString.slice(3);
+    const { data } = clientesManager.getOneCliente(idcliente);
 
-    const numMatriz = parseInt(objectString.slice(3));
+    let cod_matriz = null;
+    if (numero_matriz < 10 && numero_matriz >= 1)
+      cod_matriz = `${data.codigo.toUpperCase()}-00${numero_matriz}`;
+    else if (numero_matriz < 100 && numero_matriz >= 10)
+      cod_matriz = `${data.codigo.toUpperCase()}-0${numero_matriz}`;
+    else cod_matriz = `${data.codigo.toUpperCase()}-${numero_matriz}`;
 
     try {
       const [rows] = await con.query(
         "INSERT INTO matriz (`cod_matriz`, `descripcion`, `idmaterial`, `idcliente`, `cantPiezaGolpe`, `ubicacion`, `numero_matriz`) VALUES (?,?,?,?,?,?,?);",
         [
-          resultCodMatriz,
+          cod_matriz,
           descripcion,
           idmaterial,
           idcliente,
           cantPiezaGolpe,
           ubicacion,
-          numMatriz,
+          numero_matriz,
         ]
       );
       if (rows.affectedRows >= 1) {
@@ -164,6 +158,8 @@ export default class Matrices {
             WHERE matriz.id = ?;`,
           [rows.insertId]
         );
+
+        this.listMatriz.push(result[0]);
 
         return {
           data: {
@@ -177,7 +173,6 @@ export default class Matrices {
           error: { message: "No se Agrego la matriz", status: "error" },
         };
     } catch (e) {
-      console.log(e);
       switch (e.code) {
         case "ER_NO_REFERENCED_ROW_2":
           if (e.sqlMessage.includes("idmaterial"))
@@ -211,44 +206,19 @@ export default class Matrices {
   }
 
   async updateMatriz(idMatriz, object) {
-    const {
-      descripcion,
-      idmaterial,
-      idcliente,
-      cantPiezaGolpe,
-      ubicacion,
-      numero_matriz,
-    } = object;
+    const { descripcion, idmaterial, cantPiezaGolpe, ubicacion } = object;
 
     let enviar = {
-      codMatriz: null, //
       descripcion: null, //
       idmaterial: null, //
-      idcliente: null, //
       cantPiezaGolpe: null, //
       ubicacion: null, //
-      numMatriz: null, //
     };
 
     if (descripcion != null && descripcion != "")
       enviar.descripcion = descripcion;
     if (idmaterial != null && idmaterial != "") enviar.idmaterial = idmaterial;
-    if (idcliente != null && idcliente != "") enviar.idcliente = idcliente;
     if (ubicacion != null && ubicacion != "") enviar.ubicacion = ubicacion;
-
-    if (numero_matriz && numero_matriz != "") {
-      const numMatriz = parseInt(numero_matriz);
-
-      if (!Number.isInteger(numMatriz))
-        CustomError.createError({
-          name: "numMatriz",
-          message: "Campo Numero Matriz no es numerico",
-          cause: "Campo Numero Matriz no es numerico",
-          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
-        });
-
-      enviar.numMatriz = numMatriz;
-    }
     if (cantPiezaGolpe && cantPiezaGolpe != "") {
       const cantPiezaGolpeInteger = parseInt(cantPiezaGolpe);
 
@@ -266,22 +236,17 @@ export default class Matrices {
     try {
       const [result] = await con.query(
         `UPDATE matriz
-          SET cod_matriz = IFNULL(?,cod_matriz),
-              descripcion = IFNULL(?,descripcion),
+          SET descripcion = IFNULL(?,descripcion),
               idmaterial = IFNULL(?,idmaterial),
-              idcliente = IFNULL(?,idcliente),
               cantPiezaGolpe = IFNULL(?,cantPiezaGolpe),
-              ubicacion = IFNULL(?,ubicacion),
-              numero_matriz = IFNULL(?,numero_matriz)
+              ubicacion = IFNULL(?,ubicacion)
           WHERE id = ?;`,
         [
-          enviar.codMatriz,
           enviar.descripcion,
           enviar.idmaterial,
           enviar.idcliente,
           enviar.cantPiezaGolpe,
           enviar.ubicacion,
-          enviar.numMatriz,
           idMatriz,
         ]
       );
@@ -298,6 +263,13 @@ export default class Matrices {
           WHERE matriz.id=?; `,
         idMatriz
       );
+
+      const updateList = this.listMatriz.map((elem) => {
+        if (elem.id == idMatriz) return rows[0];
+        else return elem;
+      });
+
+      this.listMatriz(updateList);
 
       return {
         data: {
@@ -334,11 +306,17 @@ export default class Matrices {
 
   async deleteMatriz(idMatriz) {
     try {
+      //Eliminar todo lo relacionado con el historial de matriz de errores
+      try {
+        await historialErrorMatrizManager.deleteByIdMatriz(idMatriz);
+      } catch (error) {}
+
       const [result] = await con.query("DELETE FROM matriz WHERE (`id` = ?);", [
         idMatriz,
       ]);
 
-      //Eliminar todo lo relacionado con el historial de matriz de errores
+      const filterList = this.listMatriz.filter((elem) => elem.id != idMatriz);
+      this.listMatriz = filterList;
 
       if (result.affectedRows >= 1)
         return {

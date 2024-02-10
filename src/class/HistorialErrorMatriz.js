@@ -314,4 +314,20 @@ export default class HistorialMatriz {
       throw error;
     }
   }
+
+  async deleteByIdMatriz(idMatriz) {
+    try {
+      const [rows] = await con.query(
+        `SELECT id, idMatriz FROM historialFallosMatriz WHERE idMatriz = ?;`,
+        [idMatriz]
+      );
+
+      for (let i = 0; i < rows.length; i++) {
+        const { id } = rows[i];
+        try {
+          await this.deleteHistorialMatriz(id);
+        } catch (error) {}
+      }
+    } catch (error) {}
+  }
 }

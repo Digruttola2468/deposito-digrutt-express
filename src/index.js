@@ -133,10 +133,9 @@ app.use("/api/localidad", localidad);
 app.use("/api/facturaNegro", facturaNegro);
 app.use("/api/vehiculos", vehiculoRoute);
 app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
-
 app.use("/api/maquinaParada", maquinaParadaRoute);
-app.use("/api/matrices", matricesRoute);
 
+app.use("/api/matrices", matricesRoute);
 app.use("/api/envios", EnviosRoute);
 
 app.use(views);
