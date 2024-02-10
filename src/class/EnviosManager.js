@@ -1,5 +1,7 @@
 import { con } from "../config/db.js";
 import moment from "moment";
+import { ENUM_ERRORS } from "../errors/enums.js";
+import CustomError from "../errors/Custom_errors.js";
 
 export default class EnviosManager {
   constructor() {
@@ -14,8 +16,7 @@ export default class EnviosManager {
       this.listEnvios = rows;
       return { data: rows };
     } catch (e) {
-      console.error(e);
-      return { error: { message: "Something wrong" } };
+      return { error: { message: "Something wrong", status: "error" } };
     }
   }
 
@@ -27,7 +28,7 @@ export default class EnviosManager {
       );
       return { data: rows };
     } catch (e) {
-      return { error: { message: "Something wrong" } };
+      return { error: { message: "Something wrong", status: "error" } };
     }
   }
 
@@ -50,25 +51,31 @@ export default class EnviosManager {
   }
 
   async createEnvio(obj) {
-    const { idVehiculo, ubicacion, descripcion, fechaDate, idLocalidad } = obj;
+    const {
+      idVehiculo,
+      ubicacion,
+      descripcion,
+      fechaDate,
+      idLocalidad,
+      lat,
+      lon,
+    } = obj;
 
     if (idVehiculo == null || idVehiculo == "")
-      return {
-        error: {
-          message: "Campo vehiculo Vacio",
-          campus: "idVehiculo",
-          status: "error",
-        },
-      };
+      CustomError.createError({
+        name: "idVehiculo",
+        message: "No seleccionaste el auto",
+        cause: "No seleccionaste el auto",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+      });
 
     if (ubicacion == "" || ubicacion == null)
-      return {
-        error: {
-          message: "Campo Ubicacion Vacio",
-          campus: "ubicacion",
-          status: "error",
-        },
-      };
+      CustomError.createError({
+        name: "ubicacion",
+        message: "La ubicacion esta vacio",
+        cause: "La ubicacion esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+      });
 
     let date = new Date();
     if (fechaDate != "" && fechaDate != null) {
@@ -79,8 +86,18 @@ export default class EnviosManager {
 
     try {
       const [result] = await con.query(
-        "INSERT INTO envios (idVehiculo,ubicacion,descripcion,fecha_date,hora,fecha,idLocalidad) VALUES (?,?,?,?,?,?,?) ;",
-        [idVehiculo, ubicacion, descripcion, date, hora, fecha, idLocalidad]
+        "INSERT INTO envios (idVehiculo,ubicacion,descripcion,fecha_date,hora,fecha,idLocalidad,lat,lon) VALUES (?,?,?,?,?,?,?,?,?) ;",
+        [
+          idVehiculo,
+          ubicacion,
+          descripcion,
+          date,
+          hora,
+          fecha,
+          idLocalidad,
+          lat,
+          lon,
+        ]
       );
 
       try {
@@ -90,19 +107,53 @@ export default class EnviosManager {
         );
         return { data: rows[0] };
       } catch (e) {
-        return { error: { message: "No se obtuvo el objeto actualizado" } };
-      }
-    } catch (e) {
-      if (e.code == "ER_NO_REFERENCED_ROW_2")
         return {
           error: {
-            message: "No existe ese vehiculo",
-            campus: "idVehiculo",
+            message: "No se obtuvo el objeto actualizado",
             status: "error",
           },
         };
+      }
+    } catch (e) {
+      switch (e.code) {
+        case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+        case "ER_NO_REFERENCED_ROW_2":
+          if (e.sqlMessage.includes("idVehiculo"))
+            CustomError.createError({
+              name: "idVehiculo",
+              message: "No existe ese auto",
+              cause: "No existe ese auto",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+          if (e.sqlMessage.includes("idLocalidad"))
+            CustomError.createError({
+              name: "idLocalidad",
+              message: "No existe esa localidad",
+              cause: "No existe esa localidad",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+          break;
+        case "WARN_DATA_TRUNCATED":
+          if (e.sqlMessage.includes("lat"))
+            CustomError.createError({
+              name: "lat",
+              message: "Campo lat tiene que ser numerico",
+              cause: "Campo lat tiene que ser numerico",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            });
 
-      return { error: { message: "Something wrong" } };
+          if (e.sqlMessage.includes("lon"))
+            CustomError.createError({
+              name: "lon",
+              message: "Campo lon tiene que ser numerico",
+              cause: "Campo lat tiene que ser numerico",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            });
+
+          break;
+      }
+
+      return { error: { message: "Something wrong", status: "error" } };
     }
   }
 
@@ -115,6 +166,8 @@ export default class EnviosManager {
       fechaObj,
       horaObj,
       idLocalidad,
+      lat,
+      lon,
     } = obj;
 
     if (idVehiculo == "") idVehiculo = null;
@@ -122,6 +175,8 @@ export default class EnviosManager {
     if (descripcion == "") descripcion = null;
     if (fechaDate == "") fechaDate = null;
     if (idLocalidad == "") idLocalidad = null;
+    if (lat == "") lat = null;
+    if (lon == "") lon = null;
 
     let date = null;
     if (fechaDate != null) {
@@ -141,7 +196,9 @@ export default class EnviosManager {
             fecha_date = IFNULL(?,fecha_date),
             hora = IFNULL(?,hora),
             fecha = IFNULL(?,fecha),
-            idLocalidad = IFNULL(?,idLocalidad)
+            idLocalidad = IFNULL(?,idLocalidad),
+            lat = IFNULL(?, lat),
+            lon = IFNULL(?, lon)
         WHERE id = ?`,
         [
           idVehiculo,
@@ -151,11 +208,13 @@ export default class EnviosManager {
           horaObj,
           fechaObj,
           idLocalidad,
+          lat,
+          lon,
           idEnvio,
         ]
       );
       if (result.affectedRows == 0)
-        return { error: { message: "No se actualizo" } };
+        return { error: { message: "No se actualizo", status: "error" } };
 
       try {
         const [rows] = await con.query(
@@ -164,14 +223,53 @@ export default class EnviosManager {
         );
         return { data: rows[0] };
       } catch (e) {
-        console.log(e);
-        return { error: { message: "No se obtuvo el objeto actualizado" } };
+        return {
+          error: {
+            message: "No se obtuvo el objeto actualizado",
+            status: "error",
+          },
+        };
       }
     } catch (e) {
-      if (e.errno == 1452)
-        return { error: { message: "No existe ese vehiculo" } };
+      switch (e.code) {
+        case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+        case "ER_NO_REFERENCED_ROW_2":
+          if (e.sqlMessage.includes("idVehiculo"))
+            CustomError.createError({
+              name: "idVehiculo",
+              message: "No existe ese auto",
+              cause: "No existe ese auto",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+          if (e.sqlMessage.includes("idLocalidad"))
+            CustomError.createError({
+              name: "idLocalidad",
+              message: "No existe esa localidad",
+              cause: "No existe esa localidad",
+              code: ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS,
+            });
+          break;
+        case "WARN_DATA_TRUNCATED":
+          if (e.sqlMessage.includes("lat"))
+            CustomError.createError({
+              name: "lat",
+              message: "Campo lat tiene que ser numerico",
+              cause: "Campo lat tiene que ser numerico",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            });
 
-      return { error: { message: "Something wrong" } };
+          if (e.sqlMessage.includes("lon"))
+            CustomError.createError({
+              name: "lon",
+              message: "Campo lon tiene que ser numerico",
+              cause: "Campo lon tiene que ser numerico",
+              code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+            });
+
+          break;
+      }
+
+      return { error: { message: "Something wrong", status: "error" } };
     }
   }
 
@@ -182,12 +280,11 @@ export default class EnviosManager {
       ]);
 
       if (result.affectedRows == 0)
-        return { error: { message: "No existe ese envio" } };
+        return { error: { message: "No existe ese envio", status: "error" } };
 
-      return { data: { message: "Operacion Exitosa" } };
+      return { data: { message: "Operacion Exitosa", status: "success" } };
     } catch (e) {
-      console.error(e);
-      return { error: { message: "Something wrong" } };
+      return { error: { message: "Something wrong", status: "error" } };
     }
   }
 }

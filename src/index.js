@@ -120,7 +120,6 @@ app.use("/api/tiposproductos", tipoProductoRoute);
 app.use("/api/inventario", inventario);
 app.use("/api/excel", excel);
 app.use("/api", cloudinaryRoute);
-app.use("/api/pedidos", PedidosRoute);
 app.use("/api/materiaPrima", materiaPrimaRoute);
 app.use("/api/producion", producionRoute);
 app.use("/api/clientes", clientes);
@@ -134,9 +133,10 @@ app.use("/api/facturaNegro", facturaNegro);
 app.use("/api/vehiculos", vehiculoRoute);
 app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 app.use("/api/maquinaParada", maquinaParadaRoute);
-
 app.use("/api/matrices", matricesRoute);
+
 app.use("/api/envios", EnviosRoute);
+app.use("/api/pedidos", PedidosRoute);
 
 app.use(views);
 

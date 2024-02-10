@@ -23,23 +23,36 @@ router.get("/:id", async (req, res) => {
   return res.json(data);
 });
 
-router.post("/", userExtractor([allPermissions.envios]), async (req, res) => {
-  const object = req.body;
-  const { data, error } = await enviosManager.createEnvio(object);
+router.post(
+  "/",
+  userExtractor([allPermissions.envios]),
+  async (req, res, next) => {
+    const object = req.body;
+    try {
+      const { data, error } = await enviosManager.createEnvio(object);
 
-  if (error) return res.status(404).json(error);
+      if (error) return res.status(404).json(error);
 
-  return res.json(data);
-});
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
-router.put("/:id", userExtractor([allPermissions.envios]), async (req, res) => {
+router.put("/:id", userExtractor([allPermissions.envios]), async (req, res, next) => {
   const idEnvio = req.params.id;
   const object = req.body;
-  const { data, error } = await enviosManager.updateEnvio(idEnvio, object);
 
-  if (error != null) return res.status(500).json(error);
+  try {
+    const { data, error } = await enviosManager.updateEnvio(idEnvio, object);
 
-  return res.json(data);
+    if (error != null) return res.status(500).json(error);
+
+    return res.json(data);
+  } catch (error) {
+    next(error)
+  }
 });
 
 router.delete(
