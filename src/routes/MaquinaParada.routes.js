@@ -6,7 +6,7 @@ import allPermissions from "../config/permissos.js";
 const ruta = Router();
 
 ruta.get(
-  "/maquinaParada",
+  "/",
   userExtractor([allPermissions.produccion, allPermissions.inyectora]),
   async (req, res) => {
     const { data, error } = await maquinaParadaManager.getMaquinaParada();
@@ -18,7 +18,7 @@ ruta.get(
 );
 
 ruta.post(
-  "/maquinaParada",
+  "/",
   userExtractor([allPermissions.produccion, allPermissions.inyectora]),
   async (req, res) => {
     const body = req.body;
@@ -30,7 +30,7 @@ ruta.post(
 );
 
 ruta.put(
-  "/maquinaParada/:idMaquinaParada",
+  "/:idMaquinaParada",
   userExtractor([allPermissions.produccion, allPermissions.inyectora]),
   async (req, res) => {
     const idMaquinaParada = req.params.idMaquinaParada;
@@ -48,7 +48,7 @@ ruta.put(
 );
 
 ruta.delete(
-  "/maquinaParada/:idMaquina",
+  "/:idMaquina",
   userExtractor([allPermissions.produccion, allPermissions.inyectora]),
   async (req, res) => {
     const idMaquina = req.params.idMaquina;

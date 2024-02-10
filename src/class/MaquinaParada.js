@@ -14,10 +14,9 @@ export default class MaquinaParada {
             LEFT JOIN maquina ON maquinaParada.idMaquina = maquina.id;`
       );
       this.listMaquinaParada = rows;
-      return { data: rows };
+      return { data: rows, status: "success" };
     } catch (e) {
-      console.error(e);
-      return { error: { message: "Something wrong" } };
+      return { error: { message: "Something wrong", status: "error" } };
     }
   }
 
@@ -31,25 +30,39 @@ export default class MaquinaParada {
     const { idMotivoMaquinaParada, hrs, idMaquina, fecha } = object;
 
     if (idMotivoMaquinaParada == null || idMotivoMaquinaParada == "")
-      return { error: { message: "Campo Motivo de Maquina Parada Vacio" } };
+      return {
+        error: {
+          message: "Campo Motivo de Maquina Parada Vacio",
+          status: "error",
+        },
+      };
 
     if (hrs == null || hrs == "")
-      return { error: { message: "Campo de Horas Maquina Parada Vacio" } };
+      return {
+        error: {
+          message: "Campo de Horas Maquina Parada Vacio",
+          status: "error",
+        },
+      };
 
     if (idMaquina == null || idMaquina == "")
-      return { error: { message: "Campo Maquina Vacio" } };
+      return { error: { message: "Campo Maquina Vacio", status: "error" } };
 
     if (fecha == null || fecha == "")
-      return { error: { message: "Campo fecha Vacio" } };
+      return { error: { message: "Campo fecha Vacio", status: "error" } };
 
     //Convertimos la fecha ingresada a tipo Date
     const fechaDate = new Date(fecha);
 
     if (Number.isNaN(fechaDate.getDate()))
-      return { error: { message: "Error en el formato de la Fecha" } };
+      return {
+        error: { message: "Error en el formato de la Fecha", status: "error" },
+      };
 
     if (fechaDate.getFullYear() < 2023)
-      return { error: { message: "Error en el año agregado" } };
+      return {
+        error: { message: "Error en el año agregado", status: "error" },
+      };
 
     const idMotivoMaquinaParadaInteger = parseInt(idMotivoMaquinaParada);
     const hrsInteger = parseInt(hrs);
@@ -57,33 +70,58 @@ export default class MaquinaParada {
 
     //Verificamos que sean de tipo Integer
     if (!Number.isInteger(idMotivoMaquinaParadaInteger))
-      return { error: { message: "Ocurrio un error en motivo de maquina" } };
+      return {
+        error: {
+          message: "Ocurrio un error en motivo de maquina",
+          status: "error",
+        },
+      };
 
     if (!Number.isInteger(hrsInteger))
-      return { error: { message: "Campo Hrs Maquina Parada No es un numero" } };
+      return {
+        error: {
+          message: "Campo Hrs Maquina Parada No es un numero",
+          status: "error",
+        },
+      };
 
     if (!Number.isInteger(idMaquinaInteger))
-      return { error: { message: "Ocurrio un error en maquina" } };
+      return {
+        error: { message: "Ocurrio un error en maquina", status: "error" },
+      };
 
     try {
       const [rows] = await con.query(
         "INSERT INTO maquinaParada (`fecha`, `idMotivoMaquinaParada`, `hrs`, `idMaquina`) VALUES (?,?,?,?);",
         [fecha, idMotivoMaquinaParadaInteger, hrsInteger, idMaquinaInteger]
       );
-      if (rows.affectedRows >= 1)
+      if (rows.affectedRows >= 1) {
+        const [result] = await con.query(
+          `SELECT maquinaParada.id, maquinaParada.hrs, maquinaParada.fecha, maquina.nombre, maquina.numberSerie, motivoMaquinaParada.descripcion
+              FROM maquinaParada 
+              LEFT JOIN motivoMaquinaParada ON maquinaParada.idMotivoMaquinaParada = motivoMaquinaParada.id
+              LEFT JOIN maquina ON maquinaParada.idMaquina = maquina.id
+              WHERE maquinaParada.id = ?;`,
+          [rows.insertId]
+        );
+
         return {
-          data: { message: "Operacion Exitosa", insertId: rows.insertId },
+          data: {
+            message: "Operacion Exitosa",
+            data: result[0],
+            status: "success",
+          },
         };
-      else return { error: { message: "No se Agrego" } };
+      } else return { error: { message: "No se Agrego", status: "error" } };
     } catch (error) {
-      console.log(error);
       if (error.errno == 1452)
         return {
           error: {
             message: "No existe tanto como maquina o motivo maquina parada",
+            status: "error",
           },
         };
-      return { error: { message: "Something Wrong" } };
+      return { error: { message: "Something Wrong", status: "error" } };
     }
   }
 
@@ -104,6 +142,7 @@ export default class MaquinaParada {
           error: {
             message: "Campo hrs maquina parada no es numerico",
             campo: "hrs",
+            status: "error",
           },
         };
       }
@@ -114,7 +153,11 @@ export default class MaquinaParada {
 
       if (Number.isNaN(fechaDate.getDate()))
         return {
-          error: { message: "Error en el formato de la Fecha", campo: "fecha" },
+          error: {
+            message: "Error en el formato de la Fecha",
+            campo: "fecha",
+            status: "error",
+          },
         };
 
       enviar.fecha = fecha;
@@ -126,6 +169,7 @@ export default class MaquinaParada {
           error: {
             message: "Ocurrio un error",
             campo: "motivomaquinaparada",
+            status: "error",
           },
         };
       }
@@ -139,6 +183,7 @@ export default class MaquinaParada {
           error: {
             message: "Ocurrio un error",
             campo: "maquina",
+            status: "error",
           },
         };
       }
@@ -160,18 +205,28 @@ export default class MaquinaParada {
           enviar.hrs,
           enviar.idMaquina,
           enviar.fecha,
-          idMaquinaParada
+          idMaquinaParada,
         ]
       );
+
+      const [result] = await con.query(
+        `SELECT maquinaParada.id, maquinaParada.hrs, maquinaParada.fecha, maquina.nombre, maquina.numberSerie, motivoMaquinaParada.descripcion
+            FROM maquinaParada 
+            LEFT JOIN motivoMaquinaParada ON maquinaParada.idMotivoMaquinaParada = motivoMaquinaParada.id
+            LEFT JOIN maquina ON maquinaParada.idMaquina = maquina.id
+            WHERE maquinaParada.id = ?;`,
+        [idMaquinaParada]
+      );
+
+      return { data: { message: "Operacion exitosa", data: result[0] } };
     } catch (error) {
       return {
         error: {
           message: "No se logro actualizar",
+          status: "error",
         },
       };
     }
-
-    return { data: { message: "Operacion exitosa" } };
   }
 
   async deleteMaquinaParada(idMaquinaParada) {
@@ -183,12 +238,11 @@ export default class MaquinaParada {
 
       if (result.affectedRows >= 1)
         return {
-          data: { message: "Se elimino Correctamente" },
+          data: { message: "Se elimino Correctamente", status: "success" },
         };
-      else return { error: { message: "No existe" } };
+      else return { error: { message: "No existe", status: "error" } };
     } catch (error) {
-      console.log(error);
-      return { error: { message: "Something Wrong" } };
+      return { error: { message: "Something Wrong", status: "error" } };
     }
   }
 }
