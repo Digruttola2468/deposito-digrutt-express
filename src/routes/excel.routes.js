@@ -23,8 +23,6 @@ const getMercaderia = async (idcategoria) => {
   return rows;
 };
 
-
-
 router.get("/mercaderia", userExtractor(allPermissions.mercaderia), async (req, res) => {
   try {
     const resultEntrada = await getMercaderia(2);
@@ -101,7 +99,7 @@ router.get("/inventario", userExtractor(inventarioPermissions), async (req, res)
   }
 });
 
-router.get("/produccion-semanal", userExtractor(allPermissions.produccion), async (req, res) => {
+router.get("/produccion-semanal", userExtractor([allPermissions.produccion]), async (req, res) => {
   const fechaInit = req.query?.start;
   const fechaEnd = req.query?.end;
 
