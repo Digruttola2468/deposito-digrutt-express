@@ -244,7 +244,6 @@ export default class Matrices {
         [
           enviar.descripcion,
           enviar.idmaterial,
-          enviar.idcliente,
           enviar.cantPiezaGolpe,
           enviar.ubicacion,
           idMatriz,
