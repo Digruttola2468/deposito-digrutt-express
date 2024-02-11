@@ -112,8 +112,6 @@ export default class Matrices {
         code: ENUM_ERRORS.INVALID_TYPES_ERROR,
       });
 
-      console.log("ACA");
-      console.log(typeof numero_matriz);
     if (numero_matriz.length > 3) 
       CustomError.createError({
         name: "numeroMatriz",
