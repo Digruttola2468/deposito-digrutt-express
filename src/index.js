@@ -26,6 +26,7 @@ import historialMatricesErrorRoute from "./routes/historialErrorMatriz.routes.js
 import materiaPrimaRoute from "./routes/material.routes.js";
 import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
 import placeSavedEnviosRoute from "./routes/placeSavedEnvios.routes.js";
+import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.js";
 
 //ROUTES PRODUCCION
 import clientes from "./routes/clientes.routes.js";
@@ -54,6 +55,7 @@ import RemitosManager from "./class/RemitosManager.js";
 import AuthManager from "./class/AuthManager.js";
 import ProducionManager from "./class/ProduccionManager.js";
 import HistorialMatriz from "./class/HistorialErrorMatriz.js";
+import HistorialFechasPedidosManager from "./class/historialFechasPedidos.js";
 
 import MaquinaParada from "./class/MaquinaParada.js";
 import Matrices from "./class/MatricesMaster.js";
@@ -111,6 +113,7 @@ export const matricesManager = new Matrices();
 export const historialErrorMatrizManager = new HistorialMatriz();
 export const pedidosManager = new PedidosManager();
 export const enviosManager = new EnviosManager();
+export const historialPedidosManager = new HistorialFechasPedidosManager();
 
 //envios - maquinaParadaRoute - matricesRoute
 app.use("/api", indexRoute);
@@ -134,8 +137,9 @@ app.use("/api/vehiculos", vehiculoRoute);
 app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 app.use("/api/maquinaParada", maquinaParadaRoute);
 app.use("/api/matrices", matricesRoute);
-
 app.use("/api/envios", EnviosRoute);
+
+app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
 app.use("/api/pedidos", PedidosRoute);
 
 app.use(views);
@@ -151,4 +155,3 @@ app.use((req, res) => {
 });
 
 app.listen(PORT);
-console.log(`Server localhost:${PORT}`);
