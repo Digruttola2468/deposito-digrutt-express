@@ -309,4 +309,22 @@ export default class HistorialFechasPedidosManager {
       throw error;
     }
   }
+
+  async deleteByIdPedido(idPedido) {
+    try {
+      const [rows] = await con.query(
+        `SELECT id, idPedido FROM historialFechasPedidos WHERE idPedido = ?;`,
+        [idPedido]
+      );
+
+      for (let i = 0; i < rows.length; i++) {
+        const { id } = rows[i];
+        try {
+          await this.deleteHistorialFechasPedidos(id);
+        } catch (error) {
+        }
+      }
+    } catch (error) {
+    }
+  }
 }

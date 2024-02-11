@@ -1,7 +1,7 @@
 import { con } from "../config/db.js";
 import CustomError from "../errors/Custom_errors.js";
 import { ENUM_ERRORS } from "../errors/enums.js";
-import { clientesManager, inventarioManager } from "../index.js";
+import { clientesManager, historialPedidosManager, inventarioManager } from "../index.js";
 
 export default class PedidosManager {
   constructor() {
@@ -396,6 +396,15 @@ export default class PedidosManager {
       if (result.affectedRows === 0)
         return { error: { message: "No se encontro el pedido" } };
 
+      // Agregando en la parte de historial la parte enviada
+      if (enviar.cantidadEnviada != null) {
+        try {
+          await historialPedidosManager.postHistorialFechasPedidos({ idPedido: idPedido, cantidad_enviada: enviar.cantidadEnviada })
+        } catch (error) {
+          throw error
+        }
+      }
+
       const [rows] = await con.query(
         `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idInventario, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
                   FROM pedidos 
@@ -455,6 +464,12 @@ export default class PedidosManager {
 
   async deletePedido(idPedido) {
     try {
+      try {
+        await historialPedidosManager.deleteByIdPedido(idPedido);
+      } catch (error) {
+        throw error
+      }
+
       const [result] = await con.query("DELETE FROM pedidos WHERE (`id` = ?)", [
         idPedido,
       ]);
