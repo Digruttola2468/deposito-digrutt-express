@@ -259,8 +259,8 @@ export default class Matrices {
           FROM matriz 
             LEFT JOIN materiaPrima ON matriz.idmaterial = materiaPrima.id
             LEFT JOIN clientes ON matriz.idcliente = clientes.id
-          WHERE matriz.id=?; `,
-        idMatriz
+          WHERE matriz.id = ?;`,
+        [idMatriz]
       );
 
       const updateList = this.listMatriz.map((elem) => {
