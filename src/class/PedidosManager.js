@@ -162,15 +162,7 @@ export default class PedidosManager {
   }
 
   async postListPedidos(object) {
-    const { fechaEntrega, idCliente, nroOrden, products } = object;
-
-    if (fechaEntrega == null || fechaEntrega == "")
-      CustomError.createError({
-        cause: "Campo Fecha Entrega esta Vacio",
-        message: "Campo Fecha Entrega esta vacio",
-        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
-        name: "fechaEntrega",
-      });
+    const { idCliente, nroOrden, products } = object;
 
     if (idCliente == null || idCliente == "")
       CustomError.createError({
@@ -194,15 +186,6 @@ export default class PedidosManager {
         message: "Algo paso en la lista products",
         code: ENUM_ERRORS.INVALID_TYPES_ERROR,
         name: "products",
-      });
-
-    const fechaDate = new Date(fechaEntrega);
-    if (Number.isNaN(fechaDate.getDate()))
-      CustomError.createError({
-        name: "fecha",
-        cause: "Error en el formato",
-        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
-        message: "Error en el formato",
       });
 
     //Verificamos que este todo correcto
@@ -245,7 +228,7 @@ export default class PedidosManager {
       const element = products[i];
       try {
         await this.postPedidos({
-          fecha_entrega: fechaEntrega,
+          fecha_entrega: element.fechaEntrega,
           idcliente: idCliente,
           ordenCompra: nroOrden,
           cantidadEnviar: element.cantidadEnviar,
