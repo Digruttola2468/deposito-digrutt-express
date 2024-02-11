@@ -268,7 +268,7 @@ export default class Matrices {
         else return elem;
       });
 
-      this.listMatriz(updateList);
+      this.listMatriz = updateList;
 
       return {
         data: {
@@ -278,6 +278,7 @@ export default class Matrices {
         },
       };
     } catch (e) {
+      console.log(e);
       switch (e.code) {
         case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
         case "ER_NO_REFERENCED_ROW_2":
