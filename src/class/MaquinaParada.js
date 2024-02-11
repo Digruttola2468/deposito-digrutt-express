@@ -33,6 +33,7 @@ export default class MaquinaParada {
       return {
         error: {
           message: "Campo Motivo de Maquina Parada Vacio",
+          campus: "motivoMaquinaParada",
           status: "error",
         },
       };
@@ -41,27 +42,48 @@ export default class MaquinaParada {
       return {
         error: {
           message: "Campo de Horas Maquina Parada Vacio",
+          campus: "hrsMaquina",
           status: "error",
         },
       };
 
     if (idMaquina == null || idMaquina == "")
-      return { error: { message: "Campo Maquina Vacio", status: "error" } };
+      return {
+        error: {
+          message: "Campo Maquina Vacio",
+          status: "error",
+          campus: "numMaquina",
+        },
+      };
 
     if (fecha == null || fecha == "")
-      return { error: { message: "Campo fecha Vacio", status: "error" } };
+      return {
+        error: {
+          message: "Campo fecha Vacio",
+          status: "error",
+          campus: "fecha",
+        },
+      };
 
     //Convertimos la fecha ingresada a tipo Date
     const fechaDate = new Date(fecha);
 
     if (Number.isNaN(fechaDate.getDate()))
       return {
-        error: { message: "Error en el formato de la Fecha", status: "error" },
+        error: {
+          message: "Error en el formato de la Fecha",
+          status: "error",
+          campus: "fecha",
+        },
       };
 
     if (fechaDate.getFullYear() < 2023)
       return {
-        error: { message: "Error en el año agregado", status: "error" },
+        error: {
+          message: "Error en el año agregado",
+          status: "error",
+          campus: "fecha",
+        },
       };
 
     const idMotivoMaquinaParadaInteger = parseInt(idMotivoMaquinaParada);
@@ -74,6 +96,7 @@ export default class MaquinaParada {
         error: {
           message: "Ocurrio un error en motivo de maquina",
           status: "error",
+          campus: "motivoMaquinaParada",
         },
       };
 
@@ -82,12 +105,17 @@ export default class MaquinaParada {
         error: {
           message: "Campo Hrs Maquina Parada No es un numero",
           status: "error",
+          campus: "hrsMaquina",
         },
       };
 
     if (!Number.isInteger(idMaquinaInteger))
       return {
-        error: { message: "Ocurrio un error en maquina", status: "error" },
+        error: {
+          message: "Ocurrio un error en maquina",
+          status: "error",
+          campus: "numMaquina",
+        },
       };
 
     try {
@@ -114,13 +142,27 @@ export default class MaquinaParada {
         };
       } else return { error: { message: "No se Agrego", status: "error" } };
     } catch (error) {
-      if (error.errno == 1452)
-        return {
-          error: {
-            message: "No existe tanto como maquina o motivo maquina parada",
-            status: "error",
-          },
-        };
+      switch (error.code) {
+        case "ER_NO_REFERENCED_ROW_2":
+          if (error.sqlMessage.includes("idMotivoMaquinaParada"))
+            return {
+              error: {
+                message: "NO existe esa maquina parada",
+                status: "error",
+                campus: "motivoMaquinaParada",
+              },
+            };
+          if (error.sqlMessage.includes("idMaquina"))
+            return {
+              error: {
+                message: "No existe esa maquina",
+                status: "error",
+                campus: "numMaquina",
+              },
+            };
+
+          break;
+      }
       return { error: { message: "Something Wrong", status: "error" } };
     }
   }
@@ -141,7 +183,7 @@ export default class MaquinaParada {
         return {
           error: {
             message: "Campo hrs maquina parada no es numerico",
-            campo: "hrs",
+            campo: "hrsMaquinaParada",
             status: "error",
           },
         };
@@ -168,7 +210,7 @@ export default class MaquinaParada {
         return {
           error: {
             message: "Ocurrio un error",
-            campo: "motivomaquinaparada",
+            campo: "motivoMaquinaParada",
             status: "error",
           },
         };
@@ -182,7 +224,7 @@ export default class MaquinaParada {
         return {
           error: {
             message: "Ocurrio un error",
-            campo: "maquina",
+            campo: "numMaquina",
             status: "error",
           },
         };
@@ -190,16 +232,16 @@ export default class MaquinaParada {
       enviar.idMaquina = idMaquinaInteger;
     }
 
-    //Update
     try {
       await con.query(
         `
-      UPDATE maquinaParada
-        SET idMotivoMaquinaParada = IFNULL(?,idMotivoMaquinaParada),
-            hrs = IFNULL(?,hrs),
-            idMaquina = IFNULL(?,idMaquina),
-            fecha = IFNULL(?,fecha)
-        WHERE id = ?;`,
+        UPDATE maquinaParada
+          SET idMotivoMaquinaParada = IFNULL(?,idMotivoMaquinaParada),
+              hrs = IFNULL(?,hrs),
+              idMaquina = IFNULL(?,idMaquina),
+              fecha = IFNULL(?,fecha)
+          WHERE id = ?;
+        `,
         [
           enviar.idMotivoMaquinaParada,
           enviar.hrs,
