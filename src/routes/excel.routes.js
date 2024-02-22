@@ -6,12 +6,14 @@ import {
   inventarioManager,
   producionManager,
   facturaNegroManager,
+  matricesManager,
 } from "../index.js";
 
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";
 import moment from "moment";
+import permissos from "../config/permissos.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const dir = dirname(__filename);
@@ -76,12 +78,12 @@ router.get(
     try {
       const listaEnviar = [];
 
-      const listInventario = inventarioManager.getListInventario();
+      const listMatrices = inventarioManager.getlistMatrices();
 
-      if (listInventario.length == 0)
+      if (listMatrices.length == 0)
         return res.status(400).json({ message: "Lista Vacia" });
 
-      listInventario.forEach((elem) => {
+      listMatrices.forEach((elem) => {
         const stockActual = elem.entrada - elem.salida;
         listaEnviar.push({ ...elem, stockActual });
       });
@@ -327,6 +329,41 @@ router.get(
       return res
         .status(500)
         .json({ status: "error", message: "Ocurrio un error" });
+    }
+  }
+);
+
+router.get(
+  "/matrices",
+  userExtractor([permissos.produccion, permissos.matriceria]),
+  async (req, res) => {
+    try {
+
+      const listMatrices = await matricesManager.getMatrices();
+
+      if (listMatrices.length == 0)
+        return res.status(400).json({ message: "Lista Vacia" });
+
+      const workbook = new ExcelJs.Workbook();
+
+      const worksheet = workbook.addWorksheet("Matrices");
+
+      worksheet.columns = [
+        { header: "COD MATRIZ", key: "cod_matriz", width: 17 },
+        { header: "DESCRIPCION", key: "descripcion", width: 60 },
+        { header: "P x G", key: "cantPiezaGolpe", width: 10 },
+        { header: "MATERIA PRIMA", key: "material", width: 20 },
+        { header: "CLIENTE", key: "cliente", width: 20 },
+      ];
+
+      worksheet.addRows(listMatrices.data);
+
+      await workbook.xlsx.writeFile(dir + "/matrices.xlsx");
+
+      return res.sendFile(dir + "/matrices.xlsx");
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "something goes wrong" });
     }
   }
 );
