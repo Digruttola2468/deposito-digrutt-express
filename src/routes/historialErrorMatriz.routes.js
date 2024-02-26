@@ -66,7 +66,7 @@ ruta.post(
 
 ruta.put(
   "/:idHistorial",
-  userExtractor([allPermissions.matriceria, allPermissions.produccion]),
+  userExtractor([allPermissions.matriceria]),
   async (req, res, next) => {
     const idHistorial = req.params.idHistorial;
     const body = req.body;
@@ -87,7 +87,7 @@ ruta.put(
 
 ruta.put(
   "/:idHistorial/:solved",
-  userExtractor([allPermissions.matriceria, allPermissions.produccion]),
+  userExtractor([allPermissions.matriceria]),
   async (req, res, next) => {
     const idHistorial = req.params.idHistorial;
     const isSolved = req.params.solved;
@@ -107,7 +107,7 @@ ruta.put(
 
 ruta.delete(
   "/:idHistorial",
-  userExtractor([allPermissions.matriceria, allPermissions.produccion]),
+  userExtractor([allPermissions.matriceria]),
   async (req, res, next) => {
     const idHistorial = req.params.idHistorial;
     try {
