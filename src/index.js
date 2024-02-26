@@ -27,6 +27,7 @@ import materiaPrimaRoute from "./routes/material.routes.js";
 import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
 import placeSavedEnviosRoute from "./routes/placeSavedEnvios.routes.js";
 import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.js";
+import relacionMatrizMaquina from "./routes/relacionMatrizMaquina.routes.js";
 
 //ROUTES PRODUCCION
 import clientes from "./routes/clientes.routes.js";
@@ -67,6 +68,7 @@ import passport from "passport";
 import EnviosManager from "./class/EnviosManager.js";
 
 import errorHandle from "./middleware/errors.js";
+import RelacionMatrizMaquina from "./class/RelacionMatrizMaquina.js";
 
 const app = express();
 
@@ -114,6 +116,7 @@ export const historialErrorMatrizManager = new HistorialMatriz();
 export const pedidosManager = new PedidosManager();
 export const enviosManager = new EnviosManager();
 export const historialPedidosManager = new HistorialFechasPedidosManager();
+export const relacionMaquinaMatriz = new RelacionMatrizMaquina();
 
 //envios - maquinaParadaRoute - matricesRoute
 app.use("/api", indexRoute);
@@ -138,6 +141,7 @@ app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 app.use("/api/maquinaParada", maquinaParadaRoute);
 app.use("/api/matrices", matricesRoute);
 app.use("/api/envios", EnviosRoute);
+app.use("/api/maquina_matriz", relacionMatrizMaquina);
 
 app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
 app.use("/api/pedidos", PedidosRoute);
