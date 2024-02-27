@@ -105,22 +105,10 @@ export default class ProducionManager {
         return {
           error: { message: error.message, index: i, campo: error.campo },
         };
-
-      const findIdInventario = verify.find(
-        (elem) => elem.idInventario == element.idInventario
-      );
       const findNumMaquina = verify.find(
         (elem) => elem.numMaquina == element.numMaquina
       );
 
-      if (findIdInventario)
-        return {
-          error: {
-            message: "Se repite el Cod Producto",
-            index: i,
-            campo: "idInventario",
-          },
-        };
       if (findNumMaquina)
         return {
           error: {
@@ -130,10 +118,9 @@ export default class ProducionManager {
           },
         };
 
-      //Verificar que no se repita el idInventario y el numMaquina
+      //Verificar que no se repita el numMaquina
       verify.push({
         numMaquina: element.numMaquina,
-        idInventario: element.idInventario,
       });
     }
 
@@ -244,7 +231,7 @@ export default class ProducionManager {
       golpesReales,
       piezasProducidas,
       promGolpesHora,
-      idMatriz
+      idMatriz,
     } = object;
 
     this.verifyCampus(object);
@@ -259,7 +246,7 @@ export default class ProducionManager {
           golpesReales,
           piezasProducidas,
           promGolpesHora,
-          idMatriz
+          idMatriz,
         ]
       );
       if (rows.affectedRows >= 1) {
