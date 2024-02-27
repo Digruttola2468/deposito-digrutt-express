@@ -244,13 +244,14 @@ export default class ProducionManager {
       golpesReales,
       piezasProducidas,
       promGolpesHora,
+      idMatriz
     } = object;
 
     this.verifyCampus(object);
 
     try {
       const [rows] = await con.query(
-        "INSERT INTO producion (`fecha`, `num_maquina`, `idinventario`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`) VALUES (?,?,?,?,?,?);",
+        "INSERT INTO producion (`fecha`, `num_maquina`, `idinventario`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`, `idMatriz`) VALUES (?,?,?,?,?,?,?);",
         [
           fecha,
           numMaquina,
@@ -258,6 +259,7 @@ export default class ProducionManager {
           golpesReales,
           piezasProducidas,
           promGolpesHora,
+          idMatriz
         ]
       );
       if (rows.affectedRows >= 1) {
