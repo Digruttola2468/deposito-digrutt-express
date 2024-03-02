@@ -1,7 +1,7 @@
 {
   "name": "deposito-api",
   "version": "1.0.0",
-  "description": "REST API con mySQL ",
+  "description": "REST API WITH SQL - DIGRUTT DEPOSITO",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -10,12 +10,16 @@
   "author": "Ivan Di Gruttola",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "chai": "^5.1.0",
+    "mocha": "^10.3.0",
+    "nodemon": "^3.0.1",
+    "supertest": "^6.3.4"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.2",
     "bcrypt": "^5.1.1",
     "cloudinary": "^1.41.0",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.1.1",
     "exceljs": "^4.3.0",
@@ -25,6 +29,7 @@
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
+    "multer": "^1.4.5-lts.1",
     "mysql2": "^3.3.3",
     "passport": "^0.7.0",
     "passport-google-oauth2": "^0.2.0"
