@@ -11,13 +11,14 @@ export default class ProducionManager {
     try {
       const [rows] = await con.query(
         ` SELECT producion.*,
-                inventario.nombre,inventario.descripcion,inventario.articulo,inventario.url_image,
-                matriz.cod_matriz,matriz.cantPiezaGolpe,
+                inventario.nombre,inventario.articulo,inventario.url_image,
+                matriz.cod_matriz,matriz.cantPiezaGolpe,matriz.descripcion,
                 maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina
           FROM producion 
                 LEFT JOIN inventario ON producion.idinventario = inventario.id 
                 LEFT JOIN matriz ON producion.idMatriz = matriz.id
                 LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
+                LEFT JOIN turnoProduccion ON producion.idTurno = turnoProduccion.id
           ORDER BY producion.fecha DESC; `
       );
       this.listProduccion = rows;
@@ -96,7 +97,7 @@ export default class ProducionManager {
 
   async postListProduccion(list) {
     //Verificamos que este todo correcto
-    let verify = [{ idInventario: null, numMaquina: null }];
+    let verify = [{ numMaquina: null }];
     for (let i = 0; i < list.length; i++) {
       const element = list[i];
 
@@ -145,7 +146,7 @@ export default class ProducionManager {
   }
 
   verifyCampus(object) {
-    const { numMaquina, fecha, idInventario, golpesReales, piezasProducidas } =
+    const { numMaquina, fecha, idTurno, golpesReales, piezasProducidas } =
       object;
     //Validar Campos
     if (fecha == null || fecha == "")
@@ -180,6 +181,14 @@ export default class ProducionManager {
         message: "Campo piezas producidas esta vacio",
       });
 
+    if (idTurno == null || idTurno == "")
+      CustomError.createError({
+        name: "idTurno",
+        cause: "Campo turno esta vacio",
+        code: ENUM_ERRORS.INVALID_TYPE_EMPTY,
+        message: "Campo turno esta vacio",
+      });
+
     //Convertimos la fecha ingresada a tipo Date
     const fechaDate = new Date(fecha);
 
@@ -194,6 +203,7 @@ export default class ProducionManager {
     const numMaquinaInteger = parseInt(numMaquina);
     const golpesRealesInteger = parseInt(golpesReales);
     const piezasProducidasInteger = parseInt(piezasProducidas);
+    const idTurnoInteger = parseInt(idTurno);
 
     //Verificamos que sean de tipo Integer
     if (!Number.isInteger(numMaquinaInteger))
@@ -202,6 +212,13 @@ export default class ProducionManager {
         cause: "Campo N° Maquina no es numerico",
         code: ENUM_ERRORS.INVALID_TYPES_ERROR,
         message: "Campo N° Maquina no es numerico",
+      });
+    if (!Number.isInteger(idTurnoInteger))
+      CustomError.createError({
+        name: "idTurno",
+        cause: "Campo Turno no es numerico",
+        code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+        message: "Campo Turno no es numerico",
       });
 
     if (!Number.isInteger(golpesRealesInteger))
@@ -227,26 +244,26 @@ export default class ProducionManager {
     const {
       numMaquina,
       fecha,
-      idInventario,
       golpesReales,
       piezasProducidas,
       promGolpesHora,
       idMatriz,
+      idTurno,
     } = object;
 
     this.verifyCampus(object);
 
     try {
       const [rows] = await con.query(
-        "INSERT INTO producion (`fecha`, `num_maquina`, `idinventario`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`, `idMatriz`) VALUES (?,?,?,?,?,?,?);",
+        "INSERT INTO producion (`fecha`, `num_maquina`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`, `idMatriz`, `idTurno`) VALUES (?,?,?,?,?,?,?);",
         [
           fecha,
           numMaquina,
-          idInventario,
           golpesReales,
           piezasProducidas,
           promGolpesHora,
           idMatriz,
+          idTurno,
         ]
       );
       if (rows.affectedRows >= 1) {
@@ -260,6 +277,7 @@ export default class ProducionManager {
                     LEFT JOIN inventario ON producion.idinventario = inventario.id 
                     LEFT JOIN matriz ON producion.idMatriz = matriz.id
                     LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
+                    LEFT JOIN turnoProduccion ON producion.idTurno = turnoProduccion.id
               WHERE producion.id = ?; `,
             [rows.insertId]
           );
@@ -317,6 +335,7 @@ export default class ProducionManager {
       golpesReales,
       piezasProducidas,
       prom_golpeshora,
+      idTurno,
     } = obj;
 
     let campusEnviar = {
@@ -325,6 +344,7 @@ export default class ProducionManager {
       golpesReales: null,
       piezasProducidas: null,
       prom_golpeshora: null,
+      idTurno: null,
     };
 
     if (fecha != null && fecha != "") {
@@ -388,6 +408,18 @@ export default class ProducionManager {
         });
       campusEnviar.prom_golpeshora = prom_golpeshora;
     }
+    if (idTurno != null && idTurno != "") {
+      const idTurnoInteger = parseInt(idTurno);
+
+      if (!Number.isInteger(idTurnoInteger))
+        CustomError.createError({
+          name: "idTurno",
+          cause: "Campo Turno ocurrio un error",
+          code: ENUM_ERRORS.INVALID_TYPES_ERROR,
+          message: "Campo Turno ocurrio un error",
+        });
+      campusEnviar.idTurno = idTurno;
+    }
 
     //Update Produccion
     try {
@@ -398,7 +430,8 @@ export default class ProducionManager {
             num_maquina = IFNULL(?,num_maquina),
             golpesReales = IFNULL(?,golpesReales),
             piezasProducidas = IFNULL(?,piezasProducidas),
-            prom_golpeshora = IFNULL(?,prom_golpeshora)
+            prom_golpeshora = IFNULL(?,prom_golpeshora),
+            idTurno = IFNULL(?, idTurno)
         WHERE id = ?;`,
         [
           campusEnviar.fecha,
@@ -406,12 +439,11 @@ export default class ProducionManager {
           campusEnviar.golpesReales,
           campusEnviar.piezasProducidas,
           campusEnviar.prom_golpeshora,
+          campusEnviar.idTurno,
           idProduccion,
         ]
       );
     } catch (e) {
-      console.log(e);
-
       switch (e.code) {
         case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
         case "ER_NO_REFERENCED_ROW_2":
@@ -451,6 +483,7 @@ export default class ProducionManager {
               LEFT JOIN inventario ON producion.idinventario = inventario.id 
               LEFT JOIN matriz ON producion.idMatriz = matriz.id
               LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
+              LEFT JOIN turnoProduccion ON producion.idTurno = turnoProduccion.id
         WHERE producion.id = ?; `,
       [idProduccion]
     );
