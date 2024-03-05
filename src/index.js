@@ -28,6 +28,7 @@ import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
 import placeSavedEnviosRoute from "./routes/placeSavedEnvios.routes.js";
 import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.js";
 import relacionMatrizMaquina from "./routes/relacionMatrizMaquina.routes.js";
+import turnosProducionRoute from "./routes/turnos.routes.js";
 
 //ROUTES PRODUCCION
 import clientes from "./routes/clientes.routes.js";
@@ -142,6 +143,7 @@ app.use("/api/maquinaParada", maquinaParadaRoute);
 app.use("/api/matrices", matricesRoute);
 app.use("/api/envios", EnviosRoute);
 app.use("/api/maquina_matriz", relacionMatrizMaquina);
+app.use("/api/turnosProducion", turnosProducionRoute);
 
 app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
 app.use("/api/pedidos", PedidosRoute);
