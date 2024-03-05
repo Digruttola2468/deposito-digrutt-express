@@ -76,18 +76,18 @@ const app = express();
 app.use(cors());
 //app.use(express.urlencoded({ extended: true }));
 
-const MysqlStorage = MySQLStore(session);
-
-const sessionStore = new MysqlStorage({}, con);
 
 // Configurar el motor de plantillas
 app.engine("handlebars", handlebars.engine());
 app.set("views", __dirname + "/views");
 app.set("view engine", "handlebars");
 
-//Habilitamos la lectura en JSON
+// Habilitamos la lectura en JSON
 app.use(express.json());
 
+// SESSION MYSQL
+const MysqlStorage = MySQLStore(session);
+const sessionStore = new MysqlStorage({}, con);
 app.use(
   session({
     store: sessionStore,
@@ -97,9 +97,9 @@ app.use(
   })
 );
 
+// INICIALIZATE PASSPORT
 app.use(passport.initialize());
 app.use(passport.session());
-
 googleInicializate();
 
 //INIT
@@ -118,7 +118,7 @@ export const enviosManager = new EnviosManager();
 export const historialPedidosManager = new HistorialFechasPedidosManager();
 export const relacionMaquinaMatriz = new RelacionMatrizMaquina();
 
-//envios - maquinaParadaRoute - matricesRoute
+
 app.use("/api", indexRoute);
 app.use("/api/mercaderia", mercaderiaRoute);
 app.use("/api/colores", coloresRoute);
@@ -146,14 +146,17 @@ app.use("/api/maquina_matriz", relacionMatrizMaquina);
 app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
 app.use("/api/pedidos", PedidosRoute);
 
+// VIEWS
 app.use(views);
 
 app.use(errorHandle);
 
+// PAGE PRINCIPAL
 app.get("/", (req, res) => {
   res.send("Page Principal");
 });
 
+// WHEN NOT FOUND PAGE
 app.use((req, res) => {
   res.send("No se encuntra la pagina");
 });
