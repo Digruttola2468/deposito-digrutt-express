@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js"
+    "start:dev": "nodemon src/index.js",
+    "start:prod": "node src/index.js"
   },
   "author": "Ivan Di Gruttola",
   "license": "ISC",
@@ -16,22 +17,21 @@
     "supertest": "^6.3.4"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.38.2",
     "bcrypt": "^5.1.1",
-    "cloudinary": "^1.41.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.1.1",
     "exceljs": "^4.3.0",
     "express": "^4.18.2",
-    "express-handlebars": "^7.1.2",
     "express-mysql-session": "^3.0.0",
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
-    "multer": "^1.4.5-lts.1",
     "mysql2": "^3.3.3",
+    "nodemailer": "^6.9.13",
     "passport": "^0.7.0",
-    "passport-google-oauth2": "^0.2.0"
+    "passport-google-oauth2": "^0.2.0",
+    "passport-local": "^1.0.0",
+    "zod": "^3.22.4"
   }
 }
