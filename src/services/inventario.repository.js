@@ -17,9 +17,8 @@ export default class InventarioRepository {
   }
 
   async createInventario(object) {
-    const [rows] = await this.dao.insert(object);
-
-    return await this.getOne(rows.insertId);
+    const [result] = await this.dao.insert(object);
+    return {id: result.insertId, ...object};
   }
 
   async updateInventario(iid, object) {

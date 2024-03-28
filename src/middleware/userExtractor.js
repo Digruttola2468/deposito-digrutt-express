@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/dotenv.js";
+import allPermissions from '../config/permissos.js';
 
 export default (roles) => async (req, res, next) => {
   const authorization = req.get("authorization");
@@ -19,7 +20,7 @@ export default (roles) => async (req, res, next) => {
     return res.status(401).json({ message: "token vacio o invalido" });
   }
 
-  const { gmail, role } = decoredToken;
+  const { gmail, role } = decoredToken.user;
 
   if (!gmail)
     return res

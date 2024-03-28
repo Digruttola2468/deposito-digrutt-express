@@ -28,8 +28,8 @@ router.get(
   async (req, res) => {
     const mid = parseInt(req.params.mid);
     try {
-      const [result] = await mercaderiaServer.getOneMercaderia(mid);
-      return res.json({ status: "success", data: result });
+      const [rows] = await mercaderiaServer.getOneMercaderia(mid);
+      return res.json({ status: "success", data: rows[0] });
     } catch (error) {
       console.log(error);
       return res
@@ -116,7 +116,7 @@ router.put(
       );
 
       if (objectUpdated)
-        return res.json({ status: "success", data: objectUpdated });
+        return res.json({ status: "success", data: objectUpdated[0] });
       else
         return res
           .status(400)

@@ -2,118 +2,123 @@ import { Router } from "express";
 
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";
+import { inventarioServer } from "../services/index.repository.js";
 
 const router = Router();
 
-router.get(
-  "/",
-
-  userExtractor(inventarioPermissions),
-  async (req, res) => {
-    const { data, error } = await inventarioManager.getInventario();
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+router.get("/", userExtractor(inventarioPermissions), async (req, res) => {
+  try {
+    const result = await inventarioServer.getInventario();
+    return res.json({ status: "success", data: result });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Something Wrong" });
   }
-);
+});
 
-router.get(
-  "/nombres",
-
-  userExtractor(inventarioPermissions),
-  (req, res) => {
-    const { data, error } = inventarioManager.getListInventarioNombre();
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+router.get("/nombres", userExtractor(inventarioPermissions), (req, res) => {
+  try {
+    const result = inventarioServer.getListInventarioNombre();
+    return res.json({ status: "success", data: result });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Something Wrong" });
   }
-);
+});
 
 router.get(
   "/sumInventario/:id",
-
   userExtractor(inventarioPermissions),
   async (req, res) => {
     const { id } = req.params;
 
-    const result = await inventarioManager.suminventario(id);
-
-    if (result.error != null)
-      return res.status(404).json({ message: "Ocurrio un error" });
-
-    return res.json(result.data);
+    try {
+      const result = await inventarioServer.sumMercaderiaByIdInventario(id);
+      return res.json(result);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
-router.get(
-  "/:id",
-
-  userExtractor(inventarioPermissions),
-  (req, res) => {
-    const idInventario = req.params.id;
-    const { data, error } = inventarioManager.getOneInventario(idInventario);
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+router.get("/:id", userExtractor(inventarioPermissions), async (req, res) => {
+  const idInventario = req.params.id;
+  try {
+    const [rows] = await inventarioServer.getOne(idInventario);
+    return res.json({ status: "success", data: rows[0] });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Something Wrong" });
   }
-);
+});
 
 router.post(
   "/",
-
   userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
   async (req, res, next) => {
     const object = req.body;
     try {
-      const result = await inventarioManager.createInventario(object);
-
-      return res.json(result);
+      const result = await inventarioServer.createInventario(object);
+      return res.json({ status: "success", data: result });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
 
 router.put(
   "/:id",
-
   userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
   async (req, res, next) => {
     const idInventario = req.params.id;
     const object = req.body;
-
     try {
-      const result = await inventarioManager.updateInventario(
-        idInventario,
-        object
-      );
-
-      return res.json(result);
+      const [rows] = await inventarioServer.updateInventario(idInventario, object);
+      return res.json({ status: "success", data: rows[0] });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
 
 router.delete(
   "/:id",
-
   userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
-  async (req, res,next) => {
+  async (req, res, next) => {
     const idInventario = req.params.id;
     try {
-      const { data, error } = await inventarioManager.deleteInventario(
-        idInventario
-      );
-  
-      if (error != null) return res.status(500).json(error);
-  
-      return res.json(data);
+      const [result] = await inventarioServer.deleteInventario(idInventario);
+
+      if (result.affectedRows >= 1)
+        return res.json({
+          status: "success",
+          message: "Eliminado Correctamente",
+        });
+      else
+        return res.status(404).json({
+          status: "error",
+          message: "No existe ese inventario",
+        });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );

@@ -1,23 +1,34 @@
 import { Router } from "express";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
+import { remitoServer } from "../services/index.repository.js";
 
 const router = Router();
 
 router.get("/", userExtractor(allPermissions.oficina), async (req, res) => {
-  const { data, error } = await remitosManager.getRemitos();
-
-  if (error != null) return res.status(404).json(error);
-
-  return res.json(data);
+  try {
+    const result = await remitoServer.get();
+    return res.json({ status: "success", data: result });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Something Wrong" });
+  }
 });
 
-router.get("/:id", userExtractor(allPermissions.oficina), async (req, res) => {
+router.get("/:id", userExtractor(allPermissions.oficina), (req, res) => {
   const { id } = req.params;
 
-  const resultJson = remitosManager.getOneRemito(id);
-
-  res.json(resultJson);
+  try {
+    const result = remitoServer.getOneRemitoWithMercaderas(id);
+    return res.json({ status: "success", data: result });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Something Wrong" });
+  }
 });
 
 router.post(
@@ -26,44 +37,50 @@ router.post(
   async (req, res, next) => {
     const object = req.body;
     try {
-      const { data, error } = await remitosManager.newRemito(object);
-
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      const result = remitoServer.newRemito(object);
+      return res.json({ status: "success", data: result });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
 
-router.put("/:idRemito", userExtractor(allPermissions.oficina), async (req, res, next) => {
-  try {
-    const { data, error } = await remitosManager.updateRemito(
-      req.params.idRemito,
-      req.body
-    );
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
-  } catch (error) {
-    next(error);
+router.put(
+  "/:idRemito",
+  userExtractor(allPermissions.oficina),
+  async (req, res, next) => {
+    const { idRemito } = req.params;
+    const body = req.body;
+    try {
+      const result = remitoServer.updateRemito(idRemito, body);
+      return res.json({ status: "success", data: result });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
-});
+);
 
 router.put(
   "/newProduct/:idRemito",
   userExtractor(allPermissions.oficina),
   async (req, res) => {
-    const { data, error } = await remitosManager.updateRemitoAddNewMercaderia(
-      req.params.idRemito,
-      req.body
-    );
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+    const { idRemito } = req.params;
+    const body = req.body;
+    try {
+      const result = remitoServer.updateRemitoAddNewMercaderia(idRemito, body);
+      return res.json({ status: "success", data: result });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
@@ -74,13 +91,17 @@ router.delete(
     const idRemito = req.params.id;
 
     try {
-      const { data, error } = await remitosManager.deleteRemito(idRemito);
-
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      const { success } = await remitoServer.deleteRemito(idRemito);
+      if (success) return res.json({ status: "success", data: result });
+      else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe ese remito" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );

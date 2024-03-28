@@ -121,19 +121,19 @@ export default class InventarioMysql {
     };
 
     const [rows] = await con.query(
-      `SELECT stock, categoria
+      `SELECT idinventario, stock, idcategoria
             FROM mercaderia
-        WHERE mercaderia.idinventario = ?
+        WHERE idinventario = ?
         `,
       [idInventario]
     );
 
     const listMercaderiaEntrada = rows.filter(
-      (elem) => elem.categoria == "Entrada"
+      (elem) => elem.idcategoria == 2
     );
 
     const listMercaderiaSalida = rows.filter(
-      (elem) => elem.categoria == "Salida"
+      (elem) => elem.idcategoria == 1
     );
 
     //Contamos stock mercaderia Entrada
