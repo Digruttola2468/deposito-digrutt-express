@@ -1,5 +1,5 @@
 import { Router } from "express";
-import userExtractor, { auth } from "../middleware/userExtractor.js";
+import userExtractor from "../middleware/userExtractor.js";
 import { maquinaParadaManager } from "../index.js";
 import allPermissions from "../config/permissos.js";
 

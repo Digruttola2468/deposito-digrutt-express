@@ -1,4 +1,4 @@
-import {config} from 'dotenv'
+import { config } from "dotenv";
 
 config();
 
@@ -17,3 +17,7 @@ export const JWT_SECRET = process.env.JWT_SECRET;
 // AUTH GOOGLE
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+
+// MAIL
+export const MAIL_USER = process.env.MAIL_USER;
+export const MAIL_PASS = process.env.MAIL_PASS;

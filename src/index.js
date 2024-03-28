@@ -9,14 +9,18 @@ import MySQLStore from "express-mysql-session";
 import passport from "passport";
 
 // --- ROUTES ---
-import localidad from "./routes/localidad.routes.js";
 import indexRoute from "./routes/index.routes.js";
+import inventarioRoute from "./routes/inventario.routes.js";
 import mercaderiaRoute from "./routes/mercaderia.routes.js";
+import userRoute from "./routes/auth.routes.js";
+import remitoRoute from "./routes/remitos.routes.js";
+import notaEnvioRoute from "./routes/facturaNegro.routes.js";
+import excelRoute from "./routes/excel.routes.js";
+/*
+import localidad from "./routes/localidad.routes.js";
 import coloresRoute from "./routes/colores.routes.js";
 import tipoProductoRoute from "./routes/tipoProducto.routes.js";
-import inventario from "./routes/inventario.routes.js";
-import excel from "./routes/excel.routes.js";
-import facturaNegro from "./routes/facturaNegro.routes.js";
+
 import producionRoute from "./routes/producion.routes.js";
 import maquinaParadaRoute from "./routes/MaquinaParada.routes.js";
 import matricesRoute from "./routes/matrices.routes.js";
@@ -28,11 +32,10 @@ import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.j
 import relacionMatrizMaquina from "./routes/relacionMatrizMaquina.routes.js";
 import clientes from "./routes/clientes.routes.js";
 import grafica from "./routes/grafica.routes.js";
-import user from "./routes/auth.routes.js";
-import remito from "./routes/remitos.routes.js";
 import PedidosRoute from "./routes/pedidos.routes.js";
 import EnviosRoute from "./routes/envios.routes.js";
 import vehiculoRoute from "./routes/vehiculos.routes.js";
+*/
 
 import con from "./config/db.js";
 
@@ -69,21 +72,23 @@ initPassport();
 
 // --- Routers ---
 app.use("/api/server", indexRoute);
+app.use("/api/inventario", inventarioRoute);
 app.use("/api/mercaderia", mercaderiaRoute);
+app.use("/api/notaEnvio", notaEnvioRoute);
+app.use("/api/remito", remitoRoute);
+app.use("/api/session", userRoute);
+app.use("/api/excel", excelRoute);
+/*
 app.use("/api/colores", coloresRoute);
 app.use("/api/tiposproductos", tipoProductoRoute);
-app.use("/api/inventario", inventario);
-app.use("/api/excel", excel);
+
 app.use("/api/materiaPrima", materiaPrimaRoute);
 app.use("/api/producion", producionRoute);
 app.use("/api/clientes", clientes);
 app.use("/api/motivoMaquinaParada", motivoMaquinaParadaRoute);
 app.use("/api/historialMatriz", historialMatricesErrorRoute);
 app.use("/api/grafica", grafica);
-app.use("/api", user);
-app.use("/api/remito", remito);
 app.use("/api/localidad", localidad);
-app.use("/api/facturaNegro", facturaNegro);
 app.use("/api/vehiculos", vehiculoRoute);
 app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 app.use("/api/maquinaParada", maquinaParadaRoute);
@@ -92,12 +97,13 @@ app.use("/api/envios", EnviosRoute);
 app.use("/api/maquina_matriz", relacionMatrizMaquina);
 app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
 app.use("/api/pedidos", PedidosRoute);
+*/
 
-app.use(errorHandle);
+//app.use(errorHandle);
 
 // WHEN NOT FOUND PAGE
 app.use((req, res) => {
   return res.send("No se encuntra la pagina");
 });
 
-app.listen(PORT);
+app.listen(3000);

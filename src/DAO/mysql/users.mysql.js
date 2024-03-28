@@ -29,8 +29,12 @@ export default class UsersMySql {
   async insertGoogle(data) {
     return await con.query(
       `INSERT INTO users (nombre, apellido, gmail, isGmailValidate, isGoogleAuth) VALUES (?,?,?,?,?) `,
-      [data.nombre, data.apellido, data.gmail, 1, 1]
+      [data.nombre, data.apellido, data.gmail, 0, 1]
     );
+  }
+
+  async updateValidateGmail (gmail) {
+    return await con.query(`UPDATE users SET isGmailValidate = 1 WHERE gmail = ?;`, [gmail])
   }
 
   async delete(iid) {

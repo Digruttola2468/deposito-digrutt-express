@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { inventarioManager } from "../index.js";
 
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";

@@ -12,6 +12,6 @@ export const createHash = (password) => {
 };
 
 //Validate Hash
-export const isValidPassword = (user, password) => {
-  return bcrypt.compareSync(password, user.password);
+export const isValidPassword = (userPassword, password) => {
+  return bcrypt.compareSync(password, userPassword);
 };
