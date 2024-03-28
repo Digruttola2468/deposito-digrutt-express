@@ -2,39 +2,40 @@ import { Router } from "express";
 
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
+import { notaEnvioServer } from "../services/index.repository.js";
 
 const router = Router();
 
-router.get("/newNroEnvio", (req, res) => {
-  const sendNewNroEnvio = facturaNegroManager.getNroEnvio();
+/*router.get("/newNroEnvio", (req, res) => {
 
-  //Ocurrio un error
-  if (sendNewNroEnvio === -1)
-    return res.status(404).json({ message: "Something wrong" });
+});*/
 
-  return res.json({ nroEnvio: sendNewNroEnvio });
+router.get("/", userExtractor([allPermissions.oficina]), async (req, res) => {
+  try {
+    const result = await notaEnvioServer.get();
+    return res.json({ status: "success", data: result });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Something Wrong" });
+  }
 });
 
 router.get(
-  "/",
+  "/:nid",
   userExtractor([allPermissions.oficina]),
   async (req, res) => {
-    const { data, error } = await facturaNegroManager.getFacturaNegro();
-
-    if (error != null) return res.status(500).json(error);
-
-    return res.json(data);
-  }
-);
-
-router.get(
-  "/:id",
-  userExtractor([allPermissions.oficina]),
-  (req, res) => {
-    const { id } = req.params;
-    const resultJson = facturaNegroManager.getOneNotaEnvio(id);
-
-    return res.json(resultJson);
+    const { nid } = req.params;
+    try {
+      const result = await notaEnvioServer.getOneWithAllMercaderiaOutput(nid);
+      return res.json({ status: "success", data: result });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
@@ -44,13 +45,13 @@ router.post(
   async (req, res, next) => {
     const object = req.body;
     try {
-      const result = await facturaNegroManager.createFacturaNegro(object);
-
-      if (result.error != null) return res.status(404).json(result.error);
-
-      return res.json(result.data);
+      const [rows] = await notaEnvioServer.createNotaEnvio(object);
+      return res.json({ status: "success", data: rows[0] });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -62,16 +63,13 @@ router.put(
     const idNotaEnvio = req.params.idNotaEnvio;
     const object = req.body;
     try {
-      const result = await facturaNegroManager.updateRemito(
-        idNotaEnvio,
-        object
-      );
-
-      if (result.error != null) return res.status(404).json(result.error);
-
-      return res.json(result.data);
+      const [rows] = await notaEnvioServer.updateNotaEnvio(idNotaEnvio, object);
+      return res.json({ status: "success", data: rows[0] });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -83,16 +81,16 @@ router.put(
     const idNotaEnvio = req.params.idNotaEnvio;
     const object = req.body;
     try {
-      const result = await facturaNegroManager.updateNotaEnvioAddNewMercaderia(
+      const result = await notaEnvioServer.updateNotaEnvioAddNewMercaderia(
         idNotaEnvio,
         object
       );
-
-      if (result.error != null) return res.status(404).json(result.error);
-
-      return res.json(result.data);
+      return res.json({ status: "success", data: result });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -103,13 +101,23 @@ router.delete(
   async (req, res, next) => {
     const idNotaEnvio = req.params.idNotaEnvio;
     try {
-      const result = await facturaNegroManager.deleteNotaEnvio(idNotaEnvio);
-
-      if (result.error != null) return res.status(404).json(result.error);
-
-      return res.json(result.data);
+      const { error, success } = await notaEnvioServer.deleteNotaEnvio(
+        idNotaEnvio
+      );
+      if (success)
+        return res.json({
+          status: "success",
+          message: "Eliminado Correctamente",
+        });
+      else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe esa nota envio" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );

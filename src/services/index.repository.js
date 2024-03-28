@@ -14,7 +14,7 @@ import NotaEnvioRepository from "./notaEnvio.repository.js";
 // MODULE GMAIL
 import moduleGmail from '../mail.module.js'
 
-export const mercaderiaServer = new MercaderiaRepository(new Mercaderia());
+export const mercaderiaServer = new MercaderiaRepository(new Mercaderia(), new Inventario());
 export const inventarioServer = new InventarioRepository(
   new Inventario(),
   new Mercaderia()

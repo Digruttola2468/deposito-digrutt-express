@@ -85,6 +85,9 @@ export default class RemitosRepository {
             await this.mercaderiaDao.update(element.idMercaderia, enviar);
           } else return { error: "" };
         }
+
+        
+        return this.dao.getOne(rid);
       } else return { error: "" };
     } else return { error: "" };
   }

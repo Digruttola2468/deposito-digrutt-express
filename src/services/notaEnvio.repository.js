@@ -12,7 +12,7 @@ export default class NotaEnvioRepository {
     return await this.dao.getOne(nid);
   }
 
-  async getOneNotaEnvio(nid) {
+  async getOneWithAllMercaderiaOutput(nid) {
     const listMercaderiaByIdFacturaNegro =
       this.mercaderiaDao.getByIdRemito(nid);
 
@@ -49,7 +49,7 @@ export default class NotaEnvioRepository {
     return await this.getOne(rows.insertId);
   }
 
-  async updateRemito(nid, object) {
+  async updateNotaEnvio(nid, object) {
     const [result] = await this.dao.update(nid, object);
     if (result.affectedRows >= 1) {
       const listMercaderiaByIdRemito = this.mercaderiaDao.getByIdRemito(rid);
@@ -76,7 +76,7 @@ export default class NotaEnvioRepository {
       }
 
       return await this.dao.getOne(nid);
-    } else return { error: true, success: false };
+    } else throw new Error("No se actualizo");
   }
 
   async updateNotaEnvioAddNewMercaderia(nid, products) {
@@ -132,7 +132,7 @@ export default class NotaEnvioRepository {
     }
   }
 
-  async deleteRemito() {
+  async deleteNotaEnvio() {
     const listMercaderiaByIdNotaEnvio = this.mercaderiaDao.getByIdRemito(rid);
 
     if (listMercaderiaByIdNotaEnvio.length != 0) {

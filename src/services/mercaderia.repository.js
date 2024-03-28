@@ -22,7 +22,7 @@ export default class MercaderiaRepository {
     await this.inventarioDao.suminventario(idinventario);
 
     // Return New Mercaderia JSON
-    return { id: rows.insertId, ...rows };
+    return { id: rows.insertId, ...obj };
   };
 
   createListMercaderia = async (list) => {
@@ -67,7 +67,7 @@ export default class MercaderiaRepository {
     const [result] = await this.dao.delete(mid);
     if (result.affectedRows >= 1) {
       // Update Stock Inventario
-      await this.inventarioDao.suminventario(rows.idinventario);
+      await this.inventarioDao.suminventario(rows[0].idinventario);
       return true;
     } else return false;
   };
