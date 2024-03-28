@@ -11,12 +11,15 @@ import UsersRepository from "./users.repository.js";
 import RemitosRepository from "./remitos.repository.js";
 import NotaEnvioRepository from "./notaEnvio.repository.js";
 
+// MODULE GMAIL
+import moduleGmail from '../mail.module.js'
+
 export const mercaderiaServer = new MercaderiaRepository(new Mercaderia());
 export const inventarioServer = new InventarioRepository(
   new Inventario(),
   new Mercaderia()
 );
-export const userServer = new UsersRepository(new Users());
+export const userServer = new UsersRepository(new Users(), new moduleGmail());
 export const remitoServer = new RemitosRepository(
   new Remitos(),
   new Mercaderia()

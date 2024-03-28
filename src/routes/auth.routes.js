@@ -1,149 +1,78 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config.js";
-import { authManager } from "../index.js";
-import { db_supabase } from "../config/supabase.js";
 import passport from "passport";
-
+import { JWT_SECRET } from "../config/dotenv.js";
+import { userServer } from "../services/index.repository.js";
+import { auth } from "../middleware/authValidation.js";
 const router = Router();
 
-router.get("/user", (req, res) => {
-  if (req.session.user) {
-    return res.json({ valid: true, role: req.session.user });
-  } else return res.json({ valid: false });
-});
-
-router.get("/login", async (req, res) => {
-  const gmail = req.query.email;
-  const password = req.query.password;
-
-  if (gmail != null) {
-    if (password != null) {
-      try {
-        const signIn = await db_supabase.auth.signInWithPassword({
-          email: gmail,
-          password: password,
-        });
-
-        if (signIn.error != null) {
-          if (signIn.error.message == "Email not confirmed")
-            return res.status(404).json({
-              message: "El gmail no esta verificado",
-              status: "not validated gmail",
-            });
-          if (signIn.error.message == "Invalid login credentials") {
-            return res.status(404).json({
-              message: "El correo o la contraseña son incorrectos",
-              status: "incorrect gmail password",
-            });
-          } else return res.status(404).json({ message: "Upss..." });
-        }
-
-        if (!(await authManager.existUser(gmail))) {
-          //Agregar a la base de datos
-          const result = await authManager.postUser({
-            nombre: signIn.data.user.user_metadata.first_name,
-            apellido: signIn.data.user.user_metadata.last_name,
-            gmail: signIn.data.user.email,
-          });
-
-          if (result.error) return res.status(404).json({ message: "Upss..." });
-        }
-
-        const user = await authManager.getUserByGmail(gmail);
-
-        if (user.length == 0)
-          return res.status(404).json({
-            message: "No se encuntra el usuario",
-            status: "not found user",
-          });
-
-        //Save in the session
-        req.session.user = user;
-
-        const userForToken = {
-          id: user.id,
-          created_at: signIn.data.user.created_at,
-          nombre: user.nombre,
-          apellido: user.apellido,
-          gmail: user.gmail,
-          role: user.role,
-        };
-
-        const token = jwt.sign(userForToken, JWT_SECRET);
-
-        return res.json({
-          ...userForToken,
-          token,
-        });
-      } catch (error) {
-        console.log(error);
-        return res.status(500).send({ message: "Something wrong" });
-      }
-    } else res.status(404).send({ message: "Password Vacio" });
-  } else res.status(404).send({ message: "Gmail Vacio" });
-});
-
-router.post("/register", async (req, res) => {
-  const { gmail, password, nombre, apellido } = req.body;
-
-  // Validar que los campos no esten vacios
-  if (gmail == null || gmail == "")
-    return res
-      .status(400)
-      .json({ message: "Campo Gmail vacio", campus: "gmail" });
-
-  if (password == null || password == "")
-    return res
-      .status(400)
-      .json({ message: "Campo Contraseña vacio", campus: "contraseña" });
-
-  if (nombre == null || nombre == "")
-    return res
-      .status(400)
-      .json({ message: "Campo Nombre vacio", campus: "nombre" });
-
-  if (apellido == null || apellido == "")
-    return res
-      .status(400)
-      .json({ message: "Campo Apellido vacio", campus: "apellido" });
-
-  // Validar que el formato del gmail sea correcto
-  const pattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
-
-  if (gmail.match(pattern)) {
-    // Registra el usuario pero no se puede loggea porque tiene que confirmar su gmail
-    try {
-      const { data, error } = await db_supabase.auth.signUp({
-        email: gmail,
-        password: password,
-        options: {
-          data: {
-            first_name: nombre,
-            last_name: apellido,
-          },
-        },
-      });
-
-      if (error) {
-        if (error.status == 422)
-          return res.status(500).json({
-            message: "La contraseña tiene que ser +6 caracteres",
-            status: "long character password",
-            campus: "password",
-          });
-        else return res.status(500).json({ message: "something wrong" });
-      }
-
-      return res.json({ message: "Usuario Registrado" });
-    } catch (error) {
-      return res.status(500).json({ message: "something wrong" });
-    }
-  } else
-    return res.status(400).json({
-      message: "Error en el formato del correo electronico",
-      campus: "gmail",
+router.get(
+  "/profile",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    return res.json({
+      user: req.user,
+      token: req.query.secret_token,
     });
+  }
+);
+
+router.post("/login", async (req, res, next) => {
+  passport.authenticate("login", async (err, user, info) => {
+    try {
+      if (err || user == null)
+        return res
+          .status(err.statusCode)
+          .json({ status: "error", message: err.message });
+
+      req.login(user, { session: false }, async (err) => {
+        if (err) return next(err);
+        const token = jwt.sign({ user }, JWT_SECRET);
+        return res.json({ token, message: info.message });
+      });
+    } catch (e) {
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
+  })(req, res, next);
+});
+
+router.get("/validateGmail/:gmail", async (req, res) => {
+  const gmail = req.params.gmail;
+
+  try {
+    await userServer.updateOkValidateGmail(gmail);
+
+    return res.json({
+      status: "success",
+      message: "Ya el correo esta validado",
+    });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "No se logro validar" });
+  }
+});
+
+router.post("/register", async (req, res, next) => {
+  passport.authenticate(
+    "register",
+    { session: false },
+    async (err, user, info) => {
+      if (err || user == null) {
+        return res
+          .status(err.statusCode)
+          .json({ status: "error", message: err.message });
+      }
+
+      return res.json({
+        message: "Registrado Exitoso",
+        status: "success",
+      });
+    }
+  )(req, res, next);
 });
 
 router.get(
@@ -158,12 +87,14 @@ router.get(
   }),
   (req, res) => {
     req.session.user = req.user;
-    return res.send("Se registro correctamente con Google");
+
+    const token = jwt.sign({ user: req.user }, JWT_SECRET);
+    return res.json({ token });
   }
 );
 
 router.get("/google/failure", (req, res) => {
-  res.send("Error al Autenticar con Google");
+  return res.send("Error al Autenticar con Google");
 });
 
 export default router;

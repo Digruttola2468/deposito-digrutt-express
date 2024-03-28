@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { mercaderiaManager } from "../index.js";
 
-import userExtractor, { auth } from "../middleware/userExtractor.js";
+import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
+import { mercaderiaServer } from "../services/index.repository.js";
 
 const router = Router();
 
@@ -10,22 +10,34 @@ router.get(
   "/",
   userExtractor([allPermissions.mercaderia]),
   async (req, res) => {
-    const { data, error } = await mercaderiaManager.getMercaderia();
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+    try {
+      const [rows] = await mercaderiaServer.getMercaderia();
+      return res.json({ status: "success", data: rows });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
-router.get("/:mid", userExtractor([allPermissions.mercaderia]), (req, res) => {
-  const mid = parseInt(req.params.mid);
-  const { data, error } = mercaderiaManager.getOneMercaderia(mid);
-
-  if (error != null) return res.status(404).json(error);
-
-  return res.json(data);
-});
+router.get(
+  "/:mid",
+  userExtractor([allPermissions.mercaderia]),
+  async (req, res) => {
+    const mid = parseInt(req.params.mid);
+    try {
+      const [result] = await mercaderiaServer.getOneMercaderia(mid);
+      return res.json({ status: "success", data: result });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
+  }
+);
 
 router.post(
   "/",
@@ -33,13 +45,14 @@ router.post(
   async (req, res, next) => {
     const object = req.body;
     try {
-      const { data, error } = await mercaderiaManager.createMercaderia(object);
+      const data = await mercaderiaServer.createMercaderia(object);
 
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      return res.json({ status: "success", data });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -58,7 +71,7 @@ router.post(
       });
 
     try {
-      const { data, error } = await mercaderiaManager.createMercaderia({
+      const data = await mercaderiaServer.createMercaderia({
         fecha,
         stock,
         idinventario,
@@ -66,11 +79,12 @@ router.post(
         observacion,
       });
 
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      return res.json({ status: "success", data });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -79,47 +93,65 @@ router.post(
   "/list",
   userExtractor([allPermissions.mercaderia]),
   async (req, res) => {
-    const object = req.body;
-    const { data, error } = await mercaderiaManager.postMercaderiaList(object);
+    const list = req.body;
+    const listDoneNew = await mercaderiaServer.createListMercaderia(list);
 
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+    if (listDoneNew.length >= 1) {
+      return res.json({ status: "success", data: listDoneNew });
+    } else
+      return res.status(400).json({ status: "error", message: "No se agrego" });
   }
 );
 
 router.put(
-  "/:id",
+  "/:mid",
   userExtractor([allPermissions.mercaderia]),
   async (req, res, next) => {
     const object = req.body;
-    const idMercaderia = req.params.id;
+    const idMercaderia = req.params.mid;
     try {
-      const { data, error } = await mercaderiaManager.updateMercaderia(
+      const objectUpdated = await mercaderiaServer.updateMercaderia(
         idMercaderia,
         object
       );
 
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      if (objectUpdated)
+        return res.json({ status: "success", data: objectUpdated });
+      else
+        return res
+          .status(400)
+          .json({ status: "error", message: "No se actualizo con exito" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
 
 router.delete(
-  "/:id",
+  "/:mid",
   userExtractor([allPermissions.mercaderia]),
   async (req, res, next) => {
-    const idMercaderia = req.params.id;
+    const mid = parseInt(req.params.mid);
     try {
-      const result = await mercaderiaManager.deleteMercaderia(idMercaderia);
+      const isDeleted = await mercaderiaServer.deleteMercaderia(mid);
 
-      return res.json(result);
+      if (isDeleted)
+        return res.json({
+          status: "success",
+          message: "Eliminado Correctamente",
+        });
+      else
+        return res
+          .status(400)
+          .json({ status: "error", message: "No existe esa mercaderia" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );

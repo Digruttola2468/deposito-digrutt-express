@@ -22,7 +22,29 @@ export default class MercaderiaRepository {
     await this.inventarioDao.suminventario(idinventario);
 
     // Return New Mercaderia JSON
-    return await this.getOneMercaderia(rows.insertId);
+    return { id: rows.insertId, ...rows };
+  };
+
+  createListMercaderia = async (list) => {
+    const listMercaderiaDone = [];
+    for (let i = 0; i < list.length; i++) {
+      const element = list[i];
+
+      try {
+        // New Mercaderia
+        const [rows] = await this.dao.insert(element);
+
+        // Update Stock Inventario
+        await this.inventarioDao.suminventario(element.idinventario);
+
+        // Return New Mercaderia JSON
+        listMercaderiaDone.push({ id: rows.insertId, ...element });
+      } catch (error) {
+        console.log("INDEX: ", i, "Object: ", element);
+        console.error(error);
+      }
+    }
+    return listMercaderiaDone;
   };
 
   updateMercaderia = async (mid, obj) => {
@@ -46,6 +68,7 @@ export default class MercaderiaRepository {
     if (result.affectedRows >= 1) {
       // Update Stock Inventario
       await this.inventarioDao.suminventario(rows.idinventario);
-    } else return null;
+      return true;
+    } else return false;
   };
 }

@@ -1,18 +1,11 @@
 import { Router } from "express";
-import { con } from "../config/db.js";
+import con from "../config/db.js";
 import ExcelJs from "exceljs";
-import userExtractor, { auth } from "../middleware/userExtractor.js";
-import {
-  inventarioManager,
-  producionManager,
-  facturaNegroManager,
-  matricesManager,
-} from "../index.js";
+import userExtractor from "../middleware/userExtractor.js";
 
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";
-import moment from "moment";
 import permissos from "../config/permissos.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -338,7 +331,6 @@ router.get(
   userExtractor([permissos.produccion, permissos.matriceria]),
   async (req, res) => {
     try {
-
       const listMatrices = await matricesManager.getMatrices();
 
       if (listMatrices.length == 0)
@@ -367,5 +359,50 @@ router.get(
     }
   }
 );
+
+router.get("/relacionMaquina/:idMaquina", async (req, res) => {
+  const idMaquina = req.params.idMaquina;
+  const workbook = new ExcelJs.Workbook();
+
+  const worksheet = workbook.addWorksheet("Matriz Maquina");
+
+  const [rows] = await con.query(
+    "SELECT * FROM matrices_maquinas INNER JOIN matriz ON matrices_maquinas.idMatriz = matriz.id WHERE idMaquina = ?",
+    [idMaquina]
+  );
+
+  const enviar = [];
+  for (let i = 0; i < rows.length; i++) {
+    const element = rows[i];
+
+    enviar.push([element.descripcion, element.cod_matriz]);
+  }
+
+  worksheet.getCell("A1").value = `Maquina N° ${idMaquina}`;
+
+  worksheet.addTable({
+    name: `Maquina N° ${idMaquina}`,
+    ref: "A2",
+    headerRow: true,
+    totalsRow: true,
+    style: {
+      theme: "TableStyleDark3",
+      showRowStripes: true,
+    },
+    columns: [
+      {
+        name: `Descripcion`,
+      },
+      {
+        name: `Codigo`,
+      },
+    ],
+    rows: enviar,
+  });
+
+  await workbook.xlsx.writeFile(dir + `/matricesMaquina.xlsx`);
+
+  return res.sendFile(dir + `/matricesMaquina.xlsx`);
+});
 
 export default router;

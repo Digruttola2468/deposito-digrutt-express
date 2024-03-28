@@ -6,7 +6,7 @@ import {
   graficaProduccion,
 } from "../controller/grafica.controler.js";
 
-import userExtractor, { auth } from "../middleware/userExtractor.js";
+import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
 
 const router = Router();
