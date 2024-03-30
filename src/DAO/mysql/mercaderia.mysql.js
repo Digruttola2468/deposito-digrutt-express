@@ -33,24 +33,28 @@ export default class MercaderiaMySql {
     );
   }
 
-  getByIdRemito(idRemito) {
-    if (this.listMercaderia.length != 0) {
-      const filterByIdRemito = this.listMercaderia.filter(
-        (elem) => elem.idremito == idRemito
-      );
-      if (filterByIdRemito) return filterByIdRemito;
-      else return [];
-    } else return [];
+  async getByIdRemito(idRemito) {
+    return await con.query(
+      `
+        SELECT mercaderia.id,nombre,descripcion,idFacturaNegro,idCliente,idremito,fecha,stock
+            FROM mercaderia 
+                LEFT JOIN inventario on mercaderia.idinventario = inventario.id
+            WHERE mercaderia.idFacturaNegro = ?;
+    `,
+      [idRemito]
+    );
   }
 
-  getByIdNotaEnvio(idNotaEnvio) {
-    if (this.listMercaderia.length != 0) {
-      const filterByIdNotaEnvio = this.listMercaderia.filter(
-        (elem) => elem.idFacturaNegro == idNotaEnvio
-      );
-      if (filterByIdNotaEnvio) return filterByIdNotaEnvio;
-      else return [];
-    } else return [];
+  async getByIdNotaEnvio(idNotaEnvio) {
+    return await con.query(
+      `
+        SELECT mercaderia.id,nombre,descripcion,idFacturaNegro,idCliente,idremito,fecha,stock
+            FROM mercaderia 
+                LEFT JOIN inventario on mercaderia.idinventario = inventario.id
+            WHERE mercaderia.idFacturaNegro = ?;
+    `,
+      [idNotaEnvio]
+    );
   }
 
   getByIdInventario(idinventario) {
