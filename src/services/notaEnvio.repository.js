@@ -1,3 +1,4 @@
+import con from "../config/db.js";
 export default class NotaEnvioRepository {
   constructor(notaEnvioDao, mercaderiaDao) {
     this.dao = notaEnvioDao;
@@ -13,8 +14,8 @@ export default class NotaEnvioRepository {
   }
 
   async getOneWithAllMercaderiaOutput(nid) {
-    const listMercaderiaByIdFacturaNegro =
-      this.mercaderiaDao.getByIdRemito(nid);
+    const [listMercaderiaByIdFacturaNegro] =
+      await this.mercaderiaDao.getByIdNotaEnvio(nid);
 
     const [rows] = await this.getOne(nid);
 
@@ -30,7 +31,7 @@ export default class NotaEnvioRepository {
 
   async createNotaEnvio(object) {
     const { products, fecha } = object;
-    const [rows] = await this.dao.insert(object);
+    const [result] = await this.dao.insert(object);
 
     for (let i = 0; i < products.length; i++) {
       const element = products[i];
@@ -40,48 +41,51 @@ export default class NotaEnvioRepository {
         stock: element.stock,
         idinventario: element.idProduct,
         idcategoria: 1,
-        idFacturaNegro: rows.insertId,
+        idFacturaNegro: result.insertId,
       };
 
       await this.mercaderiaDao.insert(enviar);
     }
 
-    return await this.getOne(rows.insertId);
+    return await this.getOne(result.insertId);
   }
 
   async updateNotaEnvio(nid, object) {
+    const { products, fecha } = object;
     const [result] = await this.dao.update(nid, object);
     if (result.affectedRows >= 1) {
-      const listMercaderiaByIdRemito = this.mercaderiaDao.getByIdRemito(rid);
+      if (products != null && Array.isArray(products) && products.length > 0) {
+        const [listMercaderiaByIdRemito] =
+          await this.mercaderiaDao.getByIdNotaEnvio(nid);
 
-      for (let i = 0; i < products.length; i++) {
-        const element = products[i];
+        for (let i = 0; i < products.length; i++) {
+          const element = products[i];
 
-        let enviar = {
-          fecha: null,
-          stock: null,
-        };
+          let enviar = {
+            fecha: null,
+            stock: null,
+          };
 
-        if (fecha != null && fecha != "") enviar.fecha = fecha;
+          if (fecha != null && fecha != "") enviar.fecha = fecha;
 
-        enviar.stock = element.stock;
+          enviar.stock = element.stock;
 
-        //Validar si pertenece o no al mismo idRemito ya que podemos colocar cualquier idMercaderia
-        const exits = listMercaderiaByIdRemito.find(
-          (elem) => elem.id == element.idMercaderia
-        );
-        if (exits) {
-          await this.mercaderiaDao.update(element.idMercaderia, enviar);
-        } else return { error: true };
-      }
-
-      return await this.dao.getOne(nid);
+          //Validar si pertenece o no al mismo idRemito ya que podemos colocar cualquier idMercaderia
+          const exits = listMercaderiaByIdRemito.filter(
+            (elem) => {console.log("ELEM: ",elem); return elem.id == element.idMercaderia}
+          );
+          if (exits[0])
+            await this.mercaderiaDao.update(element.idMercaderia, enviar);
+          else return { error: true };
+        }
+        return await this.dao.getOne(nid);
+      } else return await this.dao.getOne(nid);
     } else throw new Error("No se actualizo");
   }
 
   async updateNotaEnvioAddNewMercaderia(nid, products) {
-    const listMercaderiaByIdNotaEnvio =
-      this.mercaderiaDao.getByIdNotaEnvio(nid);
+    const [listMercaderiaByIdNotaEnvio] =
+      await this.mercaderiaDao.getByIdNotaEnvio(nid);
 
     let listErros = [];
     if (products != null) {
@@ -114,33 +118,37 @@ export default class NotaEnvioRepository {
         valorDeclarado += parseFloat(element.price);
       }
 
-      valorDeclarado += parseFloat(listMercaderiaByIdNotaEnvio[0].total);
+      valorDeclarado += parseFloat(
+        listMercaderiaByIdNotaEnvio[0].valorDeclarado
+      );
 
+      /*
       //Update el valor declarado
       await con.query(
         `
-          UPDATE remitos 
-            SET total = IFNULL(?,total)
+          UPDATE facturaNegro 
+            SET valorDeclarado = IFNULL(?,valorDeclarado)
             WHERE id = ?
         `,
-        [valorDeclarado, rid]
+        [valorDeclarado, nid]
       );
-
-      const [rows] = await this.getOne(rid);
+*/
+      const [rows] = await this.getOne(nid);
 
       return rows;
     }
   }
 
-  async deleteNotaEnvio() {
-    const listMercaderiaByIdNotaEnvio = this.mercaderiaDao.getByIdRemito(rid);
+  async deleteNotaEnvio(nid) {
+    const [listMercaderiaByIdNotaEnvio] =
+      await this.mercaderiaDao.getByIdNotaEnvio(nid);
 
     if (listMercaderiaByIdNotaEnvio.length != 0) {
       for (let i = 0; i < listMercaderiaByIdNotaEnvio.length; i++)
         await this.mercaderiaDao.delete(listMercaderiaByIdNotaEnvio[i].id);
     }
 
-    const [result] = await this.dao.delete(rid);
+    const [result] = await this.dao.delete(nid);
 
     if (result.affectedRows >= 1) {
       return { error: false, success: true };
