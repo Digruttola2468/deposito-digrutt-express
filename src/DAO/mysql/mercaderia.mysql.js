@@ -39,7 +39,7 @@ export default class MercaderiaMySql {
         SELECT mercaderia.id,nombre,descripcion,idFacturaNegro,idCliente,idremito,fecha,stock
             FROM mercaderia 
                 LEFT JOIN inventario on mercaderia.idinventario = inventario.id
-            WHERE mercaderia.idFacturaNegro = ?;
+            WHERE mercaderia.idremito = ?;
     `,
       [idRemito]
     );
