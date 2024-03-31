@@ -72,7 +72,7 @@ export default class NotaEnvioRepository {
 
           //Validar si pertenece o no al mismo idRemito ya que podemos colocar cualquier idMercaderia
           const exits = listMercaderiaByIdRemito.filter(
-            (elem) => {console.log("ELEM: ",elem); return elem.id == element.idMercaderia}
+            (elem) => elem.id == element.idMercaderia
           );
           if (exits[0])
             await this.mercaderiaDao.update(element.idMercaderia, enviar);

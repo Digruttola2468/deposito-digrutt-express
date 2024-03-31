@@ -17,11 +17,11 @@ router.get("/", userExtractor(allPermissions.oficina), async (req, res) => {
   }
 });
 
-router.get("/:id", userExtractor(allPermissions.oficina), (req, res) => {
+router.get("/:id", userExtractor(allPermissions.oficina), async (req, res) => {
   const { id } = req.params;
 
   try {
-    const result = remitoServer.getOneRemitoWithMercaderas(id);
+    const result = await remitoServer.getOneRemitoWithMercaderas(id);
     return res.json({ status: "success", data: result });
   } catch (error) {
     console.log(error);
@@ -37,7 +37,7 @@ router.post(
   async (req, res, next) => {
     const object = req.body;
     try {
-      const result = remitoServer.newRemito(object);
+      const result = await remitoServer.newRemito(object);
       return res.json({ status: "success", data: result });
     } catch (error) {
       console.log(error);
@@ -55,7 +55,7 @@ router.put(
     const { idRemito } = req.params;
     const body = req.body;
     try {
-      const result = remitoServer.updateRemito(idRemito, body);
+      const result = await remitoServer.updateRemito(idRemito, body);
       return res.json({ status: "success", data: result });
     } catch (error) {
       console.log(error);
@@ -73,7 +73,10 @@ router.put(
     const { idRemito } = req.params;
     const body = req.body;
     try {
-      const result = remitoServer.updateRemitoAddNewMercaderia(idRemito, body);
+      const result = await remitoServer.updateRemitoAddNewMercaderia(
+        idRemito,
+        body
+      );
       return res.json({ status: "success", data: result });
     } catch (error) {
       console.log(error);
@@ -92,7 +95,11 @@ router.delete(
 
     try {
       const { success } = await remitoServer.deleteRemito(idRemito);
-      if (success) return res.json({ status: "success", data: result });
+      if (success)
+        return res.json({
+          status: "success",
+          message: "Eliminado Correctamente",
+        });
       else
         return res
           .status(404)

@@ -12,15 +12,25 @@ export default class RemitosRepository {
     return this.dao.getOne(rid);
   }
 
-  getOneRemitoWithMercaderas(rid) {
-    return {
-      remito: this.dao.getOne(rid),
-      mercaderia: this.mercaderiaDao.getByIdRemito(rid),
-    };
+  async getOneRemitoWithMercaderas(rid) {
+    const [listMercaderiaByIdRemito] = await this.mercaderiaDao.getByIdRemito(
+      rid
+    );
+
+    const [rows] = await this.getOne(rid);
+
+    if (rows[0]) {
+      if (listMercaderiaByIdRemito.length != 0) {
+        return {
+          remito: rows[0],
+          mercaderia: listMercaderiaByIdRemito,
+        };
+      } else return { error: { message: "No se encontro en la mercaderia" } };
+    } else return { error: { message: "No se encontro la nota envio" } };
   }
 
   async newRemito(object) {
-    const { products } = object;
+    const { products, fecha } = object;
     const [rows] = await this.dao.insert(object);
 
     for (let i = 0; i < products.length; i++) {
@@ -47,23 +57,12 @@ export default class RemitosRepository {
   }
 
   async updateRemito(rid, obj) {
-    const { products, valorDeclarado, fecha, nroOrden, numRemito } = obj;
-
-    if (products != null && products != "") {
-      const [result] = await con.query(
-        `
-        UPDATE remitos SET
-          total = IFNULL(?,total),
-          fecha = IFNULL(?,fecha),
-          num_orden = IFNULL(?,num_orden),
-          num_remito = IFNULL(IF(STRCMP(num_remito, ?) = 0, num_remito, ?), num_remito)
-          WHERE id = ?
-        `,
-        [valorDeclarado, fecha, nroOrden, numRemito, numRemito, rid]
-      );
-
-      if (result.affectedRows >= 1) {
-        const listMercaderiaByIdRemito = this.mercaderiaDao.getByIdRemito(rid);
+    const { products, fecha } = obj;
+    const [result] = await this.dao.update(rid, obj);
+    if (result.affectedRows >= 1) {
+      if (products != null && products != "") {
+        const [listMercaderiaByIdRemito] =
+          await this.mercaderiaDao.getByIdRemito(rid);
 
         for (let i = 0; i < products.length; i++) {
           const element = products[i];
@@ -86,14 +85,15 @@ export default class RemitosRepository {
           } else return { error: "" };
         }
 
-        
-        return this.dao.getOne(rid);
-      } else return { error: "" };
+        return await this.dao.getOne(rid);
+      } else return await this.dao.getOne(rid);
     } else return { error: "" };
   }
 
   async updateRemitoAddNewMercaderia(rid, products) {
-    const listMercaderiaByIdRemito = this.mercaderiaDao.getByIdRemito(rid);
+    const [listMercaderiaByIdRemito] = await this.mercaderiaDao.getByIdRemito(
+      rid
+    );
 
     let listErros = [];
     if (products != null) {
@@ -112,7 +112,6 @@ export default class RemitosRepository {
           }
         }
         if (listErros.length != 0) return { error: true, listErros };
-
         const enviar = {
           fecha: listMercaderiaByIdRemito[0].fecha,
           stock: element.stock,
@@ -128,14 +127,14 @@ export default class RemitosRepository {
       valorDeclarado += parseFloat(listMercaderiaByIdRemito[0].total);
 
       //Update el valor declarado
-      await con.query(
+      /*await con.query(
         `
           UPDATE remitos 
             SET total = IFNULL(?,total)
             WHERE id = ?
         `,
         [valorDeclarado, rid]
-      );
+      );*/
 
       const [rows] = await this.getOne(rid);
 
@@ -144,13 +143,15 @@ export default class RemitosRepository {
   }
 
   async deleteRemito(rid) {
-    const listMercaderiaByIdRemito = this.mercaderiaDao.getByIdRemito(rid);
+    const [listMercaderiaByIdRemito] = await this.mercaderiaDao.getByIdRemito(
+      rid
+    );
+
+    console.log(listMercaderiaByIdRemito);
 
     if (listMercaderiaByIdRemito.length != 0) {
       for (let i = 0; i < listMercaderiaByIdRemito.length; i++)
-        await this.mercaderiaDao.delete(
-          listMercaderiaByIdRemito[i].id
-        );
+        await this.mercaderiaDao.delete(listMercaderiaByIdRemito[i].id);
     }
 
     const [result] = await this.dao.delete(rid);

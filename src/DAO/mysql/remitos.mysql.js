@@ -16,10 +16,12 @@ export default class RemitosMysql {
   }
 
   async getOne(rid) {
-    if (this.listRemitos.length != 0) {
-      const findByIdRemito = this.listRemitos.find((elem) => elem.id == rid);
-      return findByIdRemito;
-    } else return [];
+    return await con.query(
+      `SELECT remitos.*,idCliente AS idcliente, clientes.cliente, clientes.cuit, clientes.domicilio, clientes.mail FROM remitos 
+          LEFT JOIN clientes on remitos.idCliente = clientes.id
+        WHERE remitos.id = ?`,
+      [rid]
+    );
   }
 
   async insert(data) {
@@ -35,7 +37,28 @@ export default class RemitosMysql {
     );
   }
 
-  async delete(iid) {
-    return await con.query("DELETE FROM users WHERE (`id` = ?);", [iid]);
+  async update(rid, data) {
+    return await con.query(
+      `
+      UPDATE remitos SET
+        total = IFNULL(?,total),
+        fecha = IFNULL(?,fecha),
+        num_orden = IFNULL(?,num_orden),
+        num_remito = IFNULL(IF(STRCMP(num_remito, ?) = 0, num_remito, ?), num_remito)
+        WHERE id = ?
+      `,
+      [
+        data.valorDeclarado,
+        data.fecha,
+        data.nroOrden,
+        data.numRemito,
+        data.numRemito,
+        rid,
+      ]
+    );
+  }
+
+  async delete(rid) {
+    return await con.query("DELETE FROM remitos WHERE (`id` = ?);", [rid]);
   }
 }
