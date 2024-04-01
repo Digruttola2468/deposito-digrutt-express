@@ -46,6 +46,7 @@ switch (PERSISTENCE) {
       "./mysql/relacionMaquinaMatriz.mysql.js"
     );
     const { default: HistorialFechasPedidosMysql } = await import ("./mysql/historialFechasPedidos.mysql.js")
+    const { default: HistorialErrorsMatrizMysql } = await import ("./mysql/historialErrorMatriz.mysql.js");
     const { default: UsersMysql } = await import("./mySql/users.mysql.js");
 
     Users = UsersMysql;
@@ -61,6 +62,7 @@ switch (PERSISTENCE) {
     Remitos = RemitoMysql;
     RelacionMaquinaMatriz = RelacionMaquinaMatrizMysql;
     HistorialFechasPedidos = HistorialFechasPedidosMysql;
+    HistorialErrorsMatriz = HistorialErrorsMatrizMysql;
     break;
 
   default:

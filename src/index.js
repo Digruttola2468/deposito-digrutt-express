@@ -22,24 +22,17 @@ import maquinaParadaRoute from "./routes/MaquinaParada.routes.js";
 import relacionMaquinaMatrizRoute from "./routes/relacionMatrizMaquina.routes.js";
 import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.js";
 import matricesRoute from "./routes/matrices.routes.js";
+import historialMatricesErrorRoute from "./routes/historialErrorMatriz.routes.js";
 /*
 import localidad from "./routes/localidad.routes.js";
 import coloresRoute from "./routes/colores.routes.js";
 import tipoProductoRoute from "./routes/tipoProducto.routes.js";
-
 import producionRoute from "./routes/producion.routes.js";
-
-
-import historialMatricesErrorRoute from "./routes/historialErrorMatriz.routes.js";
 import materiaPrimaRoute from "./routes/material.routes.js";
 import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
 import placeSavedEnviosRoute from "./routes/placeSavedEnvios.routes.js";
-
-
-
 import grafica from "./routes/grafica.routes.js";
 import PedidosRoute from "./routes/pedidos.routes.js";
-
 import vehiculoRoute from "./routes/vehiculos.routes.js";
 */
 
@@ -49,7 +42,7 @@ import con from "./config/db.js";
 import errorHandle from "./middleware/errors.js";
 import initPassport from "./config/sessions.passport.js";
 
-// Init Express 
+// Init Express
 const app = express();
 
 //Habilitamos que cualquier URL pueda acceder a este proyecto
@@ -75,7 +68,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 initPassport();
 
-
 // --- Routers ---
 app.use("/api/server", indexRoute);
 app.use("/api/inventario", inventarioRoute);
@@ -90,15 +82,13 @@ app.use("/api/maquinaParada", maquinaParadaRoute);
 app.use("/api/maquina_matriz", relacionMaquinaMatrizRoute);
 app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
 app.use("/api/matrices", matricesRoute);
+app.use("/api/historialMatriz", historialMatricesErrorRoute);
 /*
 app.use("/api/colores", coloresRoute);
 app.use("/api/tiposproductos", tipoProductoRoute);
-
 app.use("/api/materiaPrima", materiaPrimaRoute);
 app.use("/api/producion", producionRoute);
-
 app.use("/api/motivoMaquinaParada", motivoMaquinaParadaRoute);
-app.use("/api/historialMatriz", historialMatricesErrorRoute);
 app.use("/api/grafica", grafica);
 app.use("/api/localidad", localidad);
 app.use("/api/vehiculos", vehiculoRoute);
