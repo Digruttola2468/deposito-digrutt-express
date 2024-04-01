@@ -16,6 +16,7 @@ import userRoute from "./routes/auth.routes.js";
 import remitoRoute from "./routes/remitos.routes.js";
 import notaEnvioRoute from "./routes/facturaNegro.routes.js";
 import excelRoute from "./routes/excel.routes.js";
+import clientesRoute from "./routes/clientes.routes.js";
 /*
 import localidad from "./routes/localidad.routes.js";
 import coloresRoute from "./routes/colores.routes.js";
@@ -30,7 +31,7 @@ import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
 import placeSavedEnviosRoute from "./routes/placeSavedEnvios.routes.js";
 import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.js";
 import relacionMatrizMaquina from "./routes/relacionMatrizMaquina.routes.js";
-import clientes from "./routes/clientes.routes.js";
+
 import grafica from "./routes/grafica.routes.js";
 import PedidosRoute from "./routes/pedidos.routes.js";
 import EnviosRoute from "./routes/envios.routes.js";
@@ -78,13 +79,14 @@ app.use("/api/notaEnvio", notaEnvioRoute);
 app.use("/api/remito", remitoRoute);
 app.use("/api/session", userRoute);
 app.use("/api/excel", excelRoute);
+app.use("/api/clientes", clientesRoute);
 /*
 app.use("/api/colores", coloresRoute);
 app.use("/api/tiposproductos", tipoProductoRoute);
 
 app.use("/api/materiaPrima", materiaPrimaRoute);
 app.use("/api/producion", producionRoute);
-app.use("/api/clientes", clientes);
+
 app.use("/api/motivoMaquinaParada", motivoMaquinaParadaRoute);
 app.use("/api/historialMatriz", historialMatricesErrorRoute);
 app.use("/api/grafica", grafica);
