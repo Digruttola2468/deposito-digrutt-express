@@ -24,17 +24,18 @@ import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.j
 import matricesRoute from "./routes/matrices.routes.js";
 import historialMatricesErrorRoute from "./routes/historialErrorMatriz.routes.js";
 import controlCalidadRoute from "./routes/controlCalidad.routes.js";
-/*
-import localidad from "./routes/localidad.routes.js";
 import coloresRoute from "./routes/colores.routes.js";
-import tipoProductoRoute from "./routes/tipoProducto.routes.js";
-import producionRoute from "./routes/producion.routes.js";
-import materiaPrimaRoute from "./routes/material.routes.js";
+import localidadRoute from "./routes/localidad.routes.js";
+import vehiculoRoute from "./routes/vehiculos.routes.js";
 import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
 import placeSavedEnviosRoute from "./routes/placeSavedEnvios.routes.js";
+import tipoProductoRoute from "./routes/tipoProducto.routes.js";
+import materiaPrimaRoute from "./routes/material.routes.js";
+/*
+import producionRoute from "./routes/producion.routes.js";
 import grafica from "./routes/grafica.routes.js";
 import PedidosRoute from "./routes/pedidos.routes.js";
-import vehiculoRoute from "./routes/vehiculos.routes.js";
+
 */
 
 import con from "./config/db.js";
@@ -85,16 +86,17 @@ app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
 app.use("/api/matrices", matricesRoute);
 app.use("/api/historialMatriz", historialMatricesErrorRoute);
 app.use("/api/controlCalidad", controlCalidadRoute);
-/*
 app.use("/api/colores", coloresRoute);
+app.use("/api/localidad", localidadRoute);
+app.use("/api/vehiculos", vehiculoRoute);
+app.use("/api/motivoMaquinaParada", motivoMaquinaParadaRoute);
+app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 app.use("/api/tiposproductos", tipoProductoRoute);
 app.use("/api/materiaPrima", materiaPrimaRoute);
+/*
+
 app.use("/api/producion", producionRoute);
-app.use("/api/motivoMaquinaParada", motivoMaquinaParadaRoute);
 app.use("/api/grafica", grafica);
-app.use("/api/localidad", localidad);
-app.use("/api/vehiculos", vehiculoRoute);
-app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 app.use("/api/pedidos", PedidosRoute);
 */
 

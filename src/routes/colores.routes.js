@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { con } from "../config/db.js";
+import con from "../config/db.js";
 import userExtractor from "../middleware/userExtractor.js";
 
 const router = Router();
