@@ -15,6 +15,7 @@ export let Remitos;
 export let HistorialErrorsMatriz;
 export let HistorialFechasPedidos;
 export let RelacionMaquinaMatriz;
+export let controlCalidad;
 
 switch (PERSISTENCE) {
   case "MySQL":
@@ -47,6 +48,7 @@ switch (PERSISTENCE) {
     );
     const { default: HistorialFechasPedidosMysql } = await import ("./mysql/historialFechasPedidos.mysql.js")
     const { default: HistorialErrorsMatrizMysql } = await import ("./mysql/historialErrorMatriz.mysql.js");
+    const { default: controlCalidadMysql } = await import ("./mysql/controlCalidad.mysql.js")
     const { default: UsersMysql } = await import("./mySql/users.mysql.js");
 
     Users = UsersMysql;
@@ -63,6 +65,7 @@ switch (PERSISTENCE) {
     RelacionMaquinaMatriz = RelacionMaquinaMatrizMysql;
     HistorialFechasPedidos = HistorialFechasPedidosMysql;
     HistorialErrorsMatriz = HistorialErrorsMatrizMysql;
+    controlCalidad = controlCalidadMysql
     break;
 
   default:

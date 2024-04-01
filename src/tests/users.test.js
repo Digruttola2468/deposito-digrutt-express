@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import supertest from "supertest";
+import { TESTING_USER_GMAIL, TESTING_USER_PASSW } from "../config/dotenv.js";
 
 const requester = supertest("http://localhost:3000");
 
@@ -18,26 +19,29 @@ const requester = supertest("http://localhost:3000");
   });
 });*/
 
-describe('', () => {
+describe("", () => {
   let cookie = "";
 
   before(() => {
     const result = requester.post("/api/session/register").send({
-      email: "ivansandigruttola@gmail.com",
-      password: "secret",
+      email: TESTING_USER_GMAIL,
+      password: TESTING_USER_PASSW,
     });
     const resultCookie = result.headers["set-cookie"][0];
     cookie = resultCookie.split("=")[1].split(";")[0];
   });
 
   it("GET /api/session current", async () => {
-    const result = requester.get("/api/session/current").send({
-      email: "ivansandigruttola@gmail.com",
-      password: "secret",
-    }).set("Cookie", [`connect.sid=${cookie}`]);
+    const result = requester
+      .get("/api/session/current")
+      .send({
+        email: "ivansandigruttola@gmail.com",
+        password: "secret",
+      })
+      .set("Cookie", [`connect.sid=${cookie}`]);
 
     console.log(result);
 
     expect(result.ok).to.be.ok;
-  })
-})
+  });
+});

@@ -23,6 +23,7 @@ import relacionMaquinaMatrizRoute from "./routes/relacionMatrizMaquina.routes.js
 import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.js";
 import matricesRoute from "./routes/matrices.routes.js";
 import historialMatricesErrorRoute from "./routes/historialErrorMatriz.routes.js";
+import controlCalidadRoute from "./routes/controlCalidad.routes.js";
 /*
 import localidad from "./routes/localidad.routes.js";
 import coloresRoute from "./routes/colores.routes.js";
@@ -83,6 +84,7 @@ app.use("/api/maquina_matriz", relacionMaquinaMatrizRoute);
 app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
 app.use("/api/matrices", matricesRoute);
 app.use("/api/historialMatriz", historialMatricesErrorRoute);
+app.use("/api/controlCalidad", controlCalidadRoute);
 /*
 app.use("/api/colores", coloresRoute);
 app.use("/api/tiposproductos", tipoProductoRoute);
