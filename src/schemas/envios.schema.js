@@ -4,7 +4,6 @@ export const schemaPostEnvios = z.object({
   idVehiculo: z.number(),
   ubicacion: z.string(),
   descripcion: z.string(),
-  fechaDate: z.string(),
   idLocalidad: z.number(),
   lat: z.string(),
   lon: z.string(),
