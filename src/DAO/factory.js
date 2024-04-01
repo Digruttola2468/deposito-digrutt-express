@@ -1,4 +1,4 @@
-import { PERSISTENCE  } from "../config/dotenv.js";
+import { PERSISTENCE } from "../config/dotenv.js";
 
 export let Users;
 export let Clientes;
@@ -18,7 +18,7 @@ export let HistorialFechasPedidos;
 
 switch (PERSISTENCE) {
   case "MySQL":
-    const { default: ClientesMysql } = await import(
+    const { default: ClientesMySql } = await import(
       "./mySql/clientes.mysql.js"
     );
     const { default: EnviosMysql } = await import("./mySql/envios.mysql.js");
@@ -45,7 +45,7 @@ switch (PERSISTENCE) {
     const { default: UsersMysql } = await import("./mySql/users.mysql.js");
 
     Users = UsersMysql;
-    Clientes = ClientesMysql;
+    Clientes = ClientesMySql;
     Envios = EnviosMysql;
     NotasEnvio = NotasEnviosMysql;
     Inventario = InventarioMysql;

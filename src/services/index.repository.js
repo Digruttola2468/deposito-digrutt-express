@@ -4,16 +4,20 @@ import {
   Users,
   Remitos,
   NotasEnvio,
+  Clientes
 } from "../DAO/factory.js";
+
+// MODULE GMAIL
+import moduleGmail from '../mail.module.js'
+
 import MercaderiaRepository from "./mercaderia.repository.js";
 import InventarioRepository from "./inventario.repository.js";
 import UsersRepository from "./users.repository.js";
 import RemitosRepository from "./remitos.repository.js";
 import NotaEnvioRepository from "./notaEnvio.repository.js";
+import ClientesRepository from "./clientes.repository.js";
 
-// MODULE GMAIL
-import moduleGmail from '../mail.module.js'
-
+export const clienteServer = new ClientesRepository(new Clientes())
 export const mercaderiaServer = new MercaderiaRepository(new Mercaderia(), new Inventario());
 export const inventarioServer = new InventarioRepository(
   new Inventario(),
