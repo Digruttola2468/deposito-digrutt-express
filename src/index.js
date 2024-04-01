@@ -19,6 +19,7 @@ import excelRoute from "./routes/excel.routes.js";
 import clientesRoute from "./routes/clientes.routes.js";
 import EnviosRoute from "./routes/envios.routes.js";
 import maquinaParadaRoute from "./routes/MaquinaParada.routes.js";
+import relacionMaquinaMatrizRoute from "./routes/relacionMatrizMaquina.routes.js";
 /*
 import localidad from "./routes/localidad.routes.js";
 import coloresRoute from "./routes/colores.routes.js";
@@ -32,7 +33,7 @@ import materiaPrimaRoute from "./routes/material.routes.js";
 import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
 import placeSavedEnviosRoute from "./routes/placeSavedEnvios.routes.js";
 import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.js";
-import relacionMatrizMaquina from "./routes/relacionMatrizMaquina.routes.js";
+
 
 import grafica from "./routes/grafica.routes.js";
 import PedidosRoute from "./routes/pedidos.routes.js";
@@ -84,6 +85,7 @@ app.use("/api/excel", excelRoute);
 app.use("/api/clientes", clientesRoute);
 app.use("/api/envios", EnviosRoute);
 app.use("/api/maquinaParada", maquinaParadaRoute);
+app.use("/api/maquina_matriz", relacionMaquinaMatrizRoute);
 /*
 app.use("/api/colores", coloresRoute);
 app.use("/api/tiposproductos", tipoProductoRoute);
@@ -100,7 +102,7 @@ app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 
 app.use("/api/matrices", matricesRoute);
 
-app.use("/api/maquina_matriz", relacionMatrizMaquina);
+
 app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
 app.use("/api/pedidos", PedidosRoute);
 */

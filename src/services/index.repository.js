@@ -7,6 +7,7 @@ import {
   Clientes,
   Envios,
   MaquinaParada,
+  RelacionMaquinaMatriz,
 } from "../DAO/factory.js";
 
 // MODULE GMAIL
@@ -20,11 +21,15 @@ import NotaEnvioRepository from "./notaEnvio.repository.js";
 import ClientesRepository from "./clientes.repository.js";
 import EnviosRepository from "./envios.repository.js";
 import MaquinaParadaRepository from "./maquinaParada.repository.js";
+import RelacionMatrizMaquinaRepository from "./relacionMaquinaMatriz.repository.js";
 
 export const clienteServer = new ClientesRepository(new Clientes());
 export const envioServer = new EnviosRepository(new Envios());
 export const maquinaParadaServer = new MaquinaParadaRepository(
   new MaquinaParada()
+);
+export const relacionMaqMatzServer = new RelacionMatrizMaquinaRepository(
+  new RelacionMaquinaMatriz()
 );
 
 export const mercaderiaServer = new MercaderiaRepository(

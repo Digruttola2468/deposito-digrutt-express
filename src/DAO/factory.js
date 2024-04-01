@@ -12,9 +12,9 @@ export let Pedidos;
 export let Produccion;
 export let Remitos;
 
-export let RelacionMatrizMaquina;
 export let HistorialErrorsMatriz;
 export let HistorialFechasPedidos;
+export let RelacionMaquinaMatriz;
 
 switch (PERSISTENCE) {
   case "MySQL":
@@ -42,6 +42,9 @@ switch (PERSISTENCE) {
       "./mySql/produccion.mysql.js"
     );
     const { default: RemitoMysql } = await import("./mySql/remitos.mysql.js");
+    const { default: RelacionMaquinaMatrizMysql } = await import(
+      "./mysql/relacionMaquinaMatriz.mysql.js"
+    );
     const { default: UsersMysql } = await import("./mySql/users.mysql.js");
 
     Users = UsersMysql;
@@ -55,6 +58,7 @@ switch (PERSISTENCE) {
     Pedidos = PedidosMysql;
     Produccion = ProduccionMysql;
     Remitos = RemitoMysql;
+    RelacionMaquinaMatriz = RelacionMaquinaMatrizMysql;
 
     break;
 
