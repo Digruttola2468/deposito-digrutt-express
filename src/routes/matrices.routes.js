@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { matricesManager } from "../index.js";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
+import { matriceServer } from "../services/index.repository.js";
 
 const ruta = Router();
 
@@ -9,11 +9,31 @@ ruta.get(
   "/",
   userExtractor([allPermissions.produccion, allPermissions.matriceria]),
   async (req, res) => {
-    const { data, error } = await matricesManager.getMatrices();
+    try {
+      const [rows] = await matriceServer.getMatrices();
+      return res.json({ status: "success", data: rows });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
+  }
+);
 
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+ruta.get(
+  "/:mid",
+  userExtractor([allPermissions.produccion, allPermissions.matriceria]),
+  async (req, res) => {
+    try {
+      const [rows] = await matriceServer.getOneMatriz(req.params.mid);
+      return res.json({ status: "success", data: rows[0] });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
@@ -23,12 +43,16 @@ ruta.post(
   async (req, res, next) => {
     const object = req.body;
     try {
-      const { data, error } = await matricesManager.postMatriz(object);
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      const [result] = await matriceServer.newMatriz(object);
+      return res.json({
+        status: "success",
+        data: { id: result.insertId, ...object },
+      });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -40,16 +64,21 @@ ruta.put(
     const idMatriz = req.params.idMatriz;
     const body = req.body;
     try {
-      const { data, error } = await matricesManager.updateMatriz(
-        idMatriz,
-        body
-      );
+      const [result] = await matriceServer.updateMatriz(idMatriz, body);
 
-      if (error != null) return res.status(404).json(error);
+      if (result.affectedRows >= 1) {
+        const [rows] = await matriceServer.getOneMatriz(idMatriz);
 
-      return res.json(data);
+        return res.json({ status: "success", data: rows[0] });
+      } else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe esa Matriz" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -60,13 +89,21 @@ ruta.delete(
   async (req, res, next) => {
     const idMatriz = req.params.idMatriz;
     try {
-      const { data, error } = await matricesManager.deleteMatriz(idMatriz);
-
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      const [result] = await matriceServer.delete(idMatriz);
+      if (result.affectedRows >= 1)
+        return res.json({
+          status: "success",
+          message: "Se elimino correctamente",
+        });
+      else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe esa Matriz" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );

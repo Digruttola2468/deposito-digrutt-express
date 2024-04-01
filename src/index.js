@@ -21,6 +21,7 @@ import EnviosRoute from "./routes/envios.routes.js";
 import maquinaParadaRoute from "./routes/MaquinaParada.routes.js";
 import relacionMaquinaMatrizRoute from "./routes/relacionMatrizMaquina.routes.js";
 import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.js";
+import matricesRoute from "./routes/matrices.routes.js";
 /*
 import localidad from "./routes/localidad.routes.js";
 import coloresRoute from "./routes/colores.routes.js";
@@ -28,7 +29,7 @@ import tipoProductoRoute from "./routes/tipoProducto.routes.js";
 
 import producionRoute from "./routes/producion.routes.js";
 
-import matricesRoute from "./routes/matrices.routes.js";
+
 import historialMatricesErrorRoute from "./routes/historialErrorMatriz.routes.js";
 import materiaPrimaRoute from "./routes/material.routes.js";
 import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
@@ -88,6 +89,7 @@ app.use("/api/envios", EnviosRoute);
 app.use("/api/maquinaParada", maquinaParadaRoute);
 app.use("/api/maquina_matriz", relacionMaquinaMatrizRoute);
 app.use("/api/historialFechaPedidos", historialFechaPedidosRoute);
+app.use("/api/matrices", matricesRoute);
 /*
 app.use("/api/colores", coloresRoute);
 app.use("/api/tiposproductos", tipoProductoRoute);
@@ -101,11 +103,6 @@ app.use("/api/grafica", grafica);
 app.use("/api/localidad", localidad);
 app.use("/api/vehiculos", vehiculoRoute);
 app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
-
-app.use("/api/matrices", matricesRoute);
-
-
-
 app.use("/api/pedidos", PedidosRoute);
 */
 
