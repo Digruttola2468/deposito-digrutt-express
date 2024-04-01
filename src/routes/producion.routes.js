@@ -1,17 +1,39 @@
 import { Router } from "express";
-import { producionManager } from "../index.js";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
+import { produccionServer } from "../services/index.repository.js";
 
 const ruta = Router();
 
 ruta.get("/", userExtractor([allPermissions.produccion]), async (req, res) => {
-  const { data, error } = await producionManager.getProduccion();
-
-  if (error != null) return res.status(404).json(error);
-
-  return res.json(data);
+  try {
+    const [rows] = await produccionServer.getProduccion();
+    return res.json({ status: "success", data: rows });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Something Wrong" });
+  }
 });
+
+ruta.get(
+  "/:idProduccion",
+  userExtractor([allPermissions.produccion]),
+  async (req, res) => {
+    try {
+      const [rows] = await produccionServer.getOneProduccion(
+        req.params.idProduccion
+      );
+      return res.json({ status: "success", data: rows[0] });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
+  }
+);
 
 ruta.get(
   "/:numMaquina",
@@ -21,13 +43,19 @@ ruta.get(
     const init = req.query.init;
     const end = req.query.end;
 
-    const result = producionManager.getRangeDateByNumMaquina(
-      numMaquina,
-      init,
-      end
-    );
-
-    return res.json(result);
+    try {
+      const result = await produccionServer.getRangeDateByMaquina(
+        numMaquina,
+        init,
+        end
+      );
+      return res.json({ status: "success", data: result });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
@@ -37,13 +65,16 @@ ruta.post(
   async (req, res, next) => {
     const object = req.body;
     try {
-      const { data, error } = await producionManager.postProducion(object, true);
-
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      const [result] = await produccionServer.newOneProduccion(object);
+      return res.json({
+        status: "success",
+        data: { id: result.insertId, ...object },
+      });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -52,15 +83,16 @@ ruta.post(
   "/list",
   userExtractor([allPermissions.produccion]),
   async (req, res, next) => {
-    const object = req.body;
+    const list = req.body;
     try {
-      const { data, error } = await producionManager.postListProduccion(object);
+      const result = await produccionServer.newListProduccion(list);
 
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      return res.json({ status: "success", data: result });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -68,21 +100,29 @@ ruta.post(
 ruta.put(
   "/:idProduccion",
   userExtractor([allPermissions.produccion]),
-  async (req, res, next) => {
+  async (req, res) => {
     const idProduccion = req.params.idProduccion;
     const body = req.body;
 
     try {
-      const { data, error } = await producionManager.updateProduccion(
+      const [result] = await produccionServer.updateProduccion(
         idProduccion,
         body
       );
 
-      if (error != null) return res.status(404).json(error);
+      if (result.affectedRows >= 1) {
+        const [rows] = await produccionServer.getOneProduccion(idProduccion);
 
-      return res.json(data);
+        return res.json({ status: "success", data: rows[0] });
+      } else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe ese cliente" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -91,18 +131,24 @@ ruta.delete(
   "/:idProduccion",
   userExtractor([allPermissions.produccion]),
   async (req, res, next) => {
-    const idProduccion = req.params.idProduccion;
-
     try {
-      const { data, error } = await producionManager.deleteProduccion(
-        idProduccion
+      const [result] = await produccionServer.deleteProduccion(
+        req.params.idProduccion
       );
-
-      if (error != null) return res.status(404).json(error);
-
-      return res.json(data);
+      if (result.affectedRows >= 1)
+        return res.json({
+          status: "success",
+          message: "Se elimino correctamente",
+        });
+      else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe esa Produccion" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
