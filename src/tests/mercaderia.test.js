@@ -30,7 +30,7 @@ describe("** TESTING MERCADERIA **", () => {
         .send({
           fecha: "2024-01-01",
           stock: 50,
-          idcategoria: 2,
+          idcategoria: "2",
           idinventario: idInventario,
         })
         .set("Authorization", `Bearer ${token}`);
@@ -80,4 +80,5 @@ describe("** TESTING MERCADERIA **", () => {
       expect(result.ok).to.be.ok;
     });
   });
+
 });
