@@ -8,7 +8,8 @@ import {
   Envios,
   MaquinaParada,
   RelacionMaquinaMatriz,
-  HistorialFechasPedidos
+  HistorialFechasPedidos,
+  Matrices
 } from "../DAO/factory.js";
 
 // MODULE GMAIL
@@ -24,6 +25,7 @@ import EnviosRepository from "./envios.repository.js";
 import MaquinaParadaRepository from "./maquinaParada.repository.js";
 import RelacionMatrizMaquinaRepository from "./relacionMaquinaMatriz.repository.js";
 import HistorialFechasPedidosRepository from "./historialFechaPedidos.respository.js";
+import MatricesRepository from "./matrices.repository.js";
 
 export const clienteServer = new ClientesRepository(new Clientes());
 export const envioServer = new EnviosRepository(new Envios());
@@ -34,6 +36,7 @@ export const relacionMaqMatzServer = new RelacionMatrizMaquinaRepository(
   new RelacionMaquinaMatriz()
 );
 export const historialFechasPedidosServer = new HistorialFechasPedidosRepository(new HistorialFechasPedidos());
+export const matriceServer = new MatricesRepository(new Matrices(), new Clientes())
 
 export const mercaderiaServer = new MercaderiaRepository(
   new Mercaderia(),
