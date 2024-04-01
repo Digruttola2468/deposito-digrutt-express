@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { relacionMaquinaMatriz } from "../index.js";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
+import { relacionMaqMatzServer } from "../services/index.repository.js";
 
 const ruta = Router();
 
@@ -9,11 +9,15 @@ ruta.get(
   "/",
   userExtractor([allPermissions.matriceria, allPermissions.produccion]),
   async (req, res) => {
-    const { data, error } = await relacionMaquinaMatriz.getAll();
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+    try {
+      const [rows] = await relacionMaqMatzServer.getAll();
+      return res.json({ status: "success", data: rows });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
@@ -21,14 +25,17 @@ ruta.get(
   "/matriz/:idMaquina",
   userExtractor([allPermissions.matriceria, allPermissions.produccion]),
   async (req, res) => {
-    const idMaquina = req.params.idMaquina;
-    const { data, error } = await relacionMaquinaMatriz.getMatrizByIdMaquina(
-      idMaquina
-    );
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+    try {
+      const [rows] = await relacionMaqMatzServer.getListMatrizByMaquina(
+        req.params.idMaquina
+      );
+      return res.json({ status: "success", data: rows[0] });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
@@ -36,13 +43,17 @@ ruta.get(
   "/maquina/:idMatriz",
   userExtractor([allPermissions.matriceria, allPermissions.produccion]),
   async (req, res) => {
-    const idMatriz = req.params.idMaquina;
-    const { data, error } =
-      await relacionMaquinaMatriz.getListMaquinaByIdMatriz(idMatriz);
-
-    if (error != null) return res.status(404).json(error);
-
-    return res.json(data);
+    try {
+      const [rows] = await relacionMaqMatzServer.getListMaquinaByMatriz(
+        req.params.idMatriz
+      );
+      return res.json({ status: "success", data: rows[0] });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
