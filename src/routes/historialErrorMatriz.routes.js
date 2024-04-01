@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { historialErrorMatrizManager } from "../index.js";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
+import { historialErroresMatrices } from "../services/index.repository.js";
 
 const ruta = Router();
 
@@ -9,18 +9,14 @@ ruta.get(
   "/",
   userExtractor([allPermissions.matriceria, allPermissions.produccion]),
   async (req, res) => {
-    const solved = req.query?.solved;
-
-    if (solved >= 1)
-      return res.json(historialErrorMatrizManager.getIsSolvedTrue());
-    else if (solved <= 0)
-      return res.json(historialErrorMatrizManager.getIsSolvedFalse());
-    else {
-      const { data, error } = await historialErrorMatrizManager.getHistorial();
-
-      if (error) return res.status(404).json(error);
-
-      return res.json(data);
+    try {
+      const [rows] = await historialErroresMatrices.getHistorial();
+      return res.json({ status: "success", data: rows });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -28,22 +24,35 @@ ruta.get(
 ruta.get(
   "/:idHistorial",
   userExtractor([allPermissions.matriceria, allPermissions.produccion]),
-  (req, res) => {
-    const idHistorial = req.params.idHistorial;
-    const result = historialErrorMatrizManager.getOne(idHistorial);
-
-    return res.json(result);
+  async (req, res) => {
+    try {
+      const [rows] = await historialErroresMatrices.getOneHistorial(
+        req.params.idHistorial
+      );
+      return res.json({ status: "success", data: rows[0] });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
 ruta.get(
   "/:idMatriz/listIdMatriz",
   userExtractor([allPermissions.matriceria, allPermissions.produccion]),
-  (req, res) => {
+  async (req, res) => {
     const idMatriz = req.params.idMatriz;
-    const result = historialErrorMatrizManager.getListByIdMatriz(idMatriz);
-
-    return res.json(result);
+    try {
+      const [rows] = await historialErroresMatrices.getByIdMatriz(idMatriz);
+      return res.json({ status: "success", data: rows });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
@@ -53,13 +62,16 @@ ruta.post(
   async (req, res, next) => {
     const object = req.body;
     try {
-      const { data, error } =
-        await historialErrorMatrizManager.postHistorialMatriz(object);
-      if (error) return res.status(404).json(error);
-
-      return res.json(data);
+      const [result] = await historialErroresMatrices.newHistorial(object);
+      return res.json({
+        status: "success",
+        data: { id: result.insertId, ...object },
+      });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -71,16 +83,26 @@ ruta.put(
     const idHistorial = req.params.idHistorial;
     const body = req.body;
     try {
-      const { data, error } =
-        await historialErrorMatrizManager.updateHistorialMatriz(
-          idHistorial,
-          body
-        );
-      if (error) return res.status(404).json(error);
+      const [result] = await historialErroresMatrices.updateHistorial(
+        idHistorial,
+        body
+      );
 
-      return res.json(data);
+      if (result.affectedRows >= 1) {
+        const [rows] = await historialErroresMatrices.getOneHistorial(
+          idHistorial
+        );
+
+        return res.json({ status: "success", data: rows[0] });
+      } else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe ese cliente" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -92,15 +114,26 @@ ruta.put(
     const idHistorial = req.params.idHistorial;
     const isSolved = req.params.solved;
     try {
-      const { data, error } = await historialErrorMatrizManager.updateIsSolved(
+      const [result] = await historialErroresMatrices.updateMatrizTerminado(
         idHistorial,
         isSolved
       );
-      if (error) return res.status(404).json(error);
 
-      return res.json(data);
+      if (result.affectedRows >= 1) {
+        const [rows] = await historialErroresMatrices.getOneHistorial(
+          idHistorial
+        );
+
+        return res.json({ status: "success", data: rows[0] });
+      } else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe ese cliente" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -109,16 +142,24 @@ ruta.delete(
   "/:idHistorial",
   userExtractor([allPermissions.matriceria]),
   async (req, res, next) => {
-    const idHistorial = req.params.idHistorial;
     try {
-      const { data, error } =
-        await historialErrorMatrizManager.deleteHistorialMatriz(idHistorial);
-
-      if (error) return res.status(500).json(error);
-
-      return res.json(data);
+      const [result] = await historialErroresMatrices.deleteHistorial(
+        req.params.idHistorial
+      );
+      if (result.affectedRows >= 1)
+        return res.json({
+          status: "success",
+          message: "Se elimino correctamente",
+        });
+      else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe ese cliente" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
