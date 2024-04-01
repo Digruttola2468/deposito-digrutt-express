@@ -1,9 +1,9 @@
-// SERVER
+// --- SERVER ---
 import express from "express";
 import cors from "cors";
 import { PORT } from "./config/dotenv.js";
 
-// AUTH
+// --- AUTH ---
 import session from "express-session";
 import MySQLStore from "express-mysql-session";
 import passport from "passport";
@@ -31,8 +31,9 @@ import motivoMaquinaParadaRoute from "./routes/motivoMaquinaParada.routes.js";
 import placeSavedEnviosRoute from "./routes/placeSavedEnvios.routes.js";
 import tipoProductoRoute from "./routes/tipoProducto.routes.js";
 import materiaPrimaRoute from "./routes/material.routes.js";
-/*
 import producionRoute from "./routes/producion.routes.js";
+/*
+
 import grafica from "./routes/grafica.routes.js";
 import PedidosRoute from "./routes/pedidos.routes.js";
 
@@ -53,7 +54,7 @@ app.use(cors());
 // Habilitamos la lectura y escritura en JSON
 app.use(express.json());
 
-// SESSION MYSQL
+// --- SESSION MYSQL ---
 const MysqlStorage = MySQLStore(session);
 const sessionStore = new MysqlStorage({}, con);
 app.use(
@@ -65,7 +66,7 @@ app.use(
   })
 );
 
-// INICIALIZATE PASSPORT
+// --- INICIALIZATE PASSPORT ---
 app.use(passport.initialize());
 app.use(passport.session());
 initPassport();
@@ -93,9 +94,8 @@ app.use("/api/motivoMaquinaParada", motivoMaquinaParadaRoute);
 app.use("/api/savedPlacesEnviados", placeSavedEnviosRoute);
 app.use("/api/tiposproductos", tipoProductoRoute);
 app.use("/api/materiaPrima", materiaPrimaRoute);
-/*
-
 app.use("/api/producion", producionRoute);
+/*
 app.use("/api/grafica", grafica);
 app.use("/api/pedidos", PedidosRoute);
 */
@@ -107,4 +107,4 @@ app.use((req, res) => {
   return res.send("No se encuntra la pagina");
 });
 
-app.listen(3000);
+app.listen(PORT);

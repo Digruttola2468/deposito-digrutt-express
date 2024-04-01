@@ -12,6 +12,7 @@ import {
   Matrices,
   HistorialErrorsMatriz,
   controlCalidad,
+  Produccion,
 } from "../DAO/factory.js";
 
 // MODULE GMAIL
@@ -30,6 +31,7 @@ import HistorialFechasPedidosRepository from "./historialFechaPedidos.respositor
 import MatricesRepository from "./matrices.repository.js";
 import HistorialErrorMatrices from "./historialErrorMatrices.repository.js";
 import ControlCalidadRepository from "./controlCalidad.repository.js";
+import ProduccionRepository from "./produccion.repository.js";
 
 export const clienteServer = new ClientesRepository(new Clientes());
 export const envioServer = new EnviosRepository(new Envios());
@@ -45,6 +47,7 @@ export const matriceServer = new MatricesRepository(
   new Matrices(),
   new Clientes()
 );
+export const produccionServer = new ProduccionRepository(new Produccion());
 export const historialErroresMatrices = new HistorialErrorMatrices(
   new HistorialErrorsMatriz()
 );
