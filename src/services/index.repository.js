@@ -10,7 +10,8 @@ import {
   RelacionMaquinaMatriz,
   HistorialFechasPedidos,
   Matrices,
-  HistorialErrorsMatriz
+  HistorialErrorsMatriz,
+  controlCalidad,
 } from "../DAO/factory.js";
 
 // MODULE GMAIL
@@ -28,6 +29,7 @@ import RelacionMatrizMaquinaRepository from "./relacionMaquinaMatriz.repository.
 import HistorialFechasPedidosRepository from "./historialFechaPedidos.respository.js";
 import MatricesRepository from "./matrices.repository.js";
 import HistorialErrorMatrices from "./historialErrorMatrices.repository.js";
+import ControlCalidadRepository from "./controlCalidad.repository.js";
 
 export const clienteServer = new ClientesRepository(new Clientes());
 export const envioServer = new EnviosRepository(new Envios());
@@ -37,10 +39,18 @@ export const maquinaParadaServer = new MaquinaParadaRepository(
 export const relacionMaqMatzServer = new RelacionMatrizMaquinaRepository(
   new RelacionMaquinaMatriz()
 );
-export const historialFechasPedidosServer = new HistorialFechasPedidosRepository(new HistorialFechasPedidos());
-export const matriceServer = new MatricesRepository(new Matrices(), new Clientes())
-export const historialErroresMatrices = new HistorialErrorMatrices(new HistorialErrorsMatriz())
-
+export const historialFechasPedidosServer =
+  new HistorialFechasPedidosRepository(new HistorialFechasPedidos());
+export const matriceServer = new MatricesRepository(
+  new Matrices(),
+  new Clientes()
+);
+export const historialErroresMatrices = new HistorialErrorMatrices(
+  new HistorialErrorsMatriz()
+);
+export const controlCalidadServer = new ControlCalidadRepository(
+  new controlCalidad()
+);
 export const mercaderiaServer = new MercaderiaRepository(
   new Mercaderia(),
   new Inventario()

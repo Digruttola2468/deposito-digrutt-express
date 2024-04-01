@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import supertest from "supertest";
+import { TESTING_USER_GMAIL, TESTING_USER_PASSW } from "../config/dotenv.js";
 
 const requester = supertest("http://localhost:3000");
 
@@ -8,8 +9,8 @@ describe("** TESTING NOTA ENVIO **", () => {
   let token = "";
   before(async () => {
     const result = await requester.post("/api/session/login").send({
-      email: "ivansandigruttola@gmail.com",
-      password: "secret",
+      email: TESTING_USER_GMAIL,
+      password: TESTING_USER_PASSW,
     });
     token = result._body.token;
   });
