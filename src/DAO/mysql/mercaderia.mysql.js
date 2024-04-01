@@ -57,14 +57,16 @@ export default class MercaderiaMySql {
     );
   }
 
-  getByIdInventario(idinventario) {
-    if (this.listMercaderia.length != 0) {
-      const filterByIdInventario = this.listMercaderia.filter(
-        (elem) => elem.idinventario == idinventario
-      );
-      if (filterByIdInventario) return filterByIdInventario;
-      else return [];
-    } else return [];
+  async getByIdInventario(idinventario) {
+    return await con.query(
+      `
+        SELECT mercaderia.id,nombre,descripcion,idFacturaNegro,idCliente,idremito,fecha,stock,idinventario
+            FROM mercaderia 
+                LEFT JOIN inventario on mercaderia.idinventario = inventario.id
+            WHERE mercaderia.idinventario = ?;
+    `,
+      [idinventario]
+    );
   }
 
   insert = async (data) => {

@@ -3,6 +3,13 @@ import { Router } from "express";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
 import { mercaderiaServer } from "../services/index.repository.js";
+import schemaValidation from "../middleware/schemaValidation.js";
+import {
+  schemaPostListMercaderia,
+  schemaPostMercaderiaEntrada,
+  schemaPostMercaderiaSalida,
+  schemaPutMercaderia,
+} from "../schemas/mercaderia.schema.js";
 
 const router = Router();
 
@@ -42,6 +49,7 @@ router.get(
 router.post(
   "/",
   userExtractor([allPermissions.mercaderia]),
+  schemaValidation(schemaPostMercaderiaEntrada),
   async (req, res, next) => {
     const object = req.body;
     try {
@@ -60,9 +68,9 @@ router.post(
 router.post(
   "/salida",
   userExtractor([allPermissions.mercaderia]),
+  schemaValidation(schemaPostMercaderiaSalida),
   async (req, res, next) => {
     const { fecha, stock, idinventario, observacion } = req.body;
-
     if (observacion == null || observacion == "")
       return res.status(400).json({
         status: "error",
@@ -92,9 +100,13 @@ router.post(
 router.post(
   "/list",
   userExtractor([allPermissions.mercaderia]),
+  schemaValidation(schemaPostListMercaderia),
   async (req, res) => {
     const list = req.body;
-    const listDoneNew = await mercaderiaServer.createListMercaderia(list);
+    const listDoneNew = await mercaderiaServer.createListMercaderia(
+      list.fecha,
+      list.data
+    );
 
     if (listDoneNew.length >= 1) {
       return res.json({ status: "success", data: listDoneNew });
@@ -106,6 +118,7 @@ router.post(
 router.put(
   "/:mid",
   userExtractor([allPermissions.mercaderia]),
+  schemaValidation(schemaPutMercaderia),
   async (req, res, next) => {
     const object = req.body;
     const idMercaderia = req.params.mid;
