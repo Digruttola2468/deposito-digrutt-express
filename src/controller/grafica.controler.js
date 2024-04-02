@@ -1,5 +1,4 @@
 import { con } from "../config/db.js";
-import { producionManager } from "../index.js";
 
 //
 const getArrayYear = (mercaderiaApi, idinventario) => {

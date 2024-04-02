@@ -2,11 +2,13 @@ import { Router } from "express";
 import con from "../config/db.js";
 import ExcelJs from "exceljs";
 import userExtractor from "../middleware/userExtractor.js";
+import { addDay, format } from "@formkit/tempo";
 
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";
 import permissos from "../config/permissos.js";
+import { pedidoServer } from "../services/index.repository.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const dir = dirname(__filename);
@@ -412,5 +414,108 @@ router.get(
     return res.sendFile(dir + `/matricesMaquina.xlsx`);
   }
 );
+
+router.get("/pedidos/:dias", async (req, res) => {
+  const dias = req.params.dias;
+  const actual = new Date();
+
+  const dateEnd = addDay(actual, parseInt(dias));
+
+  const data = await pedidoServer.excelInforme(actual, dateEnd);
+
+  const workbook = new ExcelJs.Workbook();
+
+  const worksheet = workbook.addWorksheet("Estrategia Pedidos");
+
+  worksheet.getCell("A1").value = `FECHA INICIAL: ${format(
+    actual,
+    "short"
+  )} \t FECHA FINAL: ${format(dateEnd, "short")} ENTRE ${dias} Dias`;
+
+  let A_valueInit = 4;
+  for (let i = 0; i < data.length; i++) {
+    const element = data[i]; //ELEMT []
+
+    const enviar = [];
+    let nombreCliente = "";
+    for (let j = 0; j < element.length; j++) {
+      const obj = element[j];
+
+      let piezaXGolpe = obj.piezaXGolpe;
+      let cantidadEnviar = obj.cantFaltaEnviar;
+
+      let golpesRealesNecesito = cantidadEnviar * piezaXGolpe;
+      let golpesRealesDiaNecesito = golpesRealesNecesito / obj.faltanDays;
+
+      let piezasDia = golpesRealesDiaNecesito / piezaXGolpe;
+
+      let promGolpesHora = golpesRealesDiaNecesito / 24;
+
+      nombreCliente = obj.cliente.toUpperCase();
+
+      enviar.push([
+        obj.descripcion,
+        obj.cantFaltaEnviar,
+        obj.fecha_entrega,
+        obj.faltanDays,
+        golpesRealesDiaNecesito,
+        piezasDia,
+        promGolpesHora,
+      ]);
+    }
+
+    worksheet.getCell(
+      `A${A_valueInit - 1}`
+    ).value = `${nombreCliente.toUpperCase()}`;
+    worksheet.getCell(`A${A_valueInit - 1}`).font = {
+      size: 16,
+      bold: true,
+    };
+
+    worksheet.addTable({
+      name: `Pedido`,
+      ref: `A${A_valueInit}`,
+      headerRow: true,
+      totalsRow: false,
+      style: {
+        theme: "TableStyleDark3",
+        showRowStripes: true,
+      },
+      columns: [
+        {
+          name: `Descripcion`,
+        },
+        {
+          name: `Falta Enviar`,
+        },
+        {
+          name: `Entrega`,
+        },
+        {
+          name: `Faltan (dias)`,
+        },
+        {
+          name: `Golpes`,
+        },
+        {
+          name: `Piezas`,
+        },
+        {
+          name: `Golpes/h`,
+        },
+      ],
+      rows: enviar,
+    });
+
+    // SUMARLE 1 de espacio
+    A_valueInit += 3;
+    // SUMARLE LONGITUD TABLA
+    A_valueInit += element.length;
+  }
+
+  await workbook.xlsx.writeFile(dir + `/estrategiaPedido.xlsx`);
+
+  return res.sendFile(dir + `/estrategiaPedido.xlsx`);
+});
 
 export default router;

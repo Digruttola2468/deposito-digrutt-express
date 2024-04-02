@@ -37,7 +37,8 @@ import PedidosRepository from "./pedidos.repository.js";
 
 export const pedidoServer = new PedidosRepository(
   new Pedidos(),
-  new HistorialFechasPedidos()
+  new HistorialFechasPedidos(),
+  new Matrices()
 );
 export const clienteServer = new ClientesRepository(new Clientes());
 export const envioServer = new EnviosRepository(new Envios());
