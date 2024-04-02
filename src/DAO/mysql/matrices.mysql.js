@@ -5,6 +5,8 @@ export default class MatricesMysql {
     this.listMatrices = [];
   }
 
+  getListMatricesMemory = () => this.listMatrices;
+
   get = async () => {
     const [rows] = await con.query(
       `SELECT matriz.id, matriz.cod_matriz, matriz.descripcion, matriz.cantPiezaGolpe, matriz.numero_matriz, materiaPrima.material, clientes.cliente, matriz.idcliente
@@ -12,7 +14,7 @@ export default class MatricesMysql {
                 LEFT JOIN materiaPrima ON matriz.idmaterial = materiaPrima.id
                 LEFT JOIN clientes ON matriz.idcliente = clientes.id;`
     );
-    this.listMatriz = rows;
+    this.listMatrices = rows;
     return rows;
   };
 

@@ -10,7 +10,7 @@ ruta.get(
   userExtractor([allPermissions.produccion, allPermissions.matriceria]),
   async (req, res) => {
     try {
-      const [rows] = await matriceServer.getMatrices();
+      const rows = await matriceServer.getMatrices();
       return res.json({ status: "success", data: rows });
     } catch (error) {
       console.log(error);

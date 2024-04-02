@@ -7,7 +7,7 @@ export default class PedidosMysql {
 
   get = async () => {
     const [rows] = await con.query(
-      `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idInventario, inventario.nombre, inventario.descripcion, inventario.url_image, inventario.articulo
+      `SELECT pedidos.*,clientes.cliente, clientes.id AS idcliente, inventario.id AS idInventario, inventario.nombre, inventario.descripcion, inventario.url_image,inventario.idCodMatriz, inventario.articulo
             FROM pedidos 
                 LEFT JOIN inventario on pedidos.idinventario = inventario.id
                 LEFT JOIN clientes on pedidos.idcliente = clientes.id
