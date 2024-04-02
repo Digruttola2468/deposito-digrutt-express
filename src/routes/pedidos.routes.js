@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { pedidosManager } from "../index.js";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
+import { pedidoServer } from "../services/index.repository.js";
 
 const ruta = Router();
 
@@ -9,14 +9,18 @@ ruta.get(
   "/",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
   async (req, res) => {
-    const { data, error } = await pedidosManager.getPedidos();
-
-    if (error) return res.status(404).json(error);
-
-    return res.json(data);
+    try {
+      const [rows] = await pedidoServer.getPedidos();
+      return res.json({ status: "success", data: rows });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
-
+/*
 ruta.get(
   "/list/:value",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
@@ -39,17 +43,21 @@ ruta.get(
     const result = pedidosManager.getproductsByIsDone(id);
     return res.json(result);
   }
-);
+);*/
 
 ruta.get(
   "/:idPedido",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
   async (req, res) => {
-    const idPedido = req.params.idPedido;
-
-    const result = pedidosManager.getOne(idPedido);
-
-    return res.json(result);
+    try {
+      const [rows] = await pedidoServer.getOnePedido(req.params.idPedido);
+      return res.json({ status: "success", data: rows[0] });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
   }
 );
 
@@ -59,19 +67,22 @@ ruta.post(
   async (req, res, next) => {
     const object = req.body;
     try {
-      const { data, error } = await pedidosManager.postPedidos(object);
-
-      if (error) return res.status(404).json(error);
-
-      return res.json(data);
+      const [result] = await pedidoServer.newPedido(object);
+      return res.json({
+        status: "success",
+        data: { id: result.insertId, ...object },
+      });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
 
 //Falta validar si esta bien realizada la lista
-ruta.post(
+/*ruta.post(
   "/list",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
   async (req, res) => {
@@ -82,7 +93,7 @@ ruta.post(
 
     return res.json(data);
   }
-);
+);*/
 
 ruta.put(
   "/:idPedido",
@@ -91,16 +102,21 @@ ruta.put(
     const idPedido = req.params.idPedido;
     const object = req.body;
     try {
-      const { data, error } = await pedidosManager.updatePedidos(
-        idPedido,
-        object
-      );
+      const [result] = await pedidoServer.updatePedido(idPedido, object);
 
-      if (error) return res.status(404).json(error);
+      if (result.affectedRows >= 1) {
+        const [rows] = await pedidoServer.getOnePedido(idPedido);
 
-      return res.json(data);
+        return res.json({ status: "success", data: rows[0] });
+      } else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe ese pedido" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
@@ -113,14 +129,23 @@ ruta.put(
     const { isDone } = req.body;
 
     if (isDone != null) {
-      const { data, error } = await pedidosManager.updatePedidosIsDone(
-        idPedido,
-        isDone
-      );
+      try {
+        const [result] = await pedidoServer.updateDonePedido(idPedido, isDone);
 
-      if (error) return res.status(404).json(error);
+        if (result.affectedRows >= 1) {
+          const [rows] = await pedidoServer.getOnePedido(idPedido);
 
-      return res.json(data);
+          return res.json({ status: "success", data: rows[0] });
+        } else
+          return res
+            .status(404)
+            .json({ status: "error", message: "No existe ese pedido" });
+      } catch (error) {
+        console.log(error);
+        return res
+          .status(500)
+          .json({ status: "error", message: "Something Wrong" });
+      }
     }
   }
 );
@@ -129,15 +154,22 @@ ruta.delete(
   "/:idPedido",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
   async (req, res, next) => {
-    const idPedido = req.params.idPedido;
     try {
-      const { data, error } = await pedidosManager.deletePedido(idPedido);
-
-      if (error) return res.status(404).json(error);
-
-      return res.json(data);
+      const [result] = await pedidoServer.deletePedido(req.params.idPedido);
+      if (result.affectedRows >= 1)
+        return res.json({
+          status: "success",
+          message: "Se elimino correctamente",
+        });
+      else
+        return res
+          .status(404)
+          .json({ status: "error", message: "No existe ese pedido" });
     } catch (error) {
-      next(error);
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
     }
   }
 );
