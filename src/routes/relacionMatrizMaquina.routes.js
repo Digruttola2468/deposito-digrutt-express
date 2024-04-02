@@ -10,7 +10,7 @@ ruta.get(
   userExtractor([allPermissions.matriceria, allPermissions.produccion]),
   async (req, res) => {
     try {
-      const [rows] = await relacionMaqMatzServer.getAll();
+      const rows = await relacionMaqMatzServer.getAll();
       return res.json({ status: "success", data: rows });
     } catch (error) {
       console.log(error);

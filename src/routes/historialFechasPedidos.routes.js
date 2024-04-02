@@ -10,7 +10,7 @@ ruta.get(
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
   async (req, res, next) => {
     try {
-      const [rows] =
+      const rows =
         await historialFechasPedidosServer.getHistorialFechaPedido();
       return res.json({ status: "success", data: rows });
     } catch (error) {

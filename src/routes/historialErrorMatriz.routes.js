@@ -10,7 +10,7 @@ ruta.get(
   userExtractor([allPermissions.matriceria, allPermissions.produccion]),
   async (req, res) => {
     try {
-      const [rows] = await historialErroresMatrices.getHistorial();
+      const rows = await historialErroresMatrices.getHistorial();
       return res.json({ status: "success", data: rows });
     } catch (error) {
       console.log(error);

@@ -10,7 +10,7 @@ ruta.get(
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
   async (req, res) => {
     try {
-      const [rows] = await pedidoServer.getPedidos();
+      const rows = await pedidoServer.getPedidos();
       return res.json({ status: "success", data: rows });
     } catch (error) {
       console.log(error);

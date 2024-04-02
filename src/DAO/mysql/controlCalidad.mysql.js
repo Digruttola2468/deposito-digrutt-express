@@ -6,12 +6,14 @@ export default class controlCalidadMysql {
   }
 
   get = async () => {
-    return await con.query(
+    const [rows] =  await con.query(
       `SELECT *,clientes.id 
       FROM controlCalidad 
       LEFT JOIN inventario ON controlCalidad.idInventario = inventario.id
       LEFT JOIN clientes ON controlCalidad.idCliente = clientes.id`
     );
+    this.listControlCalidad = rows
+    return rows
   };
   getOne = async (idControlCalidad) => {
     return await con.query(

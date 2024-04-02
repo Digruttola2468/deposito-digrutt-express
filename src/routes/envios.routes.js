@@ -7,7 +7,7 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const [rows] = await envioServer.getEnvios();
+    const rows = await envioServer.getEnvios();
     return res.json({ status: "success", data: rows });
   } catch (error) {
     console.log(error);

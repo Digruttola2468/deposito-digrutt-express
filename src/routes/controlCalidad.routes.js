@@ -7,7 +7,7 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const [rows] = await controlCalidadServer.getControlCalidad();
+    const rows = await controlCalidadServer.getControlCalidad();
     return res.json({ status: "success", data: rows });
   } catch (error) {
     console.log(error);

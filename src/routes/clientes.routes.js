@@ -12,7 +12,7 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const [rows] = await clienteServer.getClientes();
+    const rows = await clienteServer.getClientes();
     return res.json({ status: "success", data: rows });
   } catch (error) {
     console.log(error);
