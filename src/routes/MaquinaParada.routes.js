@@ -10,7 +10,7 @@ ruta.get(
   userExtractor([allPermissions.produccion, allPermissions.inyectora]),
   async (req, res) => {
     try {
-      const [rows] = await maquinaParadaServer.getMaquinasParadas();
+      const rows = await maquinaParadaServer.getMaquinasParadas();
       return res.json({ status: "success", data: rows });
     } catch (error) {
       console.log(error);

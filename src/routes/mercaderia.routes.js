@@ -18,7 +18,7 @@ router.get(
   userExtractor([allPermissions.mercaderia]),
   async (req, res) => {
     try {
-      const [rows] = await mercaderiaServer.getMercaderia();
+      const rows = await mercaderiaServer.getMercaderia();
       return res.json({ status: "success", data: rows });
     } catch (error) {
       console.log(error);
