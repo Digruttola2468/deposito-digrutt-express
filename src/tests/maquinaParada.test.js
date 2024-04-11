@@ -38,6 +38,9 @@ describe("** TESTING MAQUINA PARADA /api/maquinaParada **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(newMaquinaParada);
+      expect(result.body.status).to.include("success");
+
       maquinaParada = result._body.data;
     });
 
@@ -48,6 +51,9 @@ describe("** TESTING MAQUINA PARADA /api/maquinaParada **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
+
+      maquinaParada = result._body.data;
     });
 
     it("Method: GET", async () => {
@@ -56,6 +62,8 @@ describe("** TESTING MAQUINA PARADA /api/maquinaParada **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(maquinaParada);
+      expect(result.body.status).to.include("success");
     });
 
     it("Method: DELETE", async () => {
@@ -64,6 +72,7 @@ describe("** TESTING MAQUINA PARADA /api/maquinaParada **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
     });
   });
 });
