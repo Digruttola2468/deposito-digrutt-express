@@ -115,119 +115,107 @@ router.get(
   }
 );
 
-router.get(
-  "/produccion-semanal",
-  userExtractor([allPermissions.produccion]),
-  async (req, res) => {
-    const fechaInit = req.query?.start;
-    const fechaEnd = req.query?.end;
+router.get("/produccion-semanal", async (req, res) => {
+  const fechaInit = req.query?.start;
+  const fechaEnd = req.query?.end;
 
-    const result = producionManager.getRangeDateListProduccion(
-      fechaInit,
-      fechaEnd
-    );
+  const result = producionManager.getRangeDateListProduccion(
+    fechaInit,
+    fechaEnd
+  );
 
-    const numMaquinaSet = new Set();
+  const numMaquinaSet = new Set();
+  result.forEach((elem) => {
+    numMaquinaSet.add(elem.num_maquina);
+  });
+
+  const numMaquinaList = [];
+  numMaquinaSet.forEach((value1, value2, set) => {
+    numMaquinaList.push(value2);
+  });
+
+  const enviar = [];
+
+  for (let i = 0; i < numMaquinaList.length; i++) {
+    const numMaquina = numMaquinaList[i];
+
+    let listEnviar = [];
     result.forEach((elem) => {
-      numMaquinaSet.add(elem.num_maquina);
+      if (elem.num_maquina == numMaquina) {
+        listEnviar.push([
+          new Date(elem.fecha),
+          elem.descripcion,
+          elem.golpesReales,
+          elem.piezasProducidas,
+          elem.prom_golpeshora,
+        ]);
+      }
     });
 
-    const numMaquinaList = [];
-    numMaquinaSet.forEach((value1, value2, set) => {
-      numMaquinaList.push(value2);
+    enviar.push({
+      maquina: numMaquina,
+      data: listEnviar,
     });
-
-    const enviar = [];
-
-    for (let i = 0; i < numMaquinaList.length; i++) {
-      const numMaquina = numMaquinaList[i];
-
-      let listEnviar = [];
-      result.forEach((elem) => {
-        if (elem.num_maquina == numMaquina) {
-          listEnviar.push([
-            new Date(elem.fecha),
-            elem.golpesReales,
-            elem.piezasProducidas,
-            elem.prom_golpeshora,
-          ]);
-        }
-      });
-
-      enviar.push({
-        maquina: numMaquina,
-        data: listEnviar,
-      });
-    }
-
-    const workbook = new ExcelJs.Workbook();
-
-    const worksheet = workbook.addWorksheet("Produccion Semanal");
-
-    const positionTable = [
-      "A2",
-      "F2",
-      "A11",
-      "F11",
-      "A20",
-      "F20",
-      "A29",
-      "F29",
-      "A38",
-      "F38",
-    ];
-    const positionTitle = [
-      "A1",
-      "F1",
-      "A10",
-      "F10",
-      "A19",
-      "F19",
-      "A28",
-      "F28",
-      "A37",
-      "F37",
-    ];
-
-    for (let i = 0; i < numMaquinaList.length; i++) {
-      worksheet.getCell(positionTitle[i]).value =
-        "Maquina " + enviar[i].maquina;
-      worksheet.addTable({
-        name: `Maquina ${enviar[i].maquina}`,
-        ref: positionTable[i],
-        headerRow: true,
-        totalsRow: true,
-        style: {
-          theme: "TableStyleDark3",
-          showRowStripes: true,
-        },
-        columns: [
-          { name: "Fecha", totalsRowLabel: "Total: ", filterButton: true },
-          {
-            name: "Golpes",
-            totalsRowFunction: "sum",
-            filterButton: false,
-          },
-          {
-            name: "Piezas",
-            totalsRowFunction: "sum",
-            filterButton: false,
-          },
-          {
-            name: "Golpes/h",
-            totalsRowFunction: "sum",
-            filterButton: false,
-          },
-        ],
-        rows: enviar[i].data,
-      });
-    }
-
-    await workbook.xlsx.writeFile(dir + "/produccion_semanal.xlsx");
-
-    return res.sendFile(dir + "/produccion_semanal.xlsx");
   }
-);
+
+  const workbook = new ExcelJs.Workbook();
+
+  const worksheet = workbook.addWorksheet("Produccion Semanal");
+
+  let position = 1;
+  for (let i = 0; i < numMaquinaList.length; i++) {
+    worksheet.getCell(`A${position}`).value = "Maquina " + enviar[i].maquina;
+    worksheet.getCell(`A${position}`).font = {
+      italic: true,
+      size: 12,
+    };
+    worksheet.getCell(`A${position}`).alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
+    worksheet.mergeCells(`A${position}:E${position}`);
+
+    position += 1;
+
+    worksheet.addTable({
+      name: `Maquina ${enviar[i].maquina}`,
+      ref: `A${position}`,
+      headerRow: true,
+      totalsRow: true,
+      style: {
+        theme: "TableStyleDark3",
+        showRowStripes: false,
+      },
+      columns: [
+        { name: "Fecha" },
+        { name: "Descripcion" },
+        {
+          name: "Golpes",
+          totalsRowFunction: "sum",
+          filterButton: false,
+        },
+        {
+          name: "Piezas",
+          totalsRowFunction: "sum",
+          filterButton: false,
+        },
+        {
+          name: "Golpes/h",
+          totalsRowFunction: "sum",
+          filterButton: false,
+        },
+      ],
+      rows: enviar[i].data,
+    });
+
+    position += enviar[i].data.length;
+    position += 3;
+  }
+
+  await workbook.xlsx.writeFile(dir + "/produccion_semanal.xlsx");
+
+  return res.sendFile(dir + "/produccion_semanal.xlsx");
+});
 
 router.get(
   "/notaEnvio/:idNotaEnvio",
@@ -338,7 +326,6 @@ router.get(
   userExtractor([permissos.produccion, permissos.matriceria]),
   async (req, res) => {
     try {
-
       const listMatrices = await matricesManager.getMatrices();
 
       if (listMatrices.length == 0)
