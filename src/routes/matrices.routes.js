@@ -43,10 +43,10 @@ ruta.post(
   async (req, res, next) => {
     const object = req.body;
     try {
-      const [result] = await matriceServer.newMatriz(object);
+      const resultData = await matriceServer.newMatriz(object);
       return res.json({
         status: "success",
-        data: { id: result.insertId, ...object },
+        data: resultData,
       });
     } catch (error) {
       console.log(error);
