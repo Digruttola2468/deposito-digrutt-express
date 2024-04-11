@@ -423,10 +423,25 @@ router.get("/pedidos/:dias", async (req, res) => {
 
   const worksheet = workbook.addWorksheet("Estrategia Pedidos");
 
+  const alignmentCenter = {
+    vertical: "middle", horizontal: "center"
+  };
+
   worksheet.getCell("A1").value = `FECHA INICIAL: ${format(
     actual,
     "short"
-  )} \t FECHA FINAL: ${format(dateEnd, "short")} ENTRE ${dias} Dias`;
+  )}`;
+  worksheet.getCell("A1").alignment = alignmentCenter
+  worksheet.mergeCells(`A1:B1`);
+
+  worksheet.getCell("C1").value = `FECHA FINAL: ${format(dateEnd, "short")}`
+  worksheet.getCell("C1").alignment = alignmentCenter
+  worksheet.mergeCells(`C1:E1`);
+
+  worksheet.getCell("F1").value = `ENTRE ${dias} Dias`
+  worksheet.getCell("F1").alignment = alignmentCenter
+  worksheet.mergeCells(`F1:G1`);
+
 
   let A_valueInit = 4;
   for (let i = 0; i < data.length; i++) {
@@ -454,9 +469,9 @@ router.get("/pedidos/:dias", async (req, res) => {
         obj.cantFaltaEnviar,
         obj.fecha_entrega,
         obj.faltanDays,
-        golpesRealesDiaNecesito,
-        piezasDia,
-        promGolpesHora,
+        Math.round(golpesRealesDiaNecesito),
+        Math.round(piezasDia),
+        Math.round(promGolpesHora),
       ]);
     }
 
@@ -464,9 +479,12 @@ router.get("/pedidos/:dias", async (req, res) => {
       `A${A_valueInit - 1}`
     ).value = `${nombreCliente.toUpperCase()}`;
     worksheet.getCell(`A${A_valueInit - 1}`).font = {
-      size: 16,
-      bold: true,
+      size: 14,
+      italic: true
     };
+    worksheet.mergeCells(`A${A_valueInit - 1}:G${A_valueInit - 1}`);
+    worksheet.getCell(`A${A_valueInit - 1}`).alignment = alignmentCenter
+    
 
     worksheet.addTable({
       name: `Pedido`,
@@ -482,7 +500,7 @@ router.get("/pedidos/:dias", async (req, res) => {
           name: `Descripcion`,
         },
         {
-          name: `Falta Enviar`,
+          name: `Enviar`,
         },
         {
           name: `Entrega`,
@@ -491,13 +509,13 @@ router.get("/pedidos/:dias", async (req, res) => {
           name: `Faltan (dias)`,
         },
         {
-          name: `Golpes`,
+          name: `G/Dia`,
         },
         {
-          name: `Piezas`,
+          name: `P/Dia`,
         },
         {
-          name: `Golpes/h`,
+          name: `G/h`,
         },
       ],
       rows: enviar,
@@ -508,7 +526,7 @@ router.get("/pedidos/:dias", async (req, res) => {
     // SUMARLE LONGITUD TABLA
     A_valueInit += element.length;
   }
-
+console.log
   await workbook.xlsx.writeFile(dir + `/estrategiaPedido.xlsx`);
 
   return res.sendFile(dir + `/estrategiaPedido.xlsx`);
