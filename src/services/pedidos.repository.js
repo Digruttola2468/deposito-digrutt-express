@@ -47,8 +47,6 @@ export default class PedidosRepository {
       // GET ONE MATRIZ
       const matriz = matrices.find(matrizElem => matrizElem.id == elem.idCodMatriz)
 
-        console.log(matriz?.cantPiezaGolpe ?? 0);
-
       let cantFaltaEnviar = elem.cantidadEnviar - elem.cantidad_enviada
       return { ...elem, faltanDays: diasTranscurridos, piezaXGolpe: matriz?.cantPiezaGolpe ?? 0, cantFaltaEnviar };
     });

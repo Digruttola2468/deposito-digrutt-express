@@ -26,7 +26,7 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
     const updateCliente = {
       cliente: "pepito",
       domicilio: "casa arijon 2012",
-      localidad: 2,
+      idLocalidad: 2,
       mail: "prueba@gmail.com",
       cuit: "295487819758",
     };
@@ -38,6 +38,9 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(newCliente);
+      expect(result.body.status).to.include("success");
+
       cliente = result._body.data;
     });
 
@@ -48,6 +51,8 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(updateCliente);
+      expect(result.body.status).to.include("success");
     });
 
     it("Method: GET", async () => {
@@ -56,6 +61,8 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(updateCliente);
+      expect(result.body.status).to.include("success");
     });
 
     it("Method: DELETE", async () => {
@@ -64,6 +71,7 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
     });
   });
 });

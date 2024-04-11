@@ -46,7 +46,7 @@ export default class ClientesMySql {
         object.cliente,
         object.cliente,
         object.domicilio,
-        object.localidad,
+        object.idLocalidad,
         object.mail,
         object.cuit,
         cid,
