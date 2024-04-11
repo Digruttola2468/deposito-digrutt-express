@@ -23,7 +23,9 @@ export default class MatricesRepository {
       cod_matriz = `${rows[0].codigo.toUpperCase()}-0${numero_matriz}`;
     else cod_matriz = `${rows[0].codigo.toUpperCase()}-${numero_matriz}`;
 
-    return await this.dao.insert({ cod_matriz, ...matriz });
+    const [result] = await this.dao.insert({ cod_matriz, ...matriz });
+
+    return {id: result.insertId, cod_matriz, ...matriz}
   };
 
   updateMatriz = async (mid, matriz) => {

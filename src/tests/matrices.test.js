@@ -18,6 +18,7 @@ describe("** TESTING MATRICES /api/matrices **", () => {
 
   describe("CRUD", () => {
     let matrices = null;
+    let matrizUpdated = null;
     const newMatriz = {
       descripcion: "sdfsdf",
       idmaterial: "1",
@@ -28,9 +29,8 @@ describe("** TESTING MATRICES /api/matrices **", () => {
     const updateMatriz = {
       descripcion: "noseeee",
       idmaterial: "1",
-      idcliente: "3",
       cantPiezaGolpe: "3",
-      numero_matriz: "100",
+      ubicacion: "A1",
     };
 
     it("Method: POST", async () => {
@@ -40,6 +40,9 @@ describe("** TESTING MATRICES /api/matrices **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(newMatriz);
+      expect(result.body.status).to.include("success");
+
       matrices = result._body.data;
     });
 
@@ -50,6 +53,9 @@ describe("** TESTING MATRICES /api/matrices **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
+
+      matrizUpdated = result.body.data
     });
 
     it("Method: GET", async () => {
@@ -58,6 +64,8 @@ describe("** TESTING MATRICES /api/matrices **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(matrizUpdated);
+      expect(result.body.status).to.include("success");
     });
 
     it("Method: DELETE", async () => {
@@ -66,6 +74,7 @@ describe("** TESTING MATRICES /api/matrices **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
     });
   });
 });
