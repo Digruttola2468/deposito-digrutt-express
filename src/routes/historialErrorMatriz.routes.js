@@ -63,10 +63,19 @@ ruta.post(
     const object = req.body;
     try {
       const [result] = await historialErroresMatrices.newHistorial(object);
-      return res.json({
-        status: "success",
-        data: { id: result.insertId, ...object },
-      });
+      if (result.affectedRows >= 1) {
+        const [rows] = await historialErroresMatrices.getOneHistorial(
+          result.insertId
+        );
+
+        return res.json({ status: "success", data: rows[0] });
+      } else
+        return res
+          .status(404)
+          .json({
+            status: "error",
+            message: "No existe ese Historial De los errores matrices",
+          });
     } catch (error) {
       console.log(error);
       return res
@@ -97,7 +106,10 @@ ruta.put(
       } else
         return res
           .status(404)
-          .json({ status: "error", message: "No existe ese cliente" });
+          .json({
+            status: "error",
+            message: "No existe ese Historial De los errores matrices",
+          });
     } catch (error) {
       console.log(error);
       return res
