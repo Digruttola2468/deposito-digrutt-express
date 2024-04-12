@@ -18,10 +18,10 @@ describe("** TESTING PRODUCCION /api/producion **", () => {
 
   describe("CRUD", () => {
     let produccion = null;
-    const newProduccion = {
+    let matriz = null;
+    let newProduccion = {
       numMaquina: "1",
       fecha: "2023-12-27",
-      idInventario: 525,
       golpesReales: "50",
       piezasProducidas: "541",
       promGolpesHora: 14,
@@ -34,6 +34,31 @@ describe("** TESTING PRODUCCION /api/producion **", () => {
       promGolpesHora: 50,
     };
 
+    it("Method: POST MATRIZ", async () => {
+      let newMatriz = {
+        descripcion: "sdfsdf",
+        idmaterial: "1",
+        idcliente: "1",
+        cantPiezaGolpe: "5",
+        numero_matriz: "100",
+      };
+      const result = await requester
+        .post("/api/matrices")
+        .send(newMatriz)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(newMatriz);
+      expect(result.body.status).to.include("success");
+
+      matriz = result._body.data;
+
+      newProduccion = {
+        ...newProduccion,
+        idMatriz: matriz.id,
+      };
+    });
+
     it("Method: POST", async () => {
       const result = await requester
         .post("/api/producion")
@@ -41,6 +66,9 @@ describe("** TESTING PRODUCCION /api/producion **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(newProduccion);
+      expect(result.body.status).to.include("success");
+
       produccion = result._body.data;
     });
 
@@ -51,6 +79,9 @@ describe("** TESTING PRODUCCION /api/producion **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
+
+      produccion = result._body.data;
     });
 
     it("Method: GET", async () => {
@@ -59,6 +90,8 @@ describe("** TESTING PRODUCCION /api/producion **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(produccion);
+      expect(result.body.status).to.include("success");
     });
 
     it("Method: DELETE", async () => {
@@ -67,6 +100,16 @@ describe("** TESTING PRODUCCION /api/producion **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
+    });
+
+    it("Method: DELETE MATRIZ", async () => {
+      const result = await requester
+        .delete(`/api/matrices/${matriz.id}`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
     });
   });
 });
