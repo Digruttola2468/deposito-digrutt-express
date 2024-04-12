@@ -40,6 +40,7 @@ describe("** TESTING ENVIOS /api/envios **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
       envio = result._body.data;
     });
 
@@ -50,6 +51,7 @@ describe("** TESTING ENVIOS /api/envios **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
     });
 
     it("Method: GET", async () => {
@@ -58,6 +60,7 @@ describe("** TESTING ENVIOS /api/envios **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
     });
 
     it("Method: DELETE", async () => {
@@ -66,6 +69,7 @@ describe("** TESTING ENVIOS /api/envios **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
     });
   });
 });

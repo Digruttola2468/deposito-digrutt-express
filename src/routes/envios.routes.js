@@ -33,10 +33,14 @@ router.post("/", userExtractor([allPermissions.envios]), async (req, res) => {
   const body = req.body;
   try {
     const [result] = await envioServer.newEnvio(body);
-    return res.json({
-      status: "success",
-      data: { id: result.insertId, ...body },
-    });
+    if (result.affectedRows >= 1) {
+      const [rows] = await envioServer.getOneEnvios(result.insertId);
+
+      return res.json({ status: "success", data: rows[0] });
+    } else
+      return res
+        .status(404)
+        .json({ status: "error", message: "No existe ese Envio" });
   } catch (error) {
     console.log(error);
     return res
@@ -59,7 +63,7 @@ router.put(
       } else
         return res
           .status(404)
-          .json({ status: "error", message: "No existe ese cliente" });
+          .json({ status: "error", message: "No existe ese Envio" });
     } catch (error) {
       console.log(error);
       return res
@@ -83,7 +87,7 @@ router.delete(
       else
         return res
           .status(404)
-          .json({ status: "error", message: "No existe ese cliente" });
+          .json({ status: "error", message: "No existe ese envio" });
     } catch (error) {
       console.log(error);
       return res
