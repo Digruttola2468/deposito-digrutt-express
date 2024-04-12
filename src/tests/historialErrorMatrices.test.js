@@ -19,14 +19,14 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
   describe("CRUD", () => {
     let historial = null;
     const newHistorial = {
-      idMatriz: "2",
+      idMatriz: 2,
       descripcion_deterioro: "sdfsdfs",
-      idCategoria: "3",
+      idCategoria: 3,
     };
     const updateHistorial = {
-      idMatriz: "2",
+      fecha: "2024/04/15",
       descripcion_deterioro: "esta es una prueba noma",
-      idCategoria: "4",
+      idCategoria: 4,
     };
 
     it("Method: POST", async () => {
@@ -36,6 +36,8 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
+
       historial = result._body.data;
     });
 
@@ -46,6 +48,9 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
+
+      historial = result._body.data;
     });
 
     it("Method: GET", async () => {
@@ -54,6 +59,58 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(historial);
+      expect(result.body.data.isSolved).to.eq(0);
+      expect(result.body.data.fechaTerminado).to.be.null;
+      expect(result.body.status).to.include("success");
+    });
+
+    it("Method: UPDATE SOLVED TRUE", async () => {
+      const result = await requester
+        .put(`/api/historialMatriz/${historial.id}/1`)
+        .send(updateHistorial)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
+
+      historial = result._body.data;
+    });
+
+    it("Method: GET", async () => {
+      const result = await requester
+        .get(`/api/historialMatriz/${historial.id}`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(historial);
+      expect(result.body.data.isSolved).to.eq(1);
+      expect(result.body.data.fechaTerminado).to.not.null;
+      expect(result.body.status).to.include("success");
+    });
+
+    it("Method: UPDATE SOLVED FALSE", async () => {
+      const result = await requester
+        .put(`/api/historialMatriz/${historial.id}/0`)
+        .send(updateHistorial)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
+
+      historial = result._body.data;
+    });
+
+    it("Method: GET", async () => {
+      const result = await requester
+        .get(`/api/historialMatriz/${historial.id}`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(result.ok).to.be.ok;
+      expect(result.body.data).to.include(historial);
+      expect(result.body.data.isSolved).to.eq(0);
+      expect(result.body.data.fechaTerminado).to.be.null;
+      expect(result.body.status).to.include("success");
     });
 
     it("Method: DELETE", async () => {
@@ -62,6 +119,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
     });
   });
 });

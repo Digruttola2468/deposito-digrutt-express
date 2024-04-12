@@ -18,9 +18,9 @@ export default class HistorialErrorMatrices {
   newHistorial = async (historial) => {
     //Obtenemos la fecha actual
     const fechaDate = new Date();
-    const stringDate = `${fechaDate.getFullYear()}-${
+    const stringDate = `${fechaDate.getFullYear()}/${
       fechaDate.getMonth() + 1
-    }-${fechaDate.getDate()}`;
+    }/${fechaDate.getDate()}`;
 
     return await this.dao.insert({ ...historial, stringDate });
   };
