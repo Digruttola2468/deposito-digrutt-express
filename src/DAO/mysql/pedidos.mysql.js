@@ -52,7 +52,7 @@ export default class PedidosMysql {
     return await con.query(
       "INSERT INTO pedidos (`idInventario`, `idcliente`, `cantidadEnviar`, `fecha_entrega`, `ordenCompra`) VALUES (?,?,?,?,?);",
       [
-        pedido.idInventario,
+        pedido.idinventario,
         pedido.idcliente,
         pedido.cantidadEnviar,
         pedido.fecha_entrega,
@@ -72,7 +72,7 @@ export default class PedidosMysql {
                 cantidad_enviada = IFNULL(?,cantidad_enviada)
             WHERE id = ?;`,
       [
-        object.idInventario,
+        object.idinventario,
         object.idcliente,
         object.cantidadEnviar,
         object.fecha_entrega,
