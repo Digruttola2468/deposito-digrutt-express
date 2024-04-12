@@ -17,21 +17,42 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
   });
 
   describe("CRUD", () => {
+    let inventario = null;
     let pedido = null;
-    const newPedido = {
-      idInventario: "525",
+    let newPedido = {
       idcliente: "1",
       cantidadEnviar: "1232",
       fecha_entrega: "2024-01-20",
       ordenCompra: "",
     };
     const updatePedido = {
-      idInventario: "526",
+      idinventario: "10",
       idcliente: "5",
       cantidadEnviar: "1550",
       fecha_entrega: "2024-01-30",
       ordenCompra: "OC 7030",
     };
+
+    it("Method: POST INVENTARIO", async () => {
+      const newInventario = {
+        nombre: "prueba0108",
+        descripcion: "Esto es una prueba testing",
+        pesoUnidad: 10,
+        stockCaja: 200,
+        idCliente: 1,
+      };
+      const result = await requester
+        .post("/api/inventario")
+        .send(newInventario)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(result.ok).to.be.ok;
+      inventario = result._body.data;
+      newPedido = {
+        ...newPedido,
+        idinventario: inventario.id,
+      };
+    });
 
     it("Method: POST", async () => {
       const result = await requester
@@ -40,6 +61,9 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data.is_done).to.eq(0);
+      expect(result.body.status).to.include("success");
+
       pedido = result._body.data;
     });
 
@@ -50,6 +74,10 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data.is_done).to.eq(0);
+      expect(result.body.status).to.include("success");
+
+      pedido = result._body.data;
     });
 
     it("Method: GET", async () => {
@@ -58,6 +86,31 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(result.ok).to.be.ok;
+      expect(result.body.data.is_done).to.eq(0);
+      expect(result.body.status).to.include("success");
+    });
+
+    it("Method: UPDATE DONE PEDIDO", async () => {
+      const result = await requester
+        .put(`/api/pedidos/${pedido.id}/doneStock`)
+        .send({ isDone: 1 })
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(result.ok).to.be.ok;
+      expect(result.body.data.is_done).to.eq(1);
+      expect(result.body.status).to.include("success");
+
+      pedido = result._body.data;
+    });
+
+    it("Method: GET", async () => {
+      const result = await requester
+        .get(`/api/pedidos/${pedido.id}`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(result.ok).to.be.ok;
+      expect(result.body.data.is_done).to.eq(1);
+      expect(result.body.status).to.include("success");
     });
 
     it("Method: DELETE", async () => {
@@ -65,6 +118,14 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
         .delete(`/api/pedidos/${pedido.id}`)
         .set("Authorization", `Bearer ${token}`);
 
+      expect(result.ok).to.be.ok;
+      expect(result.body.status).to.include("success");
+    });
+
+    it("DELETE /api/inventario/:iid", async () => {
+      const result = await requester
+        .delete(`/api/inventario/${inventario.id}`)
+        .set("Authorization", `Bearer ${token}`);
       expect(result.ok).to.be.ok;
     });
   });
