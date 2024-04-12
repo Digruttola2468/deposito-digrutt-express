@@ -83,7 +83,7 @@ ruta.put(
     } else
       return res
         .status(404)
-        .json({ status: "error", message: "No existe ese cliente" });
+        .json({ status: "error", message: "No existe ese historial fechas" });
   }
 );
 
@@ -104,7 +104,7 @@ ruta.delete(
       else
         return res
           .status(404)
-          .json({ status: "error", message: "No existe ese historial" });
+          .json({ status: "error", message: "No existe ese historial fechas" });
     } catch (error) {
       console.log(error);
       return res

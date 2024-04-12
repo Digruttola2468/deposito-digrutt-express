@@ -140,7 +140,7 @@ ruta.put(
       } else
         return res
           .status(404)
-          .json({ status: "error", message: "No existe ese cliente" });
+          .json({ status: "error", message: "No existe ese Historial De los errores matrices" });
     } catch (error) {
       console.log(error);
       return res
@@ -166,7 +166,7 @@ ruta.delete(
       else
         return res
           .status(404)
-          .json({ status: "error", message: "No existe ese cliente" });
+          .json({ status: "error", message: "No existe ese Historial De los errores matrices" });
     } catch (error) {
       console.log(error);
       return res
