@@ -115,14 +115,16 @@ export default class ProduccionMysql {
             num_maquina = IFNULL(?,num_maquina),
             golpesReales = IFNULL(?,golpesReales),
             piezasProducidas = IFNULL(?,piezasProducidas),
-            prom_golpeshora = IFNULL(?,prom_golpeshora)
+            prom_golpeshora = IFNULL(?,prom_golpeshora),
+            idMatriz = IFNULL(?, idMatriz)
         WHERE id = ?;`,
       [
         object.fecha,
-        object.num_maquina,
+        object.numMaquina,
         object.golpesReales,
         object.piezasProducidas,
-        object.prom_golpeshora,
+        object.promGolpesHora,
+        object.idMatriz,
         idProduccion,
       ]
     );
