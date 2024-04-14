@@ -87,7 +87,6 @@ export default class PedidosRepository {
 
       const date = new Date();
       const formatoooDate = format({ date, format: "YYYY-MM-DD" })
-      console.log(formatoooDate);
       const formatoooHora = format({ date, format: "HH:mm" })
 
       await this.historialFechaPedidosDao.insert({
