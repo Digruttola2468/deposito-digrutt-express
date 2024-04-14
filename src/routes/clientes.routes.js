@@ -10,12 +10,43 @@ import {
 
 const router = Router();
 
+const handleReturnErrors = (res, campus, message) => {
+  return res.status(400).json({ status: "error", errors: [{campus, message}] });
+};
+
+const handleErrors = (e, res, campus = ["idLocalidad", "cliente", "codigo"]) => {
+  switch (e.code) {
+    case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+      if (e.sqlMessage.includes("idLocalidad"))
+        handleReturnErrors(res, "idLocalidad", "Error tipo de dato");
+
+      break;
+    case "WARN_DATA_TRUNCATED":
+      if (e.sqlMessage.includes("idLocalidad"))
+        handleReturnErrors(res, "idLocalidad", "Error tipo de dato");
+
+      break;
+    case "ER_NO_REFERENCED_ROW_2":
+      if (e.sqlMessage.includes("idLocalidad"))
+        handleReturnErrors(res, "idLocalidad", "No existe esa localidad");
+
+      break;
+    case "ER_DUP_ENTRY":
+      if (e.sqlMessage.includes("cliente"))
+        handleReturnErrors(res, "cliente", "Ya existe ese cliente");
+      if (e.sqlMessage.includes("codigo"))
+        handleReturnErrors(res, "codigo", "Error al intentar crear cliente");
+      break;
+    default:
+      throw e;
+  }
+};
+
 router.get("/", async (req, res) => {
   try {
     const rows = await clienteServer.getClientes();
     return res.json({ status: "success", data: rows });
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ status: "error", message: "Something Wrong" });
@@ -27,7 +58,6 @@ router.get("/:cid", async (req, res) => {
     const [rows] = await clienteServer.getOneCliente(req.params.cid);
     return res.json({ status: "success", data: rows[0] });
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ status: "error", message: "Something Wrong" });
@@ -38,7 +68,7 @@ router.post(
   "/",
   userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
   schemaValidation(schemaPostCliente),
-  async (req, res, next) => {
+  async (req, res) => {
     const object = req.body;
     try {
       const [result] = await clienteServer.newCliente(object);
@@ -46,11 +76,8 @@ router.post(
         status: "success",
         data: { id: result.insertId, ...object },
       });
-    } catch (error) {
-      console.log(error);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Something Wrong" });
+    } catch (e) {
+      handleErrors(e, res)
     }
   }
 );
@@ -67,17 +94,14 @@ router.put(
 
       if (result.affectedRows >= 1) {
         const [rows] = await clienteServer.getOneCliente(idCliente);
-        
+
         return res.json({ status: "success", data: rows[0] });
       } else
         return res
           .status(404)
           .json({ status: "error", message: "No existe ese cliente" });
-    } catch (error) {
-      console.log(error);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Something Wrong" });
+    } catch (e) {
+      handleErrors(e, res)
     }
   }
 );
@@ -99,7 +123,6 @@ router.delete(
           .status(404)
           .json({ status: "error", message: "No existe ese cliente" });
     } catch (error) {
-      console.log(error);
       return res
         .status(500)
         .json({ status: "error", message: "Something Wrong" });

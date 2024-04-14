@@ -1,17 +1,17 @@
 import { z } from "zod";
 
 export const schemaPostCliente = z.object({
-  cliente: z.string(),
-  domicilio: z.string().optional(),
-  idLocalidad: z.number().min(0).optional(),
-  mail: z.string().email().optional(),
-  cuit: z.string().optional(),
+  cliente: z.string().min(1),
+  domicilio: z.string().optional().nullable(),
+  idLocalidad: z.number().min(0).optional().nullable(),
+  mail: z.string().email().optional().nullable(),
+  cuit: z.string().optional().nullable(),
 });
 
 export const schemaPutCliente = z.object({
-  cliente: z.string().optional(),
-  domicilio: z.string().optional(),
-  idLocalidad: z.number().min(0).optional(),
-  mail: z.string().email().optional(),
-  cuit: z.string().optional(),
+  cliente: z.string().min(1).optional().nullable(),
+  domicilio: z.string().optional().nullable(),
+  idLocalidad: z.number().min(0).optional().nullable(),
+  mail: z.string().email().optional().nullable(),
+  cuit: z.string().optional().nullable(),
 });

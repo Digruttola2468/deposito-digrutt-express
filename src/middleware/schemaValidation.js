@@ -5,7 +5,7 @@ export default (schema) => (req, res, next) => {
     //console.log(result.error.issues);
 
     const error = result.error.issues;
-
+    console.log(error);
     let listErrors = [];
     for (let i = 0; i < error.length; i++) {
       const element = error[i];
@@ -33,6 +33,12 @@ export default (schema) => (req, res, next) => {
           listErrors.push({
             campus: element.path[0],
             message: `El campo ${element.path[0]} esta vacio `,
+          });
+          break;
+        case "invalid_string":
+          listErrors.push({
+            campus: element.path[0],
+            message: `El Gmail es incorrecto `,
           });
           break;
       }
