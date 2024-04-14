@@ -1,4 +1,4 @@
-import { format, isAfter, isBefore } from "@formkit/tempo";
+import { format, formatStr, isAfter, isBefore } from "@formkit/tempo";
 
 export default class PedidosRepository {
   constructor(pedidosDao, historialFechaDao, matricesDao) {
@@ -7,13 +7,20 @@ export default class PedidosRepository {
     this.matricesDao = matricesDao;
   }
 
-  //await historialPedidosManager.postHistorialFechasPedidos({ idPedido: idPedido, cantidad_enviada: enviar.cantidadEnviada })
-
   getPedidos = async () => await this.dao.get();
   getOnePedido = async (idPedido) => await this.dao.getOne(idPedido);
   newPedido = async (pedido) => await this.dao.insert(pedido);
 
-  newListPedidos = async (listPedidos) => {};
+  newListPedidos = async (listPedidos) => {
+    const listPedidosAdd = [];
+    for (let i = 0; i < listPedidos.length; i++) {
+      const element = listPedidos[i];
+
+      const [result] = await this.dao.insert(element);
+      listPedidosAdd.push({ id: result.insertId, ...element });
+    }
+    return listPedidosAdd;
+  };
 
   excelInforme = async (dateInit, dateEnd) => {
     const rows = await this.dao.get();
@@ -39,16 +46,23 @@ export default class PedidosRepository {
       const milisegundosTranscurridos = Math.abs(
         fecha.getTime() - dateInit.getTime()
       );
-      
+
       let diasTranscurridos = Math.round(
         milisegundosTranscurridos / milisegundosDia
       );
 
       // GET ONE MATRIZ
-      const matriz = matrices.find(matrizElem => matrizElem.id == elem.idCodMatriz)
+      const matriz = matrices.find(
+        (matrizElem) => matrizElem.id == elem.idCodMatriz
+      );
 
-      let cantFaltaEnviar = elem.cantidadEnviar - elem.cantidad_enviada
-      return { ...elem, faltanDays: diasTranscurridos, piezaXGolpe: matriz?.cantPiezaGolpe ?? 0, cantFaltaEnviar };
+      let cantFaltaEnviar = elem.cantidadEnviar - elem.cantidad_enviada;
+      return {
+        ...elem,
+        faltanDays: diasTranscurridos,
+        piezaXGolpe: matriz?.cantPiezaGolpe ?? 0,
+        cantFaltaEnviar,
+      };
     });
 
     // PASAMOS SET TO ARRAY
@@ -68,8 +82,24 @@ export default class PedidosRepository {
     return listClientes;
   };
 
-  updatePedido = async (idPedido, pedido) =>
-    await this.dao.update(idPedido, pedido);
+  updatePedido = async (idPedido, pedido) => {
+    if (pedido.cantidadEnviada != null && pedido.cantidadEnviada >= 1) {
+
+      const date = new Date();
+      const formatoooDate = format({ date, format: "YYYY-MM-DD" })
+      console.log(formatoooDate);
+      const formatoooHora = format({ date, format: "HH:mm" })
+
+      await this.historialFechaPedidosDao.insert({
+        idPedido: idPedido,
+        stringDate: formatoooDate,
+        horaString: formatoooHora,
+        cantidad_enviada: pedido.cantidadEnviada,
+      });
+    }
+
+    return await this.dao.update(idPedido, pedido);
+  };
 
   updateDonePedido = async (idPedido, isDone) =>
     await this.dao.updatePedidosIsDone(idPedido, isDone);

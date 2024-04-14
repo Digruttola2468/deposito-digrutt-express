@@ -5,7 +5,7 @@ export default (schema) => (req, res, next) => {
     //console.log(result.error.issues);
 
     const error = result.error.issues;
-    console.log(error);
+    
     let listErrors = [];
     for (let i = 0; i < error.length; i++) {
       const element = error[i];
@@ -66,7 +66,7 @@ export const schemaListValidation = (schema) => (req, res, next) => {
             listErrors.push({
               index: element.path[0],
               campus: element.path[1],
-              message: `El campo ${element.path[0]} esta vacio`,
+              message: `El campo ${element.path[1]} esta vacio`,
             });
           } else
             listErrors.push({
@@ -79,14 +79,14 @@ export const schemaListValidation = (schema) => (req, res, next) => {
           listErrors.push({
             index: element.path[0],
             campus: element.path[1],
-            message: `No existe esa/e ${element.path[0]} `,
+            message: `No existe esa/e ${element.path[1]} `,
           });
           break;
         case "too_small":
           listErrors.push({
             index: element.path[0],
             campus: element.path[1],
-            message: `El campo ${element.path[0]} esta vacio `,
+            message: `El campo ${element.path[1]} esta vacio `,
           });
           break;
         case "invalid_string":
