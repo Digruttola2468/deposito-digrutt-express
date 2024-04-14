@@ -11,7 +11,7 @@ import {
   HistorialFechasPedidos,
   Matrices,
   HistorialErrorsMatriz,
-  controlCalidad,
+  atencionReclamos,
   Produccion,
   Pedidos,
 } from "../DAO/factory.js";
@@ -31,7 +31,7 @@ import RelacionMatrizMaquinaRepository from "./relacionMaquinaMatriz.repository.
 import HistorialFechasPedidosRepository from "./historialFechaPedidos.respository.js";
 import MatricesRepository from "./matrices.repository.js";
 import HistorialErrorMatrices from "./historialErrorMatrices.repository.js";
-import ControlCalidadRepository from "./controlCalidad.repository.js";
+import ControlCalidadRepository from "./atencionReclamos.repository.js";
 import ProduccionRepository from "./produccion.repository.js";
 import PedidosRepository from "./pedidos.repository.js";
 
@@ -59,7 +59,7 @@ export const historialErroresMatrices = new HistorialErrorMatrices(
   new HistorialErrorsMatriz()
 );
 export const controlCalidadServer = new ControlCalidadRepository(
-  new controlCalidad()
+  new atencionReclamos()
 );
 export const mercaderiaServer = new MercaderiaRepository(
   new Mercaderia(),

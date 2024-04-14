@@ -2,6 +2,11 @@ import { Router } from "express";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
 import { controlCalidadServer } from "../services/index.repository.js";
+import schemaValidation from "../middleware/schemaValidation.js";
+import {
+  schemaPostReclamos,
+  schemaPutReclamos,
+} from "../schemas/atencionReclamos.schema.js";
 
 const router = Router();
 
@@ -31,6 +36,20 @@ router.get("/cliente/:idCliente", async (req, res) => {
   }
 });
 
+router.get("/inventario/:idInventario", async (req, res) => {
+  try {
+    const [rows] = await controlCalidadServer.getControlCalidadByClientes(
+      req.params.idCliente
+    );
+    return res.json({ status: "success", data: rows });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Something Wrong" });
+  }
+});
+
 router.get("/:cid", async (req, res) => {
   try {
     const [rows] = await controlCalidadServer.getOneControlCalidad(
@@ -47,7 +66,8 @@ router.get("/:cid", async (req, res) => {
 
 router.post(
   "/",
-  userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
+  userExtractor([allPermissions.oficina]),
+  schemaValidation(schemaPostReclamos),
   async (req, res, next) => {
     const object = req.body;
     try {
@@ -67,7 +87,8 @@ router.post(
 
 router.put(
   "/:id",
-  userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
+  userExtractor([allPermissions.oficina]),
+  schemaValidation(schemaPutReclamos),
   async (req, res, next) => {
     const idControlCalidad = req.params.id;
     const object = req.body;
@@ -98,7 +119,7 @@ router.put(
 
 router.delete(
   "/:id",
-  userExtractor([allPermissions.oficina, allPermissions.mercaderia]),
+  userExtractor([allPermissions.oficina]),
   async (req, res, next) => {
     const idControlCalidad = req.params.id;
     try {
