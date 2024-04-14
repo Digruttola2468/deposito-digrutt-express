@@ -2,8 +2,46 @@ import { Router } from "express";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
 import { pedidoServer } from "../services/index.repository.js";
+import schemaValidation, {
+  schemaListValidation,
+} from "../middleware/schemaValidation.js";
+import {
+  schemaPostListPedidos,
+  schemaPostPedidos,
+  schemaPutPedidos,
+  schemaPutPedidosDone,
+} from "../schemas/pedidos.schema.js";
 
 const ruta = Router();
+
+const handleReturnErrors = (res, campus, message) => {
+  return res
+    .status(400)
+    .json({ status: "error", errors: [{ campus, message }] });
+};
+
+const handleErrors = (e, res) => {
+  switch (e.code) {
+    case "ER_NO_REFERENCED_ROW_2":
+    case "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD":
+      if (e.sqlMessage.includes("idinventario"))
+        handleReturnErrors(res, "idinventario", "No existe ese cod.producto");
+
+      if (e.sqlMessage.includes("idcliente"))
+        handleReturnErrors(res, "idcliente", "No existe ese cliente");
+
+      if (e.sqlMessage.includes("cantidadEnviar"))
+        handleReturnErrors(
+          res,
+          "cantidadEnviar",
+          "Cantidad Enviar no es numerico"
+        );
+
+      break;
+    default:
+      throw e;
+  }
+};
 
 ruta.get(
   "/",
@@ -20,8 +58,8 @@ ruta.get(
     }
   }
 );
-/*
-ruta.get(
+
+/*ruta.get(
   "/list/:value",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
   async (req, res) => {
@@ -64,8 +102,18 @@ ruta.get(
 ruta.post(
   "/",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
+  schemaValidation(schemaPostPedidos),
   async (req, res, next) => {
     const object = req.body;
+
+    const validarDate = new Date(object.fecha_entrega);
+
+    if (Number.isNaN(validarDate.getDate()))
+      return res.status(400).json({
+        status: "error",
+        errors: [{ campus: "fecha", message: "La fecha es invalido" }],
+      });
+
     try {
       const [result] = await pedidoServer.newPedido(object);
       if (result.affectedRows >= 1) {
@@ -77,34 +125,60 @@ ruta.post(
           .status(404)
           .json({ status: "error", message: "No existe ese pedido" });
     } catch (error) {
-      console.log(error);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Something Wrong" });
+      handleErrors(error, res);
     }
   }
 );
 
-//Falta validar si esta bien realizada la lista
-/*ruta.post(
+ruta.post(
   "/list",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
+  schemaListValidation(schemaPostListPedidos),
   async (req, res) => {
-    const object = req.body;
-    const { data, error } = await pedidosManager.postListPedidos(object);
+    const list = req.body;
 
-    if (error) return res.status(404).json(error);
+    const listErrors = [];
+    for (let i = 0; i < list.length; i++) {
+      const element = list[i];
+      const validarDate = new Date(element.fecha_entrega);
 
-    return res.json(data);
+      if (Number.isNaN(validarDate.getDate()))
+        listErrors.push({
+          index: i,
+          campus: "fecha",
+          message: `La fecha es invalido`,
+        });
+    }
+
+    if (listErrors.length != 0)
+      return res.status(400).json({ status: "error", errors: listErrors });
+
+    try {
+      const result = await pedidoServer.newListPedidos(list);
+
+      return res.json({ status: "success", data: result });
+    } catch (error) {
+      handleErrors(error, res);
+    }
   }
-);*/
+);
 
 ruta.put(
   "/:idPedido",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
+  schemaValidation(schemaPutPedidos),
   async (req, res, next) => {
     const idPedido = req.params.idPedido;
     const object = req.body;
+
+    const validarDate = new Date(object.fecha_entrega);
+
+    if (Number.isNaN(validarDate.getDate()))
+      return res.status(400).json({
+        status: "error",
+        errors: [{ campus: "fecha", message: "La fecha es invalido" }],
+      });
+
     try {
       const [result] = await pedidoServer.updatePedido(idPedido, object);
 
@@ -117,10 +191,7 @@ ruta.put(
           .status(404)
           .json({ status: "error", message: "No existe ese pedido" });
     } catch (error) {
-      console.log(error);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Something Wrong" });
+      handleErrors(error, res);
     }
   }
 );
@@ -128,6 +199,7 @@ ruta.put(
 ruta.put(
   "/:idPedido/doneStock",
   userExtractor([allPermissions.mercaderia, allPermissions.oficina]),
+  schemaValidation(schemaPutPedidosDone),
   async (req, res) => {
     const idPedido = req.params.idPedido;
     const { isDone } = req.body;
@@ -145,7 +217,6 @@ ruta.put(
             .status(404)
             .json({ status: "error", message: "No existe ese pedido" });
       } catch (error) {
-        console.log(error);
         return res
           .status(500)
           .json({ status: "error", message: "Something Wrong" });
