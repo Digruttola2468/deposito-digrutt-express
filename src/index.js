@@ -18,7 +18,7 @@ import notaEnvioRoute from "./routes/facturaNegro.routes.js";
 import excelRoute from "./routes/excel.routes.js";
 import clientesRoute from "./routes/clientes.routes.js";
 import EnviosRoute from "./routes/envios.routes.js";
-import maquinaParadaRoute from "./routes/MaquinaParada.routes.js";
+import maquinaParadaRoute from "./routes/maquinaParada.routes.js";
 import relacionMaquinaMatrizRoute from "./routes/relacionMatrizMaquina.routes.js";
 import historialFechaPedidosRoute from "./routes/historialFechasPedidos.routes.js";
 import matricesRoute from "./routes/matrices.routes.js";
@@ -40,9 +40,7 @@ import graficaRoute from "./routes/grafica.routes.js";
 import con from "./config/db.js";
 
 // --- Middlewares ---
-//import errorHandle from "./middleware/errors.js";
 import initPassport from "./config/sessions.passport.js";
-import { ENUM_ERRORS } from "./errors/enums.js";
 
 // Init Express
 const app = express();
@@ -69,8 +67,6 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 initPassport();
-
-
 
 // --- Routers ---
 app.use("/api/server", indexRoute);
@@ -100,59 +96,6 @@ app.use("/api/pedidos", pedidosRoute);
 /*
 app.use("/api/grafica", grafica);
 */
-
-app.use((error, req, res, next) => {
-  
-  //console.log(error);
-  console.log("MESSAGE: ", error.sqlMessage)
-  res.status(500).send({
-    status: "error",
-    error: "Something Wrong",
-  });
-  /*switch (error.code) {
-    case ENUM_ERRORS.INVALID_OBJECT_NOT_EXISTS:
-      res
-        .status(400)
-        .send({ status: "Error", campus: error.name, message: error.cause });
-      break;
-    case ENUM_ERRORS.INVALID_TYPES_ERROR:
-      res
-        .status(400)
-        .send({ status: "Error", campus: error.name, message: error.cause });
-      break;
-    case ENUM_ERRORS.DATABASE_ERROR:
-      res
-        .status(500)
-        .send({ status: "Error", error: error.name, message: error.cause });
-      break;
-    case ENUM_ERRORS.FOREING_KEY_OBJECT_NOT_EXISTS:
-      res
-        .status(404)
-        .send({ status: "Error", campus: error.name, message: error.cause });
-      break;
-    case ENUM_ERRORS.INVALID_TYPE_EMPTY:
-      res
-        .status(400)
-        .send({ status: "Error", campus: error.name, message: error.cause });
-      break;
-    case ENUM_ERRORS.ROUTING_ERROR:
-      res
-        .status(400)
-        .send({ status: "Error", error: error.name, message: error.cause });
-      break;
-    case ENUM_ERRORS.THIS_OBJECT_ALREDY_EXISTS:
-      res
-        .status(400)
-        .send({ status: "Error", campus: error.name, message: error.cause });
-      break;
-    default:
-      res.status(500).send({
-        status: "error",
-        error: "Something Wrong",
-      });
-      break;
-  }*/
-});
 
 // WHEN NOT FOUND PAGE
 app.use((req, res) => {
