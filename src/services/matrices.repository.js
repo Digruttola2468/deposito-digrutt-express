@@ -25,7 +25,11 @@ export default class MatricesRepository {
 
     const [result] = await this.dao.insert({ cod_matriz, ...matriz });
 
-    return {id: result.insertId, cod_matriz, ...matriz}
+    if (result.affectedRows >= 1) {
+      const [rows] = await this.getOneMatriz(result.insertId);
+
+      return rows;
+    } else return null;
   };
 
   updateMatriz = async (mid, matriz) => {
