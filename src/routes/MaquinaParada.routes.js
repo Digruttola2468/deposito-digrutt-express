@@ -2,8 +2,37 @@ import { Router } from "express";
 import userExtractor from "../middleware/userExtractor.js";
 import allPermissions from "../config/permissos.js";
 import { maquinaParadaServer } from "../services/index.repository.js";
+import schemaValidation from "../middleware/schemaValidation.js";
+import {
+  schemaPostMaquinaParada,
+  schemaPutMaquinaParada,
+} from "../schemas/maquinaParada.schema.js";
 
 const ruta = Router();
+
+const handleReturnErrors = (res, campus, message) => {
+  return res
+    .status(400)
+    .json({ status: "error", errors: [{ campus, message }] });
+};
+
+const handleErrors = (e, res) => {
+  switch (e.code) {
+    case "ER_NO_REFERENCED_ROW_2":
+      if (e.sqlMessage.includes("idMotivoMaquinaParada"))
+        return handleReturnErrors(
+          res,
+          "motivoMaquinaParada",
+          "No existe esa maquina parada"
+        );
+
+      if (e.sqlMessage.includes("idMaquina"))
+        return handleReturnErrors(res, "numMaquina", "No existe esa maquina");
+
+    default:
+      throw e;
+  }
+};
 
 ruta.get(
   "/",
@@ -42,8 +71,18 @@ ruta.get(
 ruta.post(
   "/",
   userExtractor([allPermissions.produccion, allPermissions.inyectora]),
+  schemaValidation(schemaPostMaquinaParada),
   async (req, res) => {
     const body = req.body;
+
+    const validarDate = new Date(body.fecha);
+
+    if (Number.isNaN(validarDate.getDate()))
+      return res.status(400).json({
+        status: "error",
+        errors: [{ campus: "fecha", message: "La fecha es invalido" }],
+      });
+
     try {
       const [result] = await maquinaParadaServer.newMaquinaParada(body);
       return res.json({
@@ -51,10 +90,7 @@ ruta.post(
         data: { id: result.insertId, ...body },
       });
     } catch (error) {
-      console.log(error);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Something Wrong" });
+      return handleErrors(error, res);
     }
   }
 );
@@ -62,6 +98,7 @@ ruta.post(
 ruta.put(
   "/:idMaquinaParada",
   userExtractor([allPermissions.produccion, allPermissions.inyectora]),
+  schemaValidation(schemaPutMaquinaParada),
   async (req, res) => {
     const idMaquinaParada = req.params.idMaquinaParada;
     const body = req.body;
@@ -83,10 +120,7 @@ ruta.put(
           .status(404)
           .json({ status: "error", message: "No existe esa Maquina Parada" });
     } catch (error) {
-      console.log(error);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Something Wrong" });
+      return handleErrors(error, res);
     }
   }
 );
@@ -108,7 +142,6 @@ ruta.delete(
           .status(404)
           .json({ status: "error", message: "No existe esa Maquina Parada" });
     } catch (error) {
-      console.log(error);
       return res
         .status(500)
         .json({ status: "error", message: "Something Wrong" });

@@ -5,7 +5,7 @@ export default (schema) => (req, res, next) => {
     //console.log(result.error.issues);
 
     const error = result.error.issues;
-    
+    console.log(error);
     let listErrors = [];
     for (let i = 0; i < error.length; i++) {
       const element = error[i];
@@ -41,6 +41,12 @@ export default (schema) => (req, res, next) => {
             message: `El Gmail es incorrecto `,
           });
           break;
+        case "too_big":
+          listErrors.push({
+            campus: element.path[0],
+            message: `El Campo ${element.path[0]} supera el numero ${element.maximum} `,
+          });
+          break;
       }
     }
 
@@ -55,7 +61,7 @@ export const schemaListValidation = (schema) => (req, res, next) => {
     //console.log(result.error.issues);
 
     const error = result.error.issues;
-    
+
     let listErrors = [];
     for (let i = 0; i < error.length; i++) {
       const element = error[i];
