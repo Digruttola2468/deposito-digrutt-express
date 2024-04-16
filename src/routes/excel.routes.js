@@ -165,7 +165,19 @@ router.get(
 
     const worksheet = workbook.addWorksheet("Produccion Semanal");
 
-    let position = 1;
+    worksheet.getCell(`A1`).value = `Semana 1 (${fechaInit} - ${fechaEnd})`;
+    worksheet.getCell(`A1`).font = {
+      italic: false,
+      size: 14,
+      bold: true,
+    };
+    worksheet.getCell(`A1`).alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
+    worksheet.mergeCells(`A1:E1`);
+
+    let position = 2;
     for (let i = 0; i < numMaquinaList.length; i++) {
       worksheet.getCell(`A${position}`).value = "Maquina " + enviar[i].maquina;
       worksheet.getCell(`A${position}`).font = {
