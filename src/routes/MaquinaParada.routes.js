@@ -103,6 +103,16 @@ ruta.put(
     const idMaquinaParada = req.params.idMaquinaParada;
     const body = req.body;
 
+    if (body.fecha != null && body.fecha != "") {
+      const validarDate = new Date(body.fecha);
+
+      if (Number.isNaN(validarDate.getDate()))
+        return res.status(400).json({
+          status: "error",
+          errors: [{ campus: "fecha", message: "La fecha es invalido" }],
+        });
+    }
+
     try {
       const [result] = await maquinaParadaServer.updateMaquinaParada(
         idMaquinaParada,

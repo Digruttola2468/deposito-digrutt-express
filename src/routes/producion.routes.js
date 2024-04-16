@@ -167,14 +167,16 @@ ruta.put(
     const idProduccion = req.params.idProduccion;
     const body = req.body;
 
-    const validarDate = new Date(body.fecha);
+    if (body.fecha != null && body.fecha != "") {
+      const validarDate = new Date(body.fecha);
 
-    if (Number.isNaN(validarDate.getDate()))
-      return res.status(400).json({
-        status: "error",
-        errors: [{ campus: "fecha", message: "La fecha es invalido" }],
-      });
-
+      if (Number.isNaN(validarDate.getDate()))
+        return res.status(400).json({
+          status: "error",
+          errors: [{ campus: "fecha", message: "La fecha es invalido" }],
+        });
+    }
+    
     try {
       const [result] = await produccionServer.updateProduccion(
         idProduccion,

@@ -170,14 +170,16 @@ ruta.put(
   async (req, res, next) => {
     const idPedido = req.params.idPedido;
     const object = req.body;
+    
+    if (body.fecha_entrega != null && body.fecha_entrega != "") {
+      const validarDate = new Date(body.fecha_entrega);
 
-    const validarDate = new Date(object.fecha_entrega);
-
-    if (Number.isNaN(validarDate.getDate()))
-      return res.status(400).json({
-        status: "error",
-        errors: [{ campus: "fecha", message: "La fecha es invalido" }],
-      });
+      if (Number.isNaN(validarDate.getDate()))
+        return res.status(400).json({
+          status: "error",
+          errors: [{ campus: "fecha", message: "La fecha es invalido" }],
+        });
+    }
 
     try {
       const [result] = await pedidoServer.updatePedido(idPedido, object);
