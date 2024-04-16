@@ -24,7 +24,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
       idCategoria: 3,
     };
     const updateHistorial = {
-      fecha: "2024/04/15",
+      stringDate: "2024/04/15",
       descripcion_deterioro: "esta es una prueba noma",
       idCategoria: 4,
     };

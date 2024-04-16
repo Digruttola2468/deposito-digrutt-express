@@ -74,8 +74,8 @@ export default class HistorialErrorMatrizMysql {
         WHERE id = ?;`,
       [
         object.descripcion_deterioro,
-        object.fecha,
-        object.categoria,
+        object.stringDate,
+        object.idCategoria,
         idHistorial,
       ]
     );
