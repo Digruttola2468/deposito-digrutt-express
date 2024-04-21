@@ -33,6 +33,7 @@ import tipoProductoRoute from "./routes/tipoProducto.routes.js";
 import materiaPrimaRoute from "./routes/material.routes.js";
 import producionRoute from "./routes/producion.routes.js";
 import pedidosRoute from "./routes/pedidos.routes.js";
+import turnosRoute from './routes/turnos.routes.js'
 /*
 import graficaRoute from "./routes/grafica.routes.js";
 */
@@ -93,6 +94,7 @@ app.use("/api/tiposproductos", tipoProductoRoute);
 app.use("/api/materiaPrima", materiaPrimaRoute);
 app.use("/api/producion", producionRoute);
 app.use("/api/pedidos", pedidosRoute);
+app.use("/turnosProducion", turnosRoute)
 /*
 app.use("/api/grafica", grafica);
 */
