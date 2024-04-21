@@ -1,20 +1,17 @@
-import {
-  Mercaderia,
-  Inventario,
-  Users,
-  Remitos,
-  NotasEnvio,
-  Clientes,
-  Envios,
-  MaquinaParada,
-  RelacionMaquinaMatriz,
-  HistorialFechasPedidos,
-  Matrices,
-  HistorialErrorsMatriz,
-  atencionReclamos,
-  Produccion,
-  Pedidos,
-} from "../DAO/factory.js";
+import Clientes from '../DAO/mysql/clientes.mysql.js'
+import Inventario from "../DAO/mysql/inventario.mysql.js"
+import Users from "../DAO/mysql/users.mysql.js"
+import Remitos from "../DAO/mysql/remitos.mysql.js"
+import NotasEnvio from "../DAO/mysql/notaEnvios.mysql.js"
+import Envios from "../DAO/mysql/envios.mysql.js"
+import MaquinaParada from "../DAO/mysql/maquinaParada.mysql.js"
+import RelacionMaquinaMatriz from "../DAO/mysql/relacionMaquinaMatriz.mysql.js"
+import HistorialFechasPedidos from "../DAO/mysql/historialFechasPedidos.mysql.js"
+import Matrices from "../DAO/mysql/matrices.mysql.js"
+import HistorialErrorsMatriz from "../DAO/mysql/historialErrorMatriz.mysql.js"
+import atencionReclamos from "../DAO/mysql/atencion_reclamos.js"
+import Produccion from "../DAO/mysql/produccion.mysql.js"
+import Pedidos from "../DAO/mysql/pedidos.mysql.js"
 
 // MODULE GMAIL
 import moduleGmail from "../mail.module.js";
