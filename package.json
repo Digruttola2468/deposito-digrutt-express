@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start:dev": "nodemon src/index.js",
-    "start:prod": "node src/index.js"
+    "start": "node src/index.js"
   },
   "author": "Ivan Di Gruttola",
   "license": "ISC",
