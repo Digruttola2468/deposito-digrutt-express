@@ -3,7 +3,9 @@ import jwt from "jsonwebtoken";
 import passport from "passport";
 import { JWT_SECRET } from "../config/dotenv.js";
 import { userServer } from "../services/index.repository.js";
-import { auth } from "../middleware/authValidation.js";
+import schemaValidation from "../middleware/schemaValidation.js";
+import { schemaPostUser } from "../schemas/user.schema.js";
+
 const router = Router();
 
 router.get(
@@ -27,7 +29,7 @@ router.post("/login", async (req, res, next) => {
 
       req.login(user, { session: false }, async (err) => {
         if (err) return next(err);
-        const token = jwt.sign({ user }, JWT_SECRET);
+        const token = jwt.sign({ user }, JWT_SECRET, { expiresIn: "5m" }); // expiresIn: "120h"
         return res.json({ token, message: info.message });
       });
     } catch (e) {
@@ -56,24 +58,28 @@ router.get("/validateGmail/:gmail", async (req, res) => {
   }
 });
 
-router.post("/register", async (req, res, next) => {
-  passport.authenticate(
-    "register",
-    { session: false },
-    async (err, user, info) => {
-      if (err || user == null) {
-        return res
-          .status(err.statusCode)
-          .json({ status: "error", message: err.message });
-      }
+router.post(
+  "/register",
+  schemaValidation(schemaPostUser),
+  async (req, res, next) => {
+    passport.authenticate(
+      "register",
+      { session: false },
+      async (err, user, info) => {
+        if (err || user == null) {
+          return res
+            .status(err.statusCode)
+            .json({ status: "error", message: err.message });
+        }
 
-      return res.json({
-        message: "Registrado Exitoso",
-        status: "success",
-      });
-    }
-  )(req, res, next);
-});
+        return res.json({
+          message: "Registrado Exitoso",
+          status: "success",
+        });
+      }
+    )(req, res, next);
+  }
+);
 
 router.get(
   "/google",

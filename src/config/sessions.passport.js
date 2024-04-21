@@ -64,7 +64,9 @@ const passportInit = () => {
           email: z.string().email(),
         });
 
-        if (schema.safeParse(req.body).success) {
+        const schemaResult = schema.safeParse(req.body);
+
+        if (schemaResult.success) {
           const [rows] = await userServer.getUserByGmail(username);
           if (rows.length >= 1) return done({statusCode: 400, message: 'Ya existe ese usuario'}, null);
 

@@ -8,7 +8,7 @@ export default class UsersRepository {
   getUserByGmail = async (gmail) => await this.dao.getByGmail(gmail);
 
   createNewUser_gmail = async (user) => {
-    const [result] = await this.dao.insert(user);
+    const result = await this.dao.insert(user);
 
     // Send Validate Correo
     await this.mailModule.send(user.gmail, 'Not Reply', `
