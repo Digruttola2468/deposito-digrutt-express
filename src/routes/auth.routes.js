@@ -30,7 +30,16 @@ router.post("/login", async (req, res, next) => {
       req.login(user, { session: false }, async (err) => {
         if (err) return next(err);
         const token = jwt.sign({ user }, JWT_SECRET, { expiresIn: "5m" }); // expiresIn: "120h"
-        return res.json({ token, message: info.message });
+        return res.json({
+          token,
+          user: {
+            role: user.role,
+            nombre: user.nombre,
+            apellido: user.apellido,
+            gmail: user.gmail,
+          },
+          message: info.message,
+        });
       });
     } catch (e) {
       return res
