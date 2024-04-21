@@ -12,6 +12,7 @@ import HistorialErrorsMatriz from "../DAO/mysql/historialErrorMatriz.mysql.js"
 import atencionReclamos from "../DAO/mysql/atencion_reclamos.js"
 import Produccion from "../DAO/mysql/produccion.mysql.js"
 import Pedidos from "../DAO/mysql/pedidos.mysql.js"
+import Mercaderia from '../DAO/mysql/mercaderia.mysql.js'
 
 // MODULE GMAIL
 import moduleGmail from "../mail.module.js";
