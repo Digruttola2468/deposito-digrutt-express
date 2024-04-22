@@ -171,8 +171,8 @@ ruta.put(
     const idPedido = req.params.idPedido;
     const object = req.body;
     
-    if (body.fecha_entrega != null && body.fecha_entrega != "") {
-      const validarDate = new Date(body.fecha_entrega);
+    if (object.fecha_entrega != null && object.fecha_entrega != "") {
+      const validarDate = new Date(object.fecha_entrega);
 
       if (Number.isNaN(validarDate.getDate()))
         return res.status(400).json({
