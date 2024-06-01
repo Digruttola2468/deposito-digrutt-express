@@ -108,6 +108,7 @@ const passportInit = () => {
       { usernameField: "email" },
       async (username, password, done) => {
         try {
+          // Get user By Gmail
           const [rows] = await userServer.getUserByGmail(username);
           if (rows.length === 0)
             return done(

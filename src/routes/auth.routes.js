@@ -29,7 +29,7 @@ router.post("/login", async (req, res, next) => {
 
       req.login(user, { session: false }, async (err) => {
         if (err) return next(err);
-        const token = jwt.sign({ user }, JWT_SECRET); // expiresIn: "120h"
+        const token = jwt.sign({ user }, JWT_SECRET);
         return res.json({
           token,
           user: {

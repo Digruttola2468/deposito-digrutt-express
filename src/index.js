@@ -94,10 +94,7 @@ app.use("/api/tiposproductos", tipoProductoRoute);
 app.use("/api/materiaPrima", materiaPrimaRoute);
 app.use("/api/producion", producionRoute);
 app.use("/api/pedidos", pedidosRoute);
-app.use("/api/turnosProducion", turnosRoute)
-/*
-app.use("/api/grafica", grafica);
-*/
+app.use("/api/turnosProducion", turnosRoute);
 
 // WHEN NOT FOUND PAGE
 app.use((req, res) => {

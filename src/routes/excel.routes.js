@@ -8,7 +8,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";
 import permissos from "../config/permissos.js";
-import { pedidoServer } from "../services/index.repository.js";
+import { inventarioServer, matriceServer, pedidoServer } from "../services/index.repository.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const dir = dirname(__filename);
@@ -68,37 +68,33 @@ router.get(
 
 router.get(
   "/inventario",
-  userExtractor(inventarioPermissions),
   async (req, res) => {
     try {
       const listaEnviar = [];
 
-      const listMatrices = inventarioManager.getlistMatrices();
+      const listMatrices = await matriceServer.getMatrices();
 
       if (listMatrices.length == 0)
         return res.status(400).json({ message: "Lista Vacia" });
 
-      listMatrices.forEach((elem) => {
+
+      /*listMatrices.forEach((elem) => {
         const stockActual = elem.entrada - elem.salida;
         listaEnviar.push({ ...elem, stockActual });
-      });
+      });*/
 
       const workbook = new ExcelJs.Workbook();
 
       const worksheet = workbook.addWorksheet("Invent de producto");
 
       worksheet.columns = [
-        { header: "ARTICULO", key: "articulo", width: 20 },
-        { header: "CODIGO PRODUCTO", key: "nombre", width: 30 },
-        { header: "DESCRIPCION", key: "descripcion", width: 60 },
-        { header: "ENTRADA", key: "entrada", width: 10 },
-        { header: "SALIDA", key: "salida", width: 10 },
-        { header: "STOCK ACTUAL", key: "stockActual", width: 15 },
-        { header: "Cliente", key: "cliente", width: 30 },
-        { header: "Peso x Unidad (gramos)", key: "pesoUnidad", width: 50 },
+        { header: "Cod Matriz", key: "cod_matriz", width: 20 },
+        { header: "Descripcion", key: "descripcion", width: 60 },
+        { header: "Cant Pieza x Golpe", key: "cantPiezaGolpe", width: 10 },
+        { header: "Cliente", key: "cliente", width: 10 },
       ];
 
-      worksheet.addRows(listaEnviar);
+      worksheet.addRows(listMatrices);
 
       await workbook.xlsx.writeFile(dir + "/inventario.xlsx");
 
