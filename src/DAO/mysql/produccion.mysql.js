@@ -22,7 +22,7 @@ export default class ProduccionMysql {
   getOne = async (idProduccion) => {
     return await con.query(
       ` SELECT producion.*,
-                  matriz.cod_matriz,matriz.cantPiezaGolpe,
+                  matriz.cod_matriz,matriz.cantPiezaGolpe,matriz.descripcion,
                   maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina
             FROM producion 
                   LEFT JOIN matriz ON producion.idMatriz = matriz.id
