@@ -39,7 +39,7 @@ export default class ProduccionMysql {
         new Date(elem.fecha) <= new Date(dateEnd)
     );
   }
-
+  
   getRangeDateByNumMaquina(numMaquina, dateInit, dateEnd) {
     const rangeDateList = this.getRangeDateListProduccion(dateInit, dateEnd);
 
