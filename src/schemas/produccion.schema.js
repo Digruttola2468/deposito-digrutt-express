@@ -7,6 +7,7 @@ export const schemaPostProduccion = z.object({
   piezasProducidas: z.number().min(0),
   promGolpesHora: z.number().min(0),
   idMatriz: z.number().min(1),
+  idTurno: z.number().min(1)
 });
 
 export const schemaListPostProduccion = z.array(
@@ -17,6 +18,7 @@ export const schemaListPostProduccion = z.array(
     piezasProducidas: z.number().min(0),
     promGolpesHora: z.number().min(0),
     idMatriz: z.number().min(1),
+    idTurno: z.number().min(1)
   })
 );
 
@@ -27,4 +29,5 @@ export const schemaPutProduccion = z.object({
   piezasProducidas: z.number().min(0).optional().nullable(),
   promGolpesHora: z.number().min(0).optional().nullable(),
   idMatriz: z.number().min(1).optional().nullable(),
+  idTurno: z.number().min(1).optional().nullable()
 });

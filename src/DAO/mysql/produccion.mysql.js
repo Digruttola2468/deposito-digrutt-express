@@ -90,7 +90,7 @@ export default class ProduccionMysql {
 
   insert = async (object) => {
     return await con.query(
-      "INSERT INTO producion (`fecha`, `num_maquina`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`, `idMatriz`) VALUES (?,?,?,?,?,?);",
+      "INSERT INTO producion (`fecha`, `num_maquina`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`, `idMatriz`, `idTurno`) VALUES (?,?,?,?,?,?,?);",
       [
         object.fecha,
         object.numMaquina,
@@ -98,6 +98,7 @@ export default class ProduccionMysql {
         object.piezasProducidas,
         object.promGolpesHora,
         object.idMatriz,
+        object.idTurno
       ]
     );
   };
@@ -111,7 +112,8 @@ export default class ProduccionMysql {
             golpesReales = IFNULL(?,golpesReales),
             piezasProducidas = IFNULL(?,piezasProducidas),
             prom_golpeshora = IFNULL(?,prom_golpeshora),
-            idMatriz = IFNULL(?, idMatriz)
+            idMatriz = IFNULL(?, idMatriz),
+            idTurno = IFNULL(?, idTurno)
         WHERE id = ?;`,
       [
         object.fecha,
@@ -120,6 +122,7 @@ export default class ProduccionMysql {
         object.piezasProducidas,
         object.promGolpesHora,
         object.idMatriz,
+        object.idTurno,
         idProduccion,
       ]
     );
