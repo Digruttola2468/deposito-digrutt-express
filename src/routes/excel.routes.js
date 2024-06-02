@@ -339,7 +339,7 @@ router.get(
   userExtractor([permissos.produccion, permissos.matriceria]),
   async (req, res) => {
     try {
-      const listMatrices = await matricesManager.getMatrices();
+      const listMatrices = await matriceServer.getMatrices();
 
       if (listMatrices.length == 0)
         return res.status(400).json({ message: "Lista Vacia" });
