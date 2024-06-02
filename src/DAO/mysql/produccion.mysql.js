@@ -90,7 +90,7 @@ export default class ProduccionMysql {
 
   insert = async (object) => {
     return await con.query(
-      "INSERT INTO producion (`fecha`, `num_maquina`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`, `idMatriz`) VALUES (?,?,?,?,?,?,?);",
+      "INSERT INTO producion (`fecha`, `num_maquina`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`, `idMatriz`) VALUES (?,?,?,?,?,?);",
       [
         object.fecha,
         object.numMaquina,
