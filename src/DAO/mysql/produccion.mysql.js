@@ -9,10 +9,12 @@ export default class ProduccionMysql {
     const [rows] = await con.query(
       ` SELECT producion.*,
                 matriz.cod_matriz,matriz.cantPiezaGolpe,matriz.descripcion,
-                maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina
+                maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina,
+                turnoProduccion.turno
           FROM producion 
                 LEFT JOIN matriz ON producion.idMatriz = matriz.id
                 LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
+                LEFT JOIN turnoProduccion ON producion.idTurno = turnoProduccion.id
           ORDER BY producion.fecha DESC; `
     );
     this.listProduccion = rows;
@@ -23,10 +25,12 @@ export default class ProduccionMysql {
     return await con.query(
       ` SELECT producion.*,
                   matriz.cod_matriz,matriz.cantPiezaGolpe,matriz.descripcion,
-                  maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina
+                  maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina,
+                  turnoProduccion.turno
             FROM producion 
                   LEFT JOIN matriz ON producion.idMatriz = matriz.id
                   LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
+                  LEFT JOIN turnoProduccion ON producion.idTurno = turnoProduccion.id
             WHERE producion.id = ?;`,
       [idProduccion]
     );

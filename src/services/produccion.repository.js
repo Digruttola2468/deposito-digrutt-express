@@ -12,7 +12,7 @@ export default class ProduccionRepository {
   getRangeDateByMaquina = (numMaquina, dateInit, dateEnd) =>
     this.dao.getRangeDateByNumMaquina(numMaquina, dateInit, dateEnd);
   
-  getRangeDateListProduccion = () => this.dao.getRangeDateListProduccion()
+  getRangeDateListProduccion = (init,end) => this.dao.getRangeDateListProduccion(init,end)
 
   newListProduccion = async (listProduccion) => {
     const listProduccionAdd = [];

@@ -40,8 +40,8 @@ const handleErrors = (e, res) => {
       break;
   }
 };
-
-ruta.get("/", userExtractor([allPermissions.produccion]), async (req, res) => {
+//
+ruta.get("/",userExtractor([allPermissions.produccion]),  async (req, res) => {
   try {
     const rows = await produccionServer.getProduccion();
     return res.json({ status: "success", data: rows });

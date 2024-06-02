@@ -8,7 +8,8 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";
 import permissos from "../config/permissos.js";
-import { inventarioServer, matriceServer, pedidoServer } from "../services/index.repository.js";
+import { inventarioServer, matriceServer, pedidoServer, produccionServer } from "../services/index.repository.js";
+import moment from "moment";
 
 const __filename = fileURLToPath(import.meta.url);
 const dir = dirname(__filename);
@@ -105,7 +106,7 @@ router.get(
     }
   }
 );
-
+// 
 router.get(
   "/produccion-semanal",
   userExtractor([allPermissions.produccion]),
@@ -113,7 +114,7 @@ router.get(
     const fechaInit = req.query?.start;
     const fechaEnd = req.query?.end;
 
-    const result = producionManager.getRangeDateListProduccion(
+    const result = produccionServer.getRangeDateListProduccion(
       fechaInit,
       fechaEnd
     );
@@ -142,21 +143,23 @@ router.get(
             elem.golpesReales,
             elem.piezasProducidas,
             elem.prom_golpeshora,
+            elem.turno
           ]);
         }
       });
-
       enviar.push({
         maquina: numMaquina,
         data: listEnviar,
       });
     }
 
+    
+
     const workbook = new ExcelJs.Workbook();
 
     const worksheet = workbook.addWorksheet("Produccion Semanal");
 
-    worksheet.getCell(`A1`).value = `Semana 1 (${fechaInit} - ${fechaEnd})`;
+    worksheet.getCell(`A1`).value = `Semana 1 (${moment.utc(fechaInit).format("L")} - ${moment.utc(fechaEnd).format("L")})`;
     worksheet.getCell(`A1`).font = {
       italic: false,
       size: 14,
@@ -166,7 +169,7 @@ router.get(
       vertical: "middle",
       horizontal: "center",
     };
-    worksheet.mergeCells(`A1:E1`);
+    worksheet.mergeCells(`A1:F1`);
 
     let position = 2;
     for (let i = 0; i < numMaquinaList.length; i++) {
@@ -179,7 +182,7 @@ router.get(
         vertical: "middle",
         horizontal: "center",
       };
-      worksheet.mergeCells(`A${position}:E${position}`);
+      worksheet.mergeCells(`A${position}:F${position}`);
 
       position += 1;
 
@@ -207,8 +210,11 @@ router.get(
           },
           {
             name: "Golpes/h",
-            totalsRowFunction: "sum",
+            totalsRowFunction: "average",
             filterButton: false,
+          },
+          {
+            name: "Turno"
           },
         ],
         rows: enviar[i].data,
@@ -217,10 +223,10 @@ router.get(
       position += enviar[i].data.length;
       position += 3;
     }
+    const dateNow = new Date();
+    await workbook.xlsx.writeFile(dir + `/produccion_semanal_${dateNow.valueOf()}.xlsx`);
 
-    await workbook.xlsx.writeFile(dir + "/produccion_semanal.xlsx");
-
-    return res.sendFile(dir + "/produccion_semanal.xlsx");
+    return res.sendFile(dir + `/produccion_semanal_${dateNow.valueOf()}.xlsx`);
   }
 );
 
