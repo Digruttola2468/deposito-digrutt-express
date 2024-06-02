@@ -8,11 +8,9 @@ export default class ProduccionMysql {
   get = async () => {
     const [rows] = await con.query(
       ` SELECT producion.*,
-                inventario.nombre,inventario.descripcion,inventario.articulo,inventario.url_image,
                 matriz.cod_matriz,matriz.cantPiezaGolpe,
                 maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina
           FROM producion 
-                LEFT JOIN inventario ON producion.idinventario = inventario.id 
                 LEFT JOIN matriz ON producion.idMatriz = matriz.id
                 LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
           ORDER BY producion.fecha DESC; `
@@ -24,11 +22,9 @@ export default class ProduccionMysql {
   getOne = async (idProduccion) => {
     return await con.query(
       ` SELECT producion.*,
-                  inventario.nombre,inventario.descripcion,inventario.articulo,inventario.url_image,
                   matriz.cod_matriz,matriz.cantPiezaGolpe,
                   maquina.numberSerie AS numero_maquina, maquina.nombre AS maquina
             FROM producion 
-                  LEFT JOIN inventario ON producion.idinventario = inventario.id 
                   LEFT JOIN matriz ON producion.idMatriz = matriz.id
                   LEFT JOIN maquina ON producion.num_maquina = maquina.numberSerie
             WHERE producion.id = ?;`,
@@ -94,11 +90,10 @@ export default class ProduccionMysql {
 
   insert = async (object) => {
     return await con.query(
-      "INSERT INTO producion (`fecha`, `num_maquina`, `idinventario`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`, `idMatriz`) VALUES (?,?,?,?,?,?,?);",
+      "INSERT INTO producion (`fecha`, `num_maquina`, `golpesReales`, `piezasProducidas`, `prom_golpeshora`, `idMatriz`) VALUES (?,?,?,?,?,?,?);",
       [
         object.fecha,
         object.numMaquina,
-        object.idInventario,
         object.golpesReales,
         object.piezasProducidas,
         object.promGolpesHora,
