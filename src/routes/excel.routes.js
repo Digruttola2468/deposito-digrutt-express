@@ -8,7 +8,12 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";
 import permissos from "../config/permissos.js";
-import { inventarioServer, matriceServer, pedidoServer, produccionServer } from "../services/index.repository.js";
+import {
+  inventarioServer,
+  matriceServer,
+  pedidoServer,
+  produccionServer,
+} from "../services/index.repository.js";
 import moment from "moment";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -67,46 +72,42 @@ router.get(
   }
 );
 
-router.get(
-  "/inventario",
-  async (req, res) => {
-    try {
-      const listaEnviar = [];
+router.get("/inventario", async (req, res) => {
+  try {
+    const listaEnviar = [];
 
-      const listMatrices = await matriceServer.getMatrices();
+    const listMatrices = await matriceServer.getMatrices();
 
-      if (listMatrices.length == 0)
-        return res.status(400).json({ message: "Lista Vacia" });
+    if (listMatrices.length == 0)
+      return res.status(400).json({ message: "Lista Vacia" });
 
-
-      /*listMatrices.forEach((elem) => {
+    /*listMatrices.forEach((elem) => {
         const stockActual = elem.entrada - elem.salida;
         listaEnviar.push({ ...elem, stockActual });
       });*/
 
-      const workbook = new ExcelJs.Workbook();
+    const workbook = new ExcelJs.Workbook();
 
-      const worksheet = workbook.addWorksheet("Invent de producto");
+    const worksheet = workbook.addWorksheet("Invent de producto");
 
-      worksheet.columns = [
-        { header: "Cod Matriz", key: "cod_matriz", width: 20 },
-        { header: "Descripcion", key: "descripcion", width: 60 },
-        { header: "Cant Pieza x Golpe", key: "cantPiezaGolpe", width: 10 },
-        { header: "Cliente", key: "cliente", width: 10 },
-      ];
+    worksheet.columns = [
+      { header: "Cod Matriz", key: "cod_matriz", width: 20 },
+      { header: "Descripcion", key: "descripcion", width: 60 },
+      { header: "Cant Pieza x Golpe", key: "cantPiezaGolpe", width: 10 },
+      { header: "Cliente", key: "cliente", width: 10 },
+    ];
 
-      worksheet.addRows(listMatrices);
+    worksheet.addRows(listMatrices);
 
-      await workbook.xlsx.writeFile(dir + "/inventario.xlsx");
+    await workbook.xlsx.writeFile(dir + "/inventario.xlsx");
 
-      return res.sendFile(dir + "/inventario.xlsx");
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "something goes wrong" });
-    }
+    return res.sendFile(dir + "/inventario.xlsx");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "something goes wrong" });
   }
-);
-// 
+});
+//
 router.get(
   "/produccion-semanal",
   userExtractor([allPermissions.produccion]),
@@ -143,7 +144,7 @@ router.get(
             elem.golpesReales,
             elem.piezasProducidas,
             elem.prom_golpeshora,
-            elem.turno
+            elem.turno,
           ]);
         }
       });
@@ -153,13 +154,13 @@ router.get(
       });
     }
 
-    
-
     const workbook = new ExcelJs.Workbook();
 
     const worksheet = workbook.addWorksheet("Produccion Semanal");
 
-    worksheet.getCell(`A1`).value = `Semana 1 (${moment.utc(fechaInit).format("L")} - ${moment.utc(fechaEnd).format("L")})`;
+    worksheet.getCell(`A1`).value = `Semana 1 (${moment
+      .utc(fechaInit)
+      .format("L")} - ${moment.utc(fechaEnd).format("L")})`;
     worksheet.getCell(`A1`).font = {
       italic: false,
       size: 14,
@@ -214,7 +215,7 @@ router.get(
             filterButton: false,
           },
           {
-            name: "Turno"
+            name: "Turno",
           },
         ],
         rows: enviar[i].data,
@@ -224,7 +225,9 @@ router.get(
       position += 3;
     }
     const dateNow = new Date();
-    await workbook.xlsx.writeFile(dir + `/produccion_semanal_${dateNow.valueOf()}.xlsx`);
+    await workbook.xlsx.writeFile(
+      dir + `/produccion_semanal_${dateNow.valueOf()}.xlsx`
+    );
 
     return res.sendFile(dir + `/produccion_semanal_${dateNow.valueOf()}.xlsx`);
   }
@@ -237,8 +240,6 @@ router.get(
     const idNotaEnvio = req.params.idNotaEnvio;
 
     const result = facturaNegroManager.getOneNotaEnvio(idNotaEnvio);
-
-    console.log("Result: ", result);
 
     const notaEnvio = result.notaEnvio.nro_envio;
     const listMercaderia = result.mercaderia;
@@ -336,7 +337,7 @@ router.get(
 
 router.get(
   "/matrices",
-  userExtractor([permissos.produccion, permissos.matriceria]),
+  //userExtractor([permissos.produccion, permissos.matriceria]),
   async (req, res) => {
     try {
       const listMatrices = await matriceServer.getMatrices();
@@ -347,16 +348,39 @@ router.get(
       const workbook = new ExcelJs.Workbook();
 
       const worksheet = workbook.addWorksheet("Matrices");
+      let listEnviar = [];
 
-      worksheet.columns = [
-        { header: "COD MATRIZ", key: "cod_matriz", width: 17 },
-        { header: "DESCRIPCION", key: "descripcion", width: 60 },
-        { header: "P x G", key: "cantPiezaGolpe", width: 10 },
-        { header: "MATERIA PRIMA", key: "material", width: 20 },
-        { header: "CLIENTE", key: "cliente", width: 20 },
-      ];
+      for (let i = 0; i < listMatrices.length; i++) {
+        const e = listMatrices[i];
+        listEnviar.push([
+          e.cod_matriz,
+          e.descripcion,
+          e.cantPiezaGolpe,
+          e.material,
+          e.cliente
+        ]);
+      }
 
-      worksheet.addRows(listMatrices.data);
+      worksheet.addTable({
+        name: `Matrices`,
+        ref: `A1`,
+        headerRow: true,
+        totalsRow: false,
+        columns: [
+          { name: "COD MATRIZ" },
+          { name: "DESCRIPCION" },
+          {
+            name: "P x G",
+          },
+          {
+            name: "MATERIA PRIMA",
+          },
+          {
+            name: "CLIENTE",
+          },
+        ],
+        rows: listEnviar,
+      });
 
       await workbook.xlsx.writeFile(dir + "/matrices.xlsx");
 
@@ -430,24 +454,21 @@ router.get("/pedidos/:dias", async (req, res) => {
   const worksheet = workbook.addWorksheet("Estrategia Pedidos");
 
   const alignmentCenter = {
-    vertical: "middle", horizontal: "center"
+    vertical: "middle",
+    horizontal: "center",
   };
 
-  worksheet.getCell("A1").value = `FECHA INICIAL: ${format(
-    actual,
-    "short"
-  )}`;
-  worksheet.getCell("A1").alignment = alignmentCenter
+  worksheet.getCell("A1").value = `FECHA INICIAL: ${format(actual, "short")}`;
+  worksheet.getCell("A1").alignment = alignmentCenter;
   worksheet.mergeCells(`A1:B1`);
 
-  worksheet.getCell("C1").value = `FECHA FINAL: ${format(dateEnd, "short")}`
-  worksheet.getCell("C1").alignment = alignmentCenter
+  worksheet.getCell("C1").value = `FECHA FINAL: ${format(dateEnd, "short")}`;
+  worksheet.getCell("C1").alignment = alignmentCenter;
   worksheet.mergeCells(`C1:E1`);
 
-  worksheet.getCell("F1").value = `ENTRE ${dias} Dias`
-  worksheet.getCell("F1").alignment = alignmentCenter
+  worksheet.getCell("F1").value = `ENTRE ${dias} Dias`;
+  worksheet.getCell("F1").alignment = alignmentCenter;
   worksheet.mergeCells(`F1:G1`);
-
 
   let A_valueInit = 4;
   for (let i = 0; i < data.length; i++) {
@@ -486,11 +507,10 @@ router.get("/pedidos/:dias", async (req, res) => {
     ).value = `${nombreCliente.toUpperCase()}`;
     worksheet.getCell(`A${A_valueInit - 1}`).font = {
       size: 14,
-      italic: true
+      italic: true,
     };
     worksheet.mergeCells(`A${A_valueInit - 1}:G${A_valueInit - 1}`);
-    worksheet.getCell(`A${A_valueInit - 1}`).alignment = alignmentCenter
-    
+    worksheet.getCell(`A${A_valueInit - 1}`).alignment = alignmentCenter;
 
     worksheet.addTable({
       name: `Pedido`,
@@ -532,7 +552,7 @@ router.get("/pedidos/:dias", async (req, res) => {
     // SUMARLE LONGITUD TABLA
     A_valueInit += element.length;
   }
-console.log
+  console.log;
   await workbook.xlsx.writeFile(dir + `/estrategiaPedido.xlsx`);
 
   return res.sendFile(dir + `/estrategiaPedido.xlsx`);
