@@ -13,7 +13,8 @@ describe("** TESTING ENVIOS /api/envios **", () => {
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD", () => {
@@ -37,7 +38,7 @@ describe("** TESTING ENVIOS /api/envios **", () => {
       const result = await requester
         .post("/api/envios")
         .send(newEnvio)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");
@@ -48,7 +49,7 @@ describe("** TESTING ENVIOS /api/envios **", () => {
       const result = await requester
         .put(`/api/envios/${envio.id}`)
         .send(updateEnvio)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");
@@ -57,7 +58,7 @@ describe("** TESTING ENVIOS /api/envios **", () => {
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/envios/${envio.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");
@@ -66,7 +67,7 @@ describe("** TESTING ENVIOS /api/envios **", () => {
     it("Method: DELETE", async () => {
       const result = await requester
         .delete(`/api/envios/${envio.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");

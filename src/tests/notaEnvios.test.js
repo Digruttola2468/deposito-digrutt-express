@@ -12,7 +12,8 @@ describe("** TESTING NOTA ENVIO **", () => {
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD /api/notaEnvio", () => {
@@ -46,7 +47,7 @@ describe("** TESTING NOTA ENVIO **", () => {
       const result = await requester
         .post(`/api/notaEnvio`)
         .send(newNotaEnvio)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       notaEnvio = result._body.data;
       expect(result.ok).to.be.ok;
     });
@@ -54,14 +55,14 @@ describe("** TESTING NOTA ENVIO **", () => {
       const result = await requester
         .put(`/api/notaEnvio/${notaEnvio.id}`)
         .send(updateNotaEnvio)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       console.log("UPDATE: ", result._body);
       expect(result.ok).to.be.ok;
     });
     it("Method: GET ONE", async () => {
       const result = await requester
         .get(`/api/notaEnvio/${notaEnvio.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       console.log("GET ONE: ", result._body);
       console.log("GET ONE: ", result._body.data.mercaderia);
       //
@@ -75,7 +76,7 @@ describe("** TESTING NOTA ENVIO **", () => {
       const result = await requester
         .put(`/api/notaEnvio/${notaEnvio.id}/newProduct`)
         .send(addNewMercaderiaInNotaEnvio)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       console.log("UPDATE new Mercaderia: ", result._body);
       expect(result.ok).to.be.ok;
     });
@@ -83,19 +84,19 @@ describe("** TESTING NOTA ENVIO **", () => {
       const result = await requester
         .put(`/api/notaEnvio/${notaEnvio.id}`)
         .send(updateNotaEnvioOnlyProducts)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       expect(result.ok).to.be.ok;
     });
     it("Method: GET ONE", async () => {
       const result = await requester
         .get(`/api/notaEnvio/${notaEnvio.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       expect(result.ok).to.be.ok;
     });
     it("Method: DELETE", async () => {
       const result = await requester
         .delete(`/api/notaEnvio/${notaEnvio.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       expect(result.ok).to.be.ok;
     });
   });

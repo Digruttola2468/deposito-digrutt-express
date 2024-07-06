@@ -13,7 +13,8 @@ describe("** TESTING INVENTARIO /api/inventario **", () => {
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD", () => {
@@ -37,7 +38,7 @@ describe("** TESTING INVENTARIO /api/inventario **", () => {
       const result = await requester
         .post("/api/inventario")
         .send(newInventario)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       inventario = result._body.data;
@@ -47,7 +48,7 @@ describe("** TESTING INVENTARIO /api/inventario **", () => {
       const result = await requester
         .put(`/api/inventario/${inventario.id}`)
         .send(updateInventario)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
     });
@@ -55,7 +56,7 @@ describe("** TESTING INVENTARIO /api/inventario **", () => {
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/inventario/${inventario.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
     });
@@ -72,7 +73,7 @@ describe("** TESTING INVENTARIO /api/inventario **", () => {
             idcategoria: 2,
             idinventario: inventario.id,
           })
-          .set("Authorization", `Bearer ${token}`);
+          .set("Cookie", [`access_token=${token}`]);
 
         expect(result.ok).to.be.ok;
       });
@@ -85,7 +86,7 @@ describe("** TESTING INVENTARIO /api/inventario **", () => {
             idinventario: inventario.id,
             observacion: "Prueba de salida",
           })
-          .set("Authorization", `Bearer ${token}`);
+          .set("Cookie", [`access_token=${token}`]);
 
         expect(result.ok).to.be.ok;
       });
@@ -94,14 +95,14 @@ describe("** TESTING INVENTARIO /api/inventario **", () => {
       }?`, async () => {
         const result = await requester
           .get(`/api/inventario/${inventario.id}`)
-          .set("Authorization", `Bearer ${token}`);
+          .set("Cookie", [`access_token=${token}`]);
 
         expect(result.ok).to.be.ok;
       });
       it("DELETE /api/inventario/:iid", async () => {
         const result = await requester
           .delete(`/api/inventario/${inventario.id}`)
-          .set("Authorization", `Bearer ${token}`);
+          .set("Cookie", [`access_token=${token}`]);
         expect(result.ok).to.be.ok;
       });
     });

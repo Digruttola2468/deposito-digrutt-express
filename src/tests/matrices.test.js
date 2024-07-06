@@ -13,7 +13,8 @@ describe("** TESTING MATRICES /api/matrices **", () => {
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD", () => {
@@ -37,7 +38,7 @@ describe("** TESTING MATRICES /api/matrices **", () => {
       const result = await requester
         .post("/api/matrices")
         .send(newMatriz)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data).to.include(newMatriz);
@@ -50,7 +51,7 @@ describe("** TESTING MATRICES /api/matrices **", () => {
       const result = await requester
         .put(`/api/matrices/${matrices.id}`)
         .send(updateMatriz)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");
@@ -61,7 +62,7 @@ describe("** TESTING MATRICES /api/matrices **", () => {
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/matrices/${matrices.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data).to.include(matrizUpdated);
@@ -71,7 +72,7 @@ describe("** TESTING MATRICES /api/matrices **", () => {
     it("Method: DELETE", async () => {
       const result = await requester
         .delete(`/api/matrices/${matrices.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");

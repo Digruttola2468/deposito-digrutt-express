@@ -22,13 +22,13 @@ const requester = supertest("http://localhost:3000");
 describe("", () => {
   let cookie = "";
 
-  before(() => {
-    const result = requester.post("/api/session/register").send({
+  before(async () => {
+    const result = await requester.post("/api/session/login").send({
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    const resultCookie = result.headers["set-cookie"][0];
-    cookie = resultCookie.split("=")[1].split(";")[0];
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   it("GET /api/session current", async () => {

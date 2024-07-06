@@ -13,7 +13,8 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD", () => {
@@ -33,7 +34,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
       const result = await requester
         .post("/api/historialMatriz")
         .send(newHistorial)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");
@@ -45,7 +46,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
       const result = await requester
         .put(`/api/historialMatriz/${historial.id}`)
         .send(updateHistorial)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");
@@ -56,7 +57,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/historialMatriz/${historial.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data).to.include(historial);
@@ -69,7 +70,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
       const result = await requester
         .put(`/api/historialMatriz/${historial.id}/1`)
         .send(updateHistorial)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");
@@ -80,7 +81,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/historialMatriz/${historial.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data).to.include(historial);
@@ -93,7 +94,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
       const result = await requester
         .put(`/api/historialMatriz/${historial.id}/0`)
         .send(updateHistorial)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");
@@ -104,7 +105,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/historialMatriz/${historial.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data).to.include(historial);
@@ -116,7 +117,7 @@ describe("** TESTING HISTORIAL ERRORES/MANTENIMIENTO MATRICES /api/historialMatr
     it("Method: DELETE", async () => {
       const result = await requester
         .delete(`/api/historialMatriz/${historial.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");

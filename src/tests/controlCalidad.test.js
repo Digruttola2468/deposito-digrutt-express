@@ -13,7 +13,8 @@ describe("** TESTING CONTROL CALIDAD /api/controlCalidad **", () => {
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD", () => {
@@ -38,7 +39,7 @@ describe("** TESTING CONTROL CALIDAD /api/controlCalidad **", () => {
       const result = await requester
         .post("/api/controlCalidad")
         .send(newControlCalidad)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       controlCalidad = result._body.data;
@@ -48,7 +49,7 @@ describe("** TESTING CONTROL CALIDAD /api/controlCalidad **", () => {
       const result = await requester
         .put(`/api/controlCalidad/${controlCalidad.id}`)
         .send(updateControlCalidad)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
     });
@@ -56,7 +57,7 @@ describe("** TESTING CONTROL CALIDAD /api/controlCalidad **", () => {
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/controlCalidad/${controlCalidad.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
     });
@@ -64,7 +65,7 @@ describe("** TESTING CONTROL CALIDAD /api/controlCalidad **", () => {
     it("Method: DELETE", async () => {
       const result = await requester
         .delete(`/api/controlCalidad/${controlCalidad.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
     });

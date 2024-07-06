@@ -14,7 +14,8 @@ describe("** TESTING HISTORIAL FECHAS PEDIDOS /api/historialFechaPedidos **", ()
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD", () => {
@@ -34,7 +35,7 @@ describe("** TESTING HISTORIAL FECHAS PEDIDOS /api/historialFechaPedidos **", ()
       const result = await requester
         .post("/api/historialFechaPedidos")
         .send(newHistorial)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       historial = result._body.data;
@@ -44,7 +45,7 @@ describe("** TESTING HISTORIAL FECHAS PEDIDOS /api/historialFechaPedidos **", ()
       const result = await requester
         .put(`/api/historialFechaPedidos/${historial.id}`)
         .send(updateHistorial)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
     });
@@ -52,7 +53,7 @@ describe("** TESTING HISTORIAL FECHAS PEDIDOS /api/historialFechaPedidos **", ()
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/historialFechaPedidos/${historial.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
     });
@@ -60,7 +61,7 @@ describe("** TESTING HISTORIAL FECHAS PEDIDOS /api/historialFechaPedidos **", ()
     it("Method: DELETE", async () => {
       const result = await requester
         .delete(`/api/historialFechaPedidos/${historial.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
     });

@@ -13,7 +13,8 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD", () => {
@@ -44,7 +45,7 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
       const result = await requester
         .post("/api/inventario")
         .send(newInventario)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       inventario = result._body.data;
@@ -58,7 +59,7 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
       const result = await requester
         .post("/api/pedidos")
         .send(newPedido)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data.is_done).to.eq(0);
@@ -71,7 +72,7 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
       const result = await requester
         .put(`/api/pedidos/${pedido.id}`)
         .send(updatePedido)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data.is_done).to.eq(0);
@@ -83,7 +84,7 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/pedidos/${pedido.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data.is_done).to.eq(0);
@@ -94,7 +95,7 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
       const result = await requester
         .put(`/api/pedidos/${pedido.id}/doneStock`)
         .send({ isDone: 1 })
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data.is_done).to.eq(1);
@@ -106,7 +107,7 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/pedidos/${pedido.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data.is_done).to.eq(1);
@@ -116,7 +117,7 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
     it("Method: DELETE", async () => {
       const result = await requester
         .delete(`/api/pedidos/${pedido.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");
@@ -125,7 +126,7 @@ describe("** TESTING PEDIDOS /api/pedidos **", () => {
     it("DELETE /api/inventario/:iid", async () => {
       const result = await requester
         .delete(`/api/inventario/${inventario.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       expect(result.ok).to.be.ok;
     });
   });

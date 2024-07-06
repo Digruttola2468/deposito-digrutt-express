@@ -13,14 +13,14 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD", () => {
     let cliente = null;
     const newCliente = {
-      cliente: "prueba",
-      domicilio: "prueba 010",
+      cliente: "nose",
       idLocalidad: 1,
     };
     const updateCliente = {
@@ -35,7 +35,7 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
       const result = await requester
         .post("/api/clientes")
         .send(newCliente)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data).to.include(newCliente);
@@ -48,7 +48,7 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
       const result = await requester
         .put(`/api/clientes/${cliente.id}`)
         .send(updateCliente)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data).to.include(updateCliente);
@@ -58,7 +58,7 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
     it("Method: GET", async () => {
       const result = await requester
         .get(`/api/clientes/${cliente.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.data).to.include(updateCliente);
@@ -68,7 +68,7 @@ describe("** TESTING CLIENTES /api/clientes **", () => {
     it("Method: DELETE", async () => {
       const result = await requester
         .delete(`/api/clientes/${cliente.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
 
       expect(result.ok).to.be.ok;
       expect(result.body.status).to.include("success");

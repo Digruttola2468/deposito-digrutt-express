@@ -12,7 +12,8 @@ describe("** TESTING REMITOS **", () => {
       email: TESTING_USER_GMAIL,
       password: TESTING_USER_PASSW,
     });
-    token = result._body.token;
+    const resultCookie = result.headers["set-cookie"][0]
+    token = resultCookie.split("=")[1].split(";")[0];
   });
 
   describe("CRUD /api/remito", () => {
@@ -47,7 +48,7 @@ describe("** TESTING REMITOS **", () => {
       const result = await requester
         .post(`/api/remito`)
         .send(newRemito)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       remito = result._body.data;
       expect(result.ok).to.be.ok;
     });
@@ -55,14 +56,14 @@ describe("** TESTING REMITOS **", () => {
       const result = await requester
         .put(`/api/remito/${remito.id}`)
         .send(updateRemito)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       console.log("UPDATE: ", result._body);
       expect(result.ok).to.be.ok;
     });
     it("Method: GET ONE", async () => {
       const result = await requester
         .get(`/api/remito/${remito.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       console.log("GET ONE: ", result._body);
       console.log("GET ONE: ", result._body.data.mercaderia);
       //
@@ -76,7 +77,7 @@ describe("** TESTING REMITOS **", () => {
       const result = await requester
         .put(`/api/remito/newProduct/${remito.id}`)
         .send(addNewMercaderiaInRemito)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       console.log("UPDATE new Mercaderia: ", result._body);
       expect(result.ok).to.be.ok;
     });
@@ -84,19 +85,19 @@ describe("** TESTING REMITOS **", () => {
       const result = await requester
         .put(`/api/remito/${remito.id}`)
         .send(updateRemitoOnlyProducts)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       expect(result.ok).to.be.ok;
     });
     it("Method: GET ONE", async () => {
       const result = await requester
         .get(`/api/remito/${remito.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       expect(result.ok).to.be.ok;
     });
     /*it("Method: DELETE", async () => {
       const result = await requester
         .delete(`/api/remito/${remito.id}`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Cookie", [`access_token=${token}`]);
       expect(result.ok).to.be.ok;
     });*/
   });
