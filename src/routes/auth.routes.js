@@ -133,7 +133,7 @@ router.post("/login", async (req, res, next) => {
         return res
           .cookie("access_token", token, {
             httpOnly: true, // La cookie solo se puede acceder en el servidor
-            secure: false, //La cookie solo se puede acceder en https
+            secure: true, //La cookie solo se puede acceder en https
             sameSite: "strict", // La cookie solo se puede acceder en el mismo dominio
             maxAge: 12000 * 60 * 60, //La cookie tiene un tiempo de validez de 12h
           })
