@@ -9,7 +9,6 @@ import { dirname } from "path";
 import allPermissions, { inventarioPermissions } from "../config/permissos.js";
 import permissos from "../config/permissos.js";
 import {
-  inventarioServer,
   matriceServer,
   pedidoServer,
   produccionServer,
@@ -337,7 +336,7 @@ router.get(
 
 router.get(
   "/matrices",
-  //userExtractor([permissos.produccion, permissos.matriceria]),
+  userExtractor([permissos.produccion, permissos.matriceria]),
   async (req, res) => {
     try {
       const listMatrices = await matriceServer.getMatrices();
@@ -557,5 +556,93 @@ router.get("/pedidos/:dias", async (req, res) => {
 
   return res.sendFile(dir + `/estrategiaPedido.xlsx`);
 });
+
+router.get(
+  "/notaEnvio/cassacia",
+  userExtractor([allPermissions.oficina]),
+  async (req, res, next) => {
+    //numero - fecha - 
+    const body = req.body;
+
+    const workbook = new ExcelJs.Workbook();
+
+    try {
+      const work = await workbook.xlsx.readFile(dir + "/notaEnvio.xlsx");
+
+      const worksheet = work.getWorksheet(`Hoja1`);
+
+      worksheet.getCell("H1").value = formatDate;
+      worksheet.getCell("G4").value = notaEnvio;
+      worksheet.getCell("A6").value = cliente;
+
+      const celdasA = [
+        "A10",
+        "A11",
+        "A12",
+        "A13",
+        "A14",
+        "A15",
+        "A16",
+        "A17",
+        "A18",
+        "A19",
+        "A20",
+        "A21",
+        "A22",
+        "A23",
+        "A24",
+        "A25",
+        "A26",
+        "A27",
+        "A28",
+        "A29",
+      ];
+      const celdasB = [
+        "B10",
+        "B11",
+        "B12",
+        "B13",
+        "B14",
+        "B15",
+        "B16",
+        "B17",
+        "B18",
+        "B19",
+        "B20",
+        "B21",
+        "B22",
+        "B23",
+        "B24",
+        "B25",
+        "B26",
+        "B27",
+        "B28",
+        "B29",
+      ];
+
+      let total = 0;
+      for (let i = 0; i < listMercaderia.length; i++) {
+        const element = listMercaderia[i];
+
+        worksheet.getCell(celdasA[i]).value = element.stock;
+        worksheet.getCell(celdasB[i]).value = element.descripcion;
+
+        total += element.stock;
+      }
+
+      worksheet.getCell("A30").value = total;
+
+      try {
+        await work.xlsx.writeFile(dir + "/notaEnvio.xlsx");
+      } catch (error) {}
+
+      return res.sendFile(dir + "/notaEnvio.xlsx");
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ status: "error", message: "Ocurrio un error" });
+    }
+  }
+);
 
 export default router;
