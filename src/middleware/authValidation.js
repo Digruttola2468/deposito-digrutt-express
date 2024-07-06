@@ -1,21 +1,34 @@
 export const auth = (req, res, next) => {
-  if (req.session?.user) return next();
-
-  return res
-    .status(401)
-    .json({ status: "error", message: "No estas registrado" });
+  const token = req.cookies.access_token;
+  if (!token)
+    return res
+      .status(403)
+      .json({ status: "error", message: "Access not authorized" });
+  
+  try {
+    const data = jwt.verify(token, JWT_SECRET);
+    req.session.user = data;
+  } catch (error) {}
+  
+  next();
 };
 
 export function authAdmin(req, res, next) {
-  const user = req.session?.user;
-  if (user) {
-    if (user.role.toLowerCase() == "admin") next();
-    else {
-      //req.logger.error("No tenes permisos para acceder");
-      return res.status(405).json({ status: "error", message: "Not Allowed" });
-    }
-  } else
+  const token = req.cookies.access_token;
+  if (!token)
+    return res
+      .status(403)
+      .json({ status: "error", message: "Access not authorized" });
+
+  try {
+    const data = jwt.verify(token, JWT_SECRET);
+
+    if (data.user.role.toLowerCase() == "admin") return next();
+    else return res.status(401).json({ status: "error", message: "Access not authorized" });
+
+  } catch (error) {
     return res
       .status(401)
-      .json({ status: "error", message: "No estas permitido" });
+      .json({ status: "error", message: "Access not authorized" });
+  }
 }

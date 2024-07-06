@@ -40,19 +40,116 @@ const handleErrors = (e, res) => {
       break;
   }
 };
-//
-ruta.get("/",userExtractor([allPermissions.produccion]),  async (req, res) => {
-  try {
-    const rows = await produccionServer.getProduccion();
-    return res.json({ status: "success", data: rows });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ status: "error", message: "Something Wrong" });
-  }
-});
 
+
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    Produccion:
+ *      type: object
+ *      properties:
+ *        fecha:
+ *          type: date
+ *          description: fecha operacion control produccion
+ *        numMaquina:
+ *          type: integer
+ *          description: numero de maquina del control establecido
+ *        golpesReales:
+ *          type: integer
+ *          description: cuantos golpes conto la maquina
+ *        piezasProducidas:
+ *          type: integer
+ *          description: cuantas piezas producidas hubo en base a los golpesReales * piezaxgolpe
+ *        promGolpesHora:
+ *          type: integer
+ *          description: promedio de golpesReales/24
+ *        idMatriz:
+ *          type: integer
+ *          description: que matriz estuvo inyectando
+ *        idTurno:
+ *          type: integer
+ *          description: en que turno se obtuvo dicha operacion
+ *      required:
+ *        - fecha
+ *        - idMatriz
+ *        - numMaquina
+ *        - golpesReales
+ *        - piezasProducidas
+ *        - promGolpesHora
+ *        - idTurno
+ *      example:
+ *        fecha: 2024-04-14
+ *        numMaquina: 2
+ *        golpesReales: 350
+ *        piezasProducidas: 350
+ *        promGolpesHora: 20
+ *        idMatriz: 1
+ *        idTurno: 1
+ */
+
+/**
+ * @swagger
+ * /api/producion:
+ *  get:
+ *    summary: devolver todos los de produccion
+ *    tags: [Produccion]
+ *    security:
+ *      - cookieAuth: []
+ *    responses:
+ *      200:
+ *        description: todos los datos de produccion
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Produccion'
+ *
+ */
+ruta.get(
+  "/",
+  userExtractor([allPermissions.produccion]),
+  async (req, res) => {
+    try {
+      const rows = await produccionServer.getProduccion();
+      return res.json({ status: "success", data: rows });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Something Wrong" });
+    }
+  }
+);
+
+/**
+ * @swagger
+ * /api/producion/{idProduccion}:
+ *  get:
+ *    summary: devolver una produccion
+ *    tags: [Produccion]
+ *    parameters:
+ *      - in: path
+ *        name: idProduccion
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: Valor unico de la lista de todos los datos de produccion
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: todos los datos de produccion
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Produccion'
+ *      404:
+ *        description: No existe esa produccion
+ */
 ruta.get(
   "/:idProduccion",
   userExtractor([allPermissions.produccion]),
@@ -71,6 +168,33 @@ ruta.get(
   }
 );
 
+/**
+ * @swagger
+ * /api/producion/maquina/{numMaquina}:
+ *  get:
+ *    summary: devolver lista produccion de una maquina
+ *    tags: [Produccion]
+ *    parameters:
+ *      - in: path
+ *        name: numMaquina
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: Numero de la maquina a consultar
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: todos los datos de produccion
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Produccion'
+ *      404:
+ *        description: No existe esa produccion
+ */
 ruta.get(
   "/maquina/:numMaquina",
   userExtractor([allPermissions.produccion]),
@@ -95,6 +219,25 @@ ruta.get(
   }
 );
 
+/**
+ * @swagger
+ * /api/producion:
+ *  post:
+ *    summary: creamos una nueva produccion
+ *    tags: [Produccion]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            $ref: '#/components/schemas/Produccion'
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Se creo correctamente!
+ */
 ruta.post(
   "/",
   userExtractor([allPermissions.produccion]),
@@ -123,6 +266,25 @@ ruta.post(
   }
 );
 
+/**
+ * @swagger
+ * /api/producion/list:
+ *  post:
+ *    summary: creamos una lista de nuevos datos de produccion
+ *    tags: [Produccion]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            $ref: '#/components/schemas/Produccion'
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Se creo correctamente!
+ */
 ruta.post(
   "/list",
   userExtractor([allPermissions.produccion]),
@@ -159,6 +321,37 @@ ruta.post(
   }
 );
 
+/**
+ * @swagger
+ * /api/producion/{idProduccion}:
+ *  put:
+ *    type: http,
+ *    scheme: bearer,
+ *    bearerFormat: JWT,
+ *    summary: actualizar datos de una produccion
+ *    tags: [Produccion]
+ *    parameters:
+ *      - in: path
+ *        name: idProduccion
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: Valor unico de la lista de produccion
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            $ref: '#/components/schemas/Produccion'
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: el dato actualizado
+ *      404:
+ *        description: No existe esa produccion
+ */
 ruta.put(
   "/:idProduccion",
   userExtractor([allPermissions.produccion]),
@@ -176,7 +369,7 @@ ruta.put(
           errors: [{ campus: "fecha", message: "La fecha es invalido" }],
         });
     }
-    
+
     try {
       const [result] = await produccionServer.updateProduccion(
         idProduccion,
@@ -200,6 +393,27 @@ ruta.put(
   }
 );
 
+/**
+ * @swagger
+ * /api/producion/{idProduccion}:
+ *  delete:
+ *    summary: eliminar una produccion
+ *    tags: [Produccion]
+ *    parameters:
+ *      - in: path
+ *        name: idProduccion
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: Valor unico de la lista de produccion
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Eliminado correctamente
+ *      404:
+ *        description: No existe esa produccion
+ */
 ruta.delete(
   "/:idProduccion",
   userExtractor([allPermissions.produccion]),

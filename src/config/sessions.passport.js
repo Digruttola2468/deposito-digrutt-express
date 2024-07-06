@@ -68,7 +68,11 @@ const passportInit = () => {
 
         if (schemaResult.success) {
           const [rows] = await userServer.getUserByGmail(username);
-          if (rows.length >= 1) return done({statusCode: 400, message: 'Ya existe ese usuario'}, null);
+          if (rows.length >= 1)
+            return done(
+              { statusCode: 400, message: "Ya existe ese usuario" },
+              null
+            );
 
           try {
             const newUser = {
@@ -134,7 +138,17 @@ const passportInit = () => {
               null
             );
 
-          return done(false, rows[0], { message: "Inicio de session exitosa" });
+          return done(
+            false,
+            {
+              id: rows[0].id,
+              nombre: rows[0].nombre,
+              apellido: rows[0].apellido,
+              gmail: rows[0].gmail,
+              role: rows[0].role,
+            },
+            { message: "Inicio de session exitosa" }
+          );
         } catch (error) {
           return done(true, null, {
             message: "Something Wrong",

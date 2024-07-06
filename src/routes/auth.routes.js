@@ -8,17 +8,115 @@ import { schemaPostUser } from "../schemas/user.schema.js";
 
 const router = Router();
 
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    User:
+ *      type: object
+ *      properties:
+ *        first_name:
+ *          type: string
+ *          description: nombre
+ *        last_name:
+ *          type: string
+ *          description: apellido
+ *        email:
+ *          type: string
+ *          description: correo electronico
+ *        password:
+ *          type: password
+ *          description: contraseña
+ *      required:
+ *        - first_name
+ *        - last_name
+ *        - email
+ *        - password
+ *      example:
+ *        first_name: juaco
+ *        last_name: cesar
+ *        email: yourcorreoelectronico@gmail.com
+ *        password: juacocesar2010
+ */
+
+
+/**
+ * @swagger
+ * /api/session/protected:
+ *  get:
+ *    summary: Obtener datos del usuario
+ *    tags: [User]
+ *    responses:
+ *      200:
+ *        description: Se obtuvo correctamente
+ */
 router.get(
-  "/profile",
-  passport.authenticate("jwt", { session: false }),
+  "/protected",
   async (req, res, next) => {
-    return res.json({
-      user: req.user,
-      token: req.query.secret_token,
-    });
+    const token = req.cookies.access_token
+    if (!token) 
+      return res.status(403).json({status: "error", message: "Access not authorized"})
+    
+    try {
+      const data = jwt.verify(token, JWT_SECRET)
+      return res.json(data);
+    } catch (error) {
+      return res.status(401).json({status: "error", message: "Access not authorized"})
+    }
   }
 );
 
+/**
+ * @swagger
+ * /api/session/logout:
+ *  post:
+ *    summary: Cerrar Session
+ *    tags: [User]
+ *    responses:
+ *      200:
+ *        description: Cerrado Con exito
+ */
+router.post(
+  "/logout",
+  (req, res, next) => {
+    return res.clearCookie('access_token').json({status: "success", message: "Cerrado con exito"})
+  }
+);
+
+/**
+ * @swagger
+ * /api/session/login:
+ *  post:
+ *    summary: Login User
+ *    tags: [User]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              email:
+ *                type: string
+ *                description: correo electronico
+ *              password:
+ *                type: string
+ *                description: contraseña
+ *            required:
+ *              - email
+ *              - password
+ *            example:
+ *              email: yourcorreoelectronico@gmail.com
+ *              password: juacocesar2010
+ *    responses:
+ *      200:
+ *        description: Se logio correctamente!
+ *        headers: 
+ *          Set-Cookie:
+ *            schema: 
+ *              type: string
+ *              example: access_token=abcde12345; Path=/; HttpOnly
+ */
 router.post("/login", async (req, res, next) => {
   passport.authenticate("login", async (err, user, info) => {
     try {
@@ -29,17 +127,25 @@ router.post("/login", async (req, res, next) => {
 
       req.login(user, { session: false }, async (err) => {
         if (err) return next(err);
-        const token = jwt.sign({ user }, JWT_SECRET);
-        return res.json({
-          token,
-          user: {
-            role: user.role,
-            nombre: user.nombre,
-            apellido: user.apellido,
-            gmail: user.gmail,
-          },
-          message: info.message,
+        const token = jwt.sign({ user }, JWT_SECRET, {
+          expiresIn: "12h",
         });
+        return res
+          .cookie("access_token", token, {
+            httpOnly: true, // La cookie solo se puede acceder en el servidor
+            secure: false, //La cookie solo se puede acceder en https
+            sameSite: "strict", // La cookie solo se puede acceder en el mismo dominio
+            maxAge: 12000 * 60 * 60, //La cookie tiene un tiempo de validez de 12h
+          })
+          .json({
+            user: {
+              role: user.role,
+              nombre: user.nombre,
+              apellido: user.apellido,
+              gmail: user.gmail,
+            },
+            message: info.message,
+          });
       });
     } catch (e) {
       return res
@@ -67,6 +173,23 @@ router.get("/validateGmail/:gmail", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/session/register:
+ *  post:
+ *    summary: nuevo usuario
+ *    tags: [User]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            $ref: '#/components/schemas/User'
+ *    responses:
+ *      200:
+ *        description: Se creo correctamente!
+ */
 router.post(
   "/register",
   schemaValidation(schemaPostUser),

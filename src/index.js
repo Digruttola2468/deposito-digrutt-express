@@ -2,6 +2,8 @@
 import express from "express";
 import cors from "cors";
 import { PORT } from "./config/dotenv.js";
+import __dirname from "./utils.js";
+import cookieParser from "cookie-parser";
 
 // --- AUTH ---
 import session from "express-session";
@@ -34,9 +36,10 @@ import materiaPrimaRoute from "./routes/material.routes.js";
 import producionRoute from "./routes/producion.routes.js";
 import pedidosRoute from "./routes/pedidos.routes.js";
 import turnosRoute from './routes/turnos.routes.js'
-/*
-import graficaRoute from "./routes/grafica.routes.js";
-*/
+
+// --- SWAGGER DOC ---
+import swaggerUI from "swagger-ui-express";
+import swaggerJSDoc from "swagger-jsdoc";
 
 import con from "./config/db.js";
 
@@ -51,6 +54,7 @@ app.use(cors());
 
 // Habilitamos la lectura y escritura en JSON
 app.use(express.json());
+app.use(cookieParser());
 
 // --- SESSION MYSQL ---
 const MysqlStorage = MySQLStore(session);
@@ -68,6 +72,23 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 initPassport();
+
+// --- SWAGGER DOC VARIANT ---
+const swaggerSpec = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "DIGRUTT API DOC",
+      version: "1.0.0"
+    },
+    servers: [
+      {
+        url: "http://localhost:3000"
+      }
+    ]
+  },
+  apis: [`${__dirname}/routes/producion.routes.js`, `${__dirname}/routes/auth.routes.js`]
+}
 
 // --- Routers ---
 app.use("/api/server", indexRoute);
@@ -95,6 +116,8 @@ app.use("/api/materiaPrima", materiaPrimaRoute);
 app.use("/api/producion", producionRoute);
 app.use("/api/pedidos", pedidosRoute);
 app.use("/api/turnosProducion", turnosRoute);
+
+app.use("/api-doc", swaggerUI.serve, swaggerUI.setup(swaggerJSDoc(swaggerSpec)))
 
 // WHEN NOT FOUND PAGE
 app.use((req, res) => {
