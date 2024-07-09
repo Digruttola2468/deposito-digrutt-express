@@ -84,6 +84,9 @@ const swaggerSpec = {
     servers: [
       {
         url: "http://localhost:3000"
+      },
+      {
+        url: "https://deposito-digrutt-express-production.up.railway.app"
       }
     ]
   },
