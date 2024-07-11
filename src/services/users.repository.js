@@ -12,9 +12,15 @@ export default class UsersRepository {
 
     // Send Validate Correo
     await this.mailModule.send(user.gmail, 'Not Reply', `
-    <div>
-      <a href="http://localhost:3000/api/session/validateGmail/${user.gmail}">Click Aca Para validar el correo</a>
-    </div>
+        <div>
+            <p style="font-family: Arial, Helvetica, sans-serif;display: inline">Bienvenido <b>${user.apellido} ${user.nombre}</b>, necesitamos que valides tu correo electronico haciendo click en el siguiente boton</p>
+        </div>
+        <div>
+            <a href="http://localhost:3000/api/session/validateGmail/${user.gmail}" style="font-family: Arial, Helvetica, sans-serif;background-color: #2962ff; display: block; padding: 8px; border-radius: 2px;outline: none; cursor: pointer; border: none; font-weight: bold; color: #fff;">Validar Correo Electronico</a>
+        </div>
+        <div>
+            <p style="font-family: Arial, Helvetica, sans-serif;">No responder este mensaje</p>
+        </div>
     `)
 
     //Return user

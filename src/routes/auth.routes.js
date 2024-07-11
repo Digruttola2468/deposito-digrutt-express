@@ -8,6 +8,15 @@ import { schemaPostUser } from "../schemas/user.schema.js";
 
 const router = Router();
 
+const NAME_COOKIE = "access_token"
+const COOKIE_OPTIONS = {
+  httpOnly: true, // La cookie solo se puede acceder en el servidor
+  secure: false, //La cookie solo se puede acceder en https
+  sameSite: "none", // La cookie solo se puede acceder en el mismo dominio
+  maxAge: 12000 * 60 * 60, //La cookie tiene un tiempo de validez de 12h
+  domain: "http://localhost:5173"
+}
+
 /**
  * @swagger
  * components:
@@ -79,7 +88,8 @@ router.get(
 router.post(
   "/logout",
   (req, res, next) => {
-    return res.clearCookie('access_token').json({status: "success", message: "Cerrado con exito"})
+    req.session.destroy();
+    return res.clearCookie(NAME_COOKIE).json({status: "success", message: "Cerrado con exito"})
   }
 );
 
@@ -131,18 +141,15 @@ router.post("/login", async (req, res, next) => {
           expiresIn: "12h",
         });
         return res
-          .cookie("access_token", token, {
-            httpOnly: true, // La cookie solo se puede acceder en el servidor
-            secure: false, //La cookie solo se puede acceder en https
-            sameSite: "strict", // La cookie solo se puede acceder en el mismo dominio
-            maxAge: 12000 * 60 * 60, //La cookie tiene un tiempo de validez de 12h
-          })
+          .cookie(NAME_COOKIE, token, COOKIE_OPTIONS)
           .json({
             user: {
               role: user.role,
               nombre: user.nombre,
               apellido: user.apellido,
               gmail: user.gmail,
+              isGmailValidate: user.isGmailValidate,
+              isGoogleAuth: user.isGoogleAuth
             },
             message: info.message,
           });
@@ -226,8 +233,12 @@ router.get(
   (req, res) => {
     req.session.user = req.user;
 
-    const token = jwt.sign({ user: req.user }, JWT_SECRET);
-    return res.json({ token });
+    const token = jwt.sign({ user: req.user }, JWT_SECRET, {
+      expiresIn: "12h",
+    });
+    return res
+      .cookie(NAME_COOKIE, token, COOKIE_OPTIONS)
+      .json({ user: req.user })
   }
 );
 

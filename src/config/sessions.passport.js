@@ -23,7 +23,7 @@ const passportInit = () => {
       {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: "http:localhost:3000/api/session/google/callback",
+        callbackURL: "http://localhost:3000/api/session/google/callback",
         passReqToCallback: true,
       },
       async function (request, accessToken, refreshToken, profile, done) {
@@ -44,7 +44,13 @@ const passportInit = () => {
             isGmailValidate: 0,
             isGoogleAuth: 1,
           });
-        } else return done(null, rows[0]);
+        } else return done(null, {
+          id: rows[0].id,
+          nombre: rows[0].nombre,
+          apellido: rows[0].apellido,
+          gmail: rows[0].gmail,
+          role: rows[0].role,
+        });
       }
     )
   );
@@ -146,6 +152,8 @@ const passportInit = () => {
               apellido: rows[0].apellido,
               gmail: rows[0].gmail,
               role: rows[0].role,
+              isGmailValidate: rows[0].isGmailValidate,
+              isGoogleAuth: rows[0].isGoogleAuth
             },
             { message: "Inicio de session exitosa" }
           );

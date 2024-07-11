@@ -50,7 +50,7 @@ import initPassport from "./config/sessions.passport.js";
 const app = express();
 
 //Habilitamos que cualquier URL pueda acceder a este proyecto
-app.use(cors());
+app.use(cors({credentials: true, origin: true, withCredentials: true }))
 
 // Habilitamos la lectura y escritura en JSON
 app.use(express.json());
